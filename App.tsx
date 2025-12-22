@@ -23,10 +23,8 @@ import { MasterItemModal } from './components/MasterItemModal';
 import { DeliveryLocationModal } from './components/DeliveryLocationModal';
 import { AssetGeneralModal } from './components/AssetGeneralModal';
 import { ServiceModal } from './components/ServiceModal';
-import { Users, User, Baby, Activity } from 'lucide-react';
 import { 
   MOCK_VEHICLE_DATA, 
-  MOCK_SERVICE_DATA, 
   MOCK_TAX_KIR_DATA, 
   MOCK_MASTER_VENDOR_DATA, 
   MOCK_VEHICLE_CONTRACT_DATA, 
@@ -61,44 +59,12 @@ import { useLanguage } from './contexts/LanguageContext';
 
 const App: React.FC = () => {
   const { t } = useLanguage();
-  const [activeModule, setActiveModule] = useState('Servis'); // Changed default to Servis for demo
+  const [activeModule, setActiveModule] = useState('Servis');
   const [activeTab, setActiveTab] = useState('Semua');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Log Book Filters State
-  const [logBookFilters, setLogBookFilters] = useState({
-    location: '',
-    category: '',
-    date: ''
-  });
-
-  const handleLogBookFilterChange = (field: string, value: string) => {
-    setLogBookFilters(prev => ({ ...prev, [field]: value }));
-  };
-
-  // Stationery Filters State
-  const [stationeryFilters, setStationeryFilters] = useState({
-    transactionId: '',
-    requester: '',
-    date: ''
-  });
-
-  const handleStationeryFilterChange = (field: string, value: string) => {
-    setStationeryFilters(prev => ({ ...prev, [field]: value }));
-  };
-
-  // Master ATK/ARK Filters State
-  const [masterFilters, setMasterFilters] = useState({
-    category: '',
-    partCode: ''
-  });
-
-  const handleMasterFilterChange = (field: string, value: string) => {
-    setMasterFilters(prev => ({ ...prev, [field]: value }));
-  };
-
-  // Data States - Adding dummy data to match screenshot
+  // Data States
   const [vehicleData] = useState<VehicleRecord[]>(MOCK_VEHICLE_DATA);
   const [buildingData, setBuildingData] = useState<BuildingRecord[]>(MOCK_BUILDING_DATA);
   const [reminderData] = useState<ReminderRecord[]>(MOCK_REMINDER_DATA);
@@ -151,13 +117,11 @@ const App: React.FC = () => {
   const [arkMaster, setArkMaster] = useState<MasterItem[]>(MOCK_MASTER_ARK_DATA);
   const [logBookData, setLogBookData] = useState<LogBookRecord[]>(MOCK_LOGBOOK_DATA);
   
-  // Master Lists
   const [uomList, setUomList] = useState<GeneralMasterItem[]>(MOCK_UOM_DATA);
   const [atkCategories, setAtkCategories] = useState<GeneralMasterItem[]>(MOCK_ATK_CATEGORY);
   const [arkCategories, setArkCategories] = useState<GeneralMasterItem[]>(MOCK_ARK_CATEGORY);
   const [delivLocations, setDelivLocations] = useState<DeliveryLocationRecord[]>(MOCK_DELIVERY_LOCATIONS);
 
-  // Master Data States
   const [masterLists, setMasterLists] = useState<Record<string, GeneralMasterItem[]>>({
     'Jenis Pajak': MOCK_GENERAL_MASTER_DATA.jenisPajak,
     'Jenis Pembayaran': MOCK_GENERAL_MASTER_DATA.jenisPembayaran,
@@ -195,22 +159,12 @@ const App: React.FC = () => {
 
   const handleModuleNavigate = (module: string) => {
     setActiveModule(module);
-    setMasterFilters({ category: '', partCode: '' });
-    setStationeryFilters({ transactionId: '', requester: '', date: '' });
-    
-    if (module === 'Kontrak Gedung') {
-        setActiveTab('Milik Sendiri');
-    } else if (module === 'Daftar Aset') {
-        setActiveTab('Aktif');
-    } else if (module.includes('Master')) {
-        setActiveTab('Items');
-    } else if (module === 'Log Book') {
-        setActiveTab(''); 
-    } else if (module === 'Servis') {
-        setActiveTab('Semua');
-    } else {
-        setActiveTab('Semua');
-    }
+    if (module === 'Kontrak Gedung') setActiveTab('Milik Sendiri');
+    else if (module === 'Daftar Aset') setActiveTab('Aktif');
+    else if (module.includes('Master')) setActiveTab('Items');
+    else if (module === 'Log Book') setActiveTab(''); 
+    else if (module === 'Servis') setActiveTab('Semua');
+    else setActiveTab('Semua');
     setIsMobileMenuOpen(false); 
   };
 
@@ -224,28 +178,40 @@ const App: React.FC = () => {
     setSelectedService(null);
 
     if (activeModule === 'Kontrak Gedung') {
-        setIsAssetGeneralModalOpen(true);
+        setIsBuildingModalOpen(true); // Fixed: Open BuildingModal for comparison feature
     } else if (activeModule === 'Servis') {
         setIsServiceModalOpen(true);
     } else if (activeModule === 'Daftar Aset') {
-        setSelectedVehicle(null);
         setIsVehicleModalOpen(true);
     } else if (activeModule === 'Master ATK' || activeModule === 'Master ARK') {
-        if (activeTab === 'UOM' || activeTab === 'Category') {
-            setSelectedMasterItem(null);
-            setIsMasterModalOpen(true);
-        } else if (activeTab === 'Delivery Location') {
-            setSelectedDeliveryLocation(null);
-            setIsDeliveryLocationModalOpen(true);
-        } else {
-            setIsMasterItemModalOpen(true);
-        }
+        if (activeTab === 'UOM' || activeTab === 'Category') setIsMasterModalOpen(true);
+        else if (activeTab === 'Delivery Location') setIsDeliveryLocationModalOpen(true);
+        else setIsMasterItemModalOpen(true);
     } else if (activeModule.includes('ATK') || activeModule.includes('ARK') || activeModule === 'Log Book') {
         setIsStockModalOpen(true);
     } else if (masterLists[activeModule]) {
-        setSelectedMasterItem(null);
         setIsMasterModalOpen(true);
     }
+  };
+
+  const handleSaveBuilding = (data: Partial<BuildingRecord>) => {
+    if (modalMode === 'create') {
+        const newBuilding: BuildingRecord = {
+            id: Date.now().toString(),
+            name: data.name || 'Gedung Baru',
+            assetNo: data.assetNo || `BDG-${Date.now()}`,
+            type: data.type || 'Office',
+            ownership: data.ownership || 'Rent',
+            location: data.location || '',
+            address: data.address || '',
+            status: 'Draft',
+            proposals: data.proposals || []
+        };
+        setBuildingData([...buildingData, newBuilding]);
+    } else if (selectedBuilding) {
+        setBuildingData(buildingData.map(b => b.id === selectedBuilding.id ? { ...b, ...data } : b));
+    }
+    setIsBuildingModalOpen(false);
   };
 
   const handleSaveService = (data: Partial<ServiceRecord>) => {
@@ -272,33 +238,19 @@ const App: React.FC = () => {
     setIsServiceModalOpen(false);
   };
 
-  // Fix: Added handleSaveGeneralMaster to handle saving master data items
   const handleSaveGeneralMaster = (name: string) => {
     if (modalMode === 'create') {
-      const newItem: GeneralMasterItem = {
-        id: Date.now(),
-        name: name
-      };
-      if (masterLists[activeModule]) {
-        setMasterLists(prev => ({
-          ...prev,
-          [activeModule]: [...prev[activeModule], newItem]
-        }));
-      } else if (activeTab === 'UOM') {
-        setUomList([...uomList, newItem]);
-      } else if (activeTab === 'Category') {
+      const newItem: GeneralMasterItem = { id: Date.now(), name: name };
+      if (masterLists[activeModule]) setMasterLists(prev => ({ ...prev, [activeModule]: [...prev[activeModule], newItem] }));
+      else if (activeTab === 'UOM') setUomList([...uomList, newItem]);
+      else if (activeTab === 'Category') {
         if (activeModule === 'Master ARK') setArkCategories([...arkCategories, newItem]);
         else setAtkCategories([...atkCategories, newItem]);
       }
     } else if (selectedMasterItem) {
-      if (masterLists[activeModule]) {
-        setMasterLists(prev => ({
-          ...prev,
-          [activeModule]: prev[activeModule].map(item => item.id === selectedMasterItem.id ? { ...item, name } : item)
-        }));
-      } else if (activeTab === 'UOM') {
-        setUomList(uomList.map(item => item.id === selectedMasterItem.id ? { ...item, name } : item));
-      } else if (activeTab === 'Category') {
+      if (masterLists[activeModule]) setMasterLists(prev => ({ ...prev, [activeModule]: prev[activeModule].map(item => item.id === selectedMasterItem.id ? { ...item, name } : item) }));
+      else if (activeTab === 'UOM') setUomList(uomList.map(item => item.id === selectedMasterItem.id ? { ...item, name } : item));
+      else if (activeTab === 'Category') {
         if (activeModule === 'Master ARK') setArkCategories(arkCategories.map(item => item.id === selectedMasterItem.id ? { ...item, name } : item));
         else setAtkCategories(atkCategories.map(item => item.id === selectedMasterItem.id ? { ...item, name } : item));
       }
@@ -306,7 +258,6 @@ const App: React.FC = () => {
     setIsMasterModalOpen(false);
   };
 
-  // Fix: Added handleSaveMasterItem to handle saving master products for ATK/ARK
   const handleSaveMasterItem = (data: Partial<MasterItem>) => {
     const isArk = activeModule === 'Master ARK';
     if (modalMode === 'create') {
@@ -334,53 +285,14 @@ const App: React.FC = () => {
     setIsMasterItemModalOpen(false);
   };
 
-  // Fix: Added handleSaveDeliveryLocation to handle saving delivery locations
   const handleSaveDeliveryLocation = (data: Partial<DeliveryLocationRecord>) => {
     if (modalMode === 'create') {
-      const newLoc: DeliveryLocationRecord = {
-        id: Date.now(),
-        name: data.name || '',
-        address: data.address || '',
-        type: data.type || 'HO'
-      };
+      const newLoc: DeliveryLocationRecord = { id: Date.now(), name: data.name || '', address: data.address || '', type: data.type || 'HO' };
       setDelivLocations([...delivLocations, newLoc]);
     } else if (selectedDeliveryLocation) {
       setDelivLocations(delivLocations.map(item => item.id === selectedDeliveryLocation.id ? { ...item, ...data } as DeliveryLocationRecord : item));
     }
     setIsDeliveryLocationModalOpen(false);
-  };
-
-  // Fix: Added handleSaveBuilding to handle saving/updating building records
-  const handleSaveBuilding = (data: Partial<GeneralAssetRecord>) => {
-    if (modalMode === 'create') {
-      const newBuilding: BuildingRecord = {
-        id: Date.now().toString(),
-        name: `Gedung Baru ${Date.now()}`,
-        assetNo: data.assetNumber || `BDG-${Date.now()}`,
-        type: data.type || 'Office',
-        ownership: (data.ownership as 'Own' | 'Rent') || 'Rent',
-        location: data.assetLocation || '',
-        address: data.address || '',
-        status: 'Draft',
-        channel: data.channel,
-        department: data.department,
-        subLocation: data.subLocation
-      };
-      setBuildingData([...buildingData, newBuilding]);
-    } else if (selectedBuilding) {
-      setBuildingData(buildingData.map(item => item.id === selectedBuilding.id ? {
-        ...item,
-        assetNo: data.assetNumber || item.assetNo,
-        type: data.type || item.type,
-        ownership: (data.ownership as 'Own' | 'Rent') || item.ownership,
-        location: data.assetLocation || item.location,
-        address: data.address || item.address,
-        channel: data.channel || item.channel,
-        department: data.department || item.department,
-        subLocation: data.subLocation || item.subLocation
-      } : item));
-    }
-    setIsAssetGeneralModalOpen(false);
   };
 
   const renderContent = () => {
@@ -416,8 +328,8 @@ const App: React.FC = () => {
          case 'Kontrak Gedung': return (
             <BuildingTable 
                 data={buildingData.filter(b => b.ownership === (activeTab === 'Milik Sendiri' ? 'Own' : 'Rent'))}
-                onEdit={(b) => { setSelectedBuilding(b); setModalMode('edit'); setIsAssetGeneralModalOpen(true); }}
-                onView={(b) => { setSelectedBuilding(b); setModalMode('view'); setIsAssetGeneralModalOpen(true); }}
+                onEdit={(b) => { setSelectedBuilding(b); setModalMode('edit'); setIsBuildingModalOpen(true); }}
+                onView={(b) => { setSelectedBuilding(b); setModalMode('view'); setIsBuildingModalOpen(true); }}
             />
          );
          case 'List Reminder Dokumen': return <ReminderTable data={reminderData} />;
@@ -453,7 +365,6 @@ const App: React.FC = () => {
     if (activeModule === 'Master ATK' || activeModule === 'Master ARK') return ['Items', 'UOM', 'Category', 'Delivery Location'];
     if (activeModule === 'Servis') return ['Semua', 'Persetujuan'];
     if (activeModule.includes('Daftar') || activeModule.includes('Approval') || activeModule.includes('Request')) return ['Semua', 'Draft', 'On Progress', 'Pending', 'Approved', 'Rejected', 'Closed'];
-    if (activeModule === 'Log Book') return []; 
     return ['Semua'];
   }, [activeModule]);
 
@@ -513,6 +424,14 @@ const App: React.FC = () => {
         mode={modalMode}
       />
 
+      <BuildingModal 
+        isOpen={isBuildingModalOpen}
+        onClose={() => setIsBuildingModalOpen(false)}
+        onSave={handleSaveBuilding}
+        initialData={selectedBuilding || undefined}
+        mode={modalMode}
+      />
+
       <ServiceModal 
         isOpen={isServiceModalOpen}
         onClose={() => setIsServiceModalOpen(false)}
@@ -552,16 +471,13 @@ const App: React.FC = () => {
       <AssetGeneralModal 
         isOpen={isAssetGeneralModalOpen}
         onClose={() => setIsAssetGeneralModalOpen(false)}
-        onSave={handleSaveBuilding}
+        onSave={() => setIsAssetGeneralModalOpen(false)}
         initialData={selectedBuilding ? {
             assetNumber: selectedBuilding.assetNo,
             assetCategory: 'Building',
             type: selectedBuilding.type,
             ownership: selectedBuilding.ownership,
             assetLocation: selectedBuilding.location,
-            channel: selectedBuilding.channel,
-            department: selectedBuilding.department,
-            subLocation: selectedBuilding.subLocation,
             address: selectedBuilding.address
         } : undefined}
         mode={modalMode}
