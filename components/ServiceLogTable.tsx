@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ServiceRecord } from '../types';
 import { Eye, Pencil, Calendar, Wrench, Package, Info, History, Landmark, CreditCard } from 'lucide-react';
@@ -104,14 +105,14 @@ export const ServiceLogTable: React.FC<Props> = ({ data, onEdit, onView }) => {
                 <td className="p-5 align-top text-center">
                     <div className="flex items-center justify-center gap-1">
                         <button 
-                          onClick={() => onView?.(item)}
+                          onClick={(e) => { e.stopPropagation(); onView?.(item); }}
                           className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-all"
                           title="View Full Report"
                         >
                             <Eye size={18} />
                         </button>
                         <button 
-                          onClick={() => onEdit?.(item)}
+                          onClick={(e) => { e.stopPropagation(); onEdit?.(item); }}
                           className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                           title="Edit Log"
                         >

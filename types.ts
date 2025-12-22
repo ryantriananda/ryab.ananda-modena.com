@@ -39,6 +39,18 @@ export interface AssetRecord {
   status: 'Approved' | 'Pending' | 'Rejected' | 'Closed' | 'Draft' | 'On Progress';
 }
 
+export interface GeneralAssetRecord {
+  assetNumber: string;
+  assetCategory: string;
+  type: string;
+  ownership: string;
+  assetLocation: string;
+  channel: string;
+  department: string;
+  subLocation: string;
+  address: string;
+}
+
 export interface BuildingProposal {
   id: string;
   optionName: string;
@@ -101,6 +113,11 @@ export interface BuildingRecord {
   location: string;
   address: string;
   status: 'Open' | 'Close' | 'Draft';
+  
+  // Fields from Image 1
+  channel?: string;
+  department?: string;
+  subLocation?: string;
   
   // Rental specifics
   landlordName?: string;
