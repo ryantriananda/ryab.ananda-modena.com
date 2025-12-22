@@ -223,6 +223,8 @@ export interface TaxKirRecord {
   vendor?: string;
   estimasiBiaya?: string;
   jenisPembayaran?: string;
+  // Added targetSelesai to fix type errors in TaxKirModal
+  targetSelesai?: string;
 }
 
 export interface MutationRecord {
