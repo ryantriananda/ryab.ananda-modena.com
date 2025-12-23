@@ -75,7 +75,7 @@ export const VehicleContractModal: React.FC<Props> = ({
       <input 
         type={type} 
         disabled={isView || disabled}
-        className="w-full bg-white border border-gray-100 rounded-2xl px-5 py-4 text-[12px] font-black text-black focus:border-black outline-none disabled:bg-gray-50 disabled:text-gray-400 transition-all placeholder:text-gray-200 shadow-sm"
+        className="w-full bg-white border border-gray-100 rounded-2xl px-5 py-4 text-[12px] font-black text-black focus:border-black outline-none disabled:bg-gray-50 disabled:text-gray-400 transition-all placeholder:text-gray-300 shadow-sm"
         value={value || ''}
         placeholder={placeholder}
         onChange={(e) => setForm({...form, [field]: e.target.value})}
@@ -129,7 +129,7 @@ export const VehicleContractModal: React.FC<Props> = ({
           </button>
         </div>
 
-        {/* Form Body - Grid Layout matching User Image */}
+        {/* Form Body */}
         <div className="flex-1 overflow-y-auto p-12 custom-scrollbar bg-[#FBFBFB]">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             
@@ -141,27 +141,6 @@ export const VehicleContractModal: React.FC<Props> = ({
                 <div className="absolute top-0 left-0 w-full h-1 bg-black opacity-5"></div>
                 <SectionHeader title="CONTRACT SETUP" sub="General Contract Information" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="md:col-span-2">
-                    <Label required>Flagging Kepemilikan</Label>
-                    <div className="flex gap-4">
-                        {['Milik Modena', 'Sewa'].map(type => {
-                            const isSelected = form.ownership === type;
-                            return (
-                                <button
-                                    key={type}
-                                    onClick={() => !isView && setForm({...form, ownership: type as any})}
-                                    disabled={isView}
-                                    className={`flex-1 py-4 text-[10px] font-black uppercase tracking-widest rounded-2xl border transition-all 
-                                        ${isSelected 
-                                            ? 'bg-black text-white border-black shadow-lg scale-[1.02]' 
-                                            : 'bg-white text-gray-400 border-gray-200 hover:border-black hover:text-black'}`}
-                                >
-                                    {type}
-                                </button>
-                            );
-                        })}
-                    </div>
-                  </div>
                   <InputField label="No. Kontrak" value={form.noKontrak} field="noKontrak" required placeholder="KTR/MDC/2024/001" className="md:col-span-2" />
                   <InputField label="Vendor / Lessor" value={form.vendor} field="vendor" required placeholder="PT. TRAC ASTRA / MPMRent" className="md:col-span-2" />
                   <InputField label="Tanggal Mulai" value={form.tglMulai} field="tglMulai" type="date" required />
