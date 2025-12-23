@@ -130,7 +130,7 @@ const App: React.FC = () => {
       setIsStockModalOpen(true);
     } else if (activeModule === 'Daftar Aset') {
       setIsVehicleModalOpen(true);
-    } else if (activeModule === 'Building Asset Management' || activeModule === 'Branch Improvement') {
+    } else if (activeModule === 'Building Asset Management' || activeModule === 'Branch Improvement' || activeModule === 'Master Gedung') {
       setSelectedBuildingAsset(null);
       setIsBuildingModalOpen(true);
     } else if (activeModule === 'Servis') {
@@ -289,6 +289,13 @@ const App: React.FC = () => {
                 onView={(item) => { setSelectedBuildingAsset(item); setModalMode('view'); setIsBuildingModalOpen(true); }} 
                 onAction={handleWorkflowAction}
             />;
+         case 'Master Gedung':
+            return <BuildingTable 
+                data={buildingData} 
+                onEdit={()=>{}} 
+                onView={()=>{}} 
+                onDelete={(id) => setBuildingData(prev => prev.filter(b => b.id !== id))}
+            />;
          case 'List Reminder Dokumen':
             return <ReminderTable 
                 data={filterReminders(reminderData)} 
@@ -349,7 +356,7 @@ const App: React.FC = () => {
   const getModuleTabs = () => {
     if (isReminderModule) return ['SEMUA', 'URGENT', 'WARNING', 'SAFE'];
     if (isBuildingWorkflow) return ['SEMUA', 'PENDING', 'REVISED', 'APPROVED', 'REJECTED'];
-    if (activeModule.includes('Master') || activeModule === 'Jenis Kendaraan') return ['SEMUA'];
+    if (activeModule.includes('Master') || activeModule === 'Jenis Kendaraan' || activeModule === 'Master Gedung') return ['SEMUA'];
     return ['SEMUA', 'PENDING', 'APPROVED', 'REJECTED'];
   };
 

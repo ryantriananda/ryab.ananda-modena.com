@@ -135,6 +135,7 @@ export const Sidebar: React.FC<Props> = ({
         { label: 'Tipe Vendor', icon: <Settings size={16} /> },
         { label: 'Peran', icon: <Settings size={16} /> },
         { label: 'Master Vendor', icon: <Users size={16} /> },
+        { label: 'Master Gedung', icon: <Building size={16} /> },
       ]
     },
   ];

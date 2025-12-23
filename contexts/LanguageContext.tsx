@@ -44,6 +44,7 @@ const translations: Record<string, Record<Language, string>> = {
   'Master Data': { id: 'Master Data', en: 'Master Data' },
   'Project Mgmt': { id: 'Manajemen Proyek', en: 'Project Mgmt' },
   'Manajemen User': { id: 'Manajemen User', en: 'User Management' },
+  'Master Gedung': { id: 'Master Gedung', en: 'Master Building' },
   
   // Master Sub-items
   'Jenis Pajak': { id: 'Jenis Pajak', en: 'Tax Type' },
