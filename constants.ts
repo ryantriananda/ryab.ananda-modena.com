@@ -1,7 +1,136 @@
 
-import { AssetRecord, MasterItem, ContractRecord, TimesheetRecord, VendorRecord, VehicleRecord, ServiceRecord, TaxKirRecord, MutationRecord, SalesRecord, MasterVendorRecord, DeliveryLocationRecord, LogBookRecord, BuildingRecord, ReminderRecord, VehicleContractRecord, GeneralMasterItem } from './types';
+import { AssetRecord, MasterItem, ContractRecord, TimesheetRecord, VendorRecord, VehicleRecord, ServiceRecord, TaxKirRecord, MutationRecord, SalesRecord, MasterVendorRecord, DeliveryLocationRecord, LogBookRecord, BuildingRecord, ReminderRecord, VehicleContractRecord, GeneralMasterItem, BuildingProposal } from './types';
 
-// Helper function to generate mock data for ATK/ARK
+// Helper for generating deep proposal data
+const generateMockProposals = (buildingId: string): BuildingProposal[] => [
+  {
+    id: `PROP-${buildingId}-1`,
+    optionName: 'Opsi Utama (Prime Loc)',
+    address: { jl: 'Jl. Utama No. 88', kota: 'Jakarta', kabupaten: 'Selatan', propinsi: 'DKI Jakarta' },
+    phoneLines: '4 Lines',
+    electricity: '13200 VA',
+    water: 'PAM & Sumur',
+    areas: { land: '500', building: '350', frontYard: '100' },
+    conditions: { fence: 'Beton Tinggi', gate: 'Besi Lipat', parking: '6 Mobil' },
+    security: ['CCTV 8 Titik', 'Alarm', 'Pos Satpam'],
+    floors: { ground: 'Granit 60x60', f1: 'Parquet', f2: 'Keramik', f3: '-', f4: '-' },
+    materials: ['Tiang Baja', 'Dinding Bata Merah', 'Atap Spandek'],
+    legal: { shm: true, hgb: true, imb: true },
+    costs: { rent: '450000000', tax: '45000000', notary: '5000000' },
+    owner: { name: 'H. Ahmad', phone: '0811223344', address: 'Jakarta' },
+    survey: { pros: ['Lokasi sangat strategis', 'Bangunan baru'], cons: ['Harga sewa tinggi'] }
+  },
+  {
+    id: `PROP-${buildingId}-2`,
+    optionName: 'Opsi Alternatif 1',
+    address: { jl: 'Jl. Alternative No. 12', kota: 'Jakarta', kabupaten: 'Selatan', propinsi: 'DKI Jakarta' },
+    phoneLines: '2 Lines',
+    electricity: '6600 VA',
+    water: 'Sumur Bor',
+    areas: { land: '400', building: '400', frontYard: '50' },
+    conditions: { fence: 'Baja Ringan', gate: 'Sliding Gate', parking: '4 Mobil' },
+    security: ['CCTV 2 Titik'],
+    floors: { ground: 'Keramik', f1: 'Keramik', f2: '-', f3: '-', f4: '-' },
+    materials: ['Beton Bertulang', 'Atap Genteng'],
+    legal: { shm: true, hgb: false, imb: true },
+    costs: { rent: '300000000', tax: '30000000', notary: '2500000' },
+    owner: { name: 'Ibu Ratna', phone: '0855667788', address: 'Tangerang' },
+    survey: { pros: ['Akses truk mudah', 'Halaman luas'], cons: ['Bangunan lama', 'Perlu renovasi atap'] }
+  }
+];
+
+export const MOCK_BUILDING_DATA: BuildingRecord[] = [
+    {
+        id: '1',
+        name: 'Experience Center Satrio',
+        assetNo: 'BDG-JKT-001',
+        type: 'Showroom',
+        ownership: 'Own',
+        location: 'Jakarta Selatan',
+        address: 'Jl. Prof. DR. Satrio No. C4, Kuningan',
+        status: 'Open',
+        department: 'Sales & Marketing',
+        channel: 'Direct',
+        subLocation: 'Main Floor',
+        certificateNo: 'SHM/12345/JKT-SEL',
+        acquisitionValue: '75000000000',
+        proposals: []
+    },
+    {
+        id: '2',
+        name: 'Logistik Hub Cakung',
+        assetNo: 'BDG-JKT-042',
+        type: 'Warehouse',
+        ownership: 'Rent',
+        location: 'Jakarta Timur',
+        address: 'Kawasan Industri Cakung Blok B No. 12',
+        status: 'Open',
+        department: 'Supply Chain',
+        channel: 'Indirect',
+        subLocation: 'Storage A1',
+        landlordName: 'PT Pergudangan Jaya',
+        rentalCost: '1200000000',
+        startDate: '2023-05-01',
+        endDate: '2026-05-01',
+        proposals: generateMockProposals('2')
+    },
+    {
+        id: '3',
+        name: 'Branch Office Surabaya',
+        assetNo: 'BDG-SBY-005',
+        type: 'Office',
+        ownership: 'Rent',
+        location: 'Surabaya',
+        address: 'Jl. Ahmad Yani No. 15, Gayungan',
+        status: 'Open',
+        department: 'Operations',
+        channel: 'Direct',
+        subLocation: 'Lantai 3',
+        landlordName: 'Maspion Square Property',
+        rentalCost: '450000000',
+        startDate: '2024-01-01',
+        endDate: '2025-01-01',
+        proposals: [
+            {
+                id: 'PROP-3-1',
+                optionName: 'Maspion Office Park',
+                address: { jl: 'Jl. Ahmad Yani 15', kota: 'Surabaya', kabupaten: 'Gayungan', propinsi: 'Jatim' },
+                phoneLines: '10 Lines',
+                electricity: '22000 VA',
+                water: 'PAM',
+                areas: { land: '0', building: '1200', frontYard: '0' },
+                conditions: { fence: 'Lobby Security', gate: 'Secure Entry', parking: 'Basement' },
+                security: ['CCTV', 'Integrated Security', 'Fire Sprinkler'],
+                floors: { ground: 'Marble', f1: 'Marble', f2: 'Marble', f3: 'Carpet', f4: 'Carpet' },
+                materials: ['Kaca Tempered', 'Alumunium Frame'],
+                legal: { shm: false, hgb: true, imb: true },
+                costs: { rent: '450000000', tax: '45000000', notary: '10000000' },
+                owner: { name: 'Maspion Group', phone: '031-123456', address: 'Surabaya' },
+                survey: { pros: ['Fasilitas gedung lengkap', 'Pusat bisnis'], cons: ['Biaya maintenance tinggi'] }
+            }
+        ]
+    },
+    {
+        id: '4',
+        name: 'Home Center Bandung',
+        assetNo: 'BDG-BDG-012',
+        type: 'Showroom',
+        ownership: 'Rent',
+        location: 'Bandung',
+        address: 'Jl. Pelajar Pejuang 45 No. 22',
+        status: 'Draft',
+        department: 'Retail',
+        channel: 'Direct',
+        subLocation: 'Front Store',
+        landlordName: 'Bapak H. Ridwan',
+        rentalCost: '300000000',
+        startDate: '2024-06-01',
+        endDate: '2027-06-01',
+        proposals: generateMockProposals('4').slice(0, 1) // Only one candidate for Bandung
+    }
+];
+
+// ... rest of the helper functions remain same
 const generateAssetData = (type: 'ATK' | 'ARK', startId: number): AssetRecord[] => {
   const statuses: AssetRecord['status'][] = ['Approved', 'Pending', 'Rejected', 'Closed', 'Draft', 'On Progress'];
   const data: AssetRecord[] = [];
@@ -33,7 +162,6 @@ const generateAssetData = (type: 'ATK' | 'ARK', startId: number): AssetRecord[] 
 
   const items = type === 'ATK' ? itemsATK : itemsARK;
 
-  // Create records
   for (let i = 0; i < 15; i++) {
     const emp = employees[i % employees.length];
     const item = items[i % items.length];
@@ -101,41 +229,6 @@ export const MOCK_DELIVERY_LOCATIONS: DeliveryLocationRecord[] = [
     { id: 1, name: 'MODENA Head Office', address: 'Jl. Prof. DR. Satrio No. C4', type: 'HO' },
     { id: 2, name: 'MODENA Kemang', address: 'Jl. Kemang Selatan No. 150', type: 'Showroom' },
     { id: 3, name: 'Warehouse Cakung', address: 'Kawasan Industri Cakung Blok B', type: 'Warehouse' }
-];
-
-export const MOCK_BUILDING_DATA: BuildingRecord[] = [
-    {
-        id: '1',
-        name: 'Gedung Pusat Satrio',
-        assetNo: 'BDG-JKT-009',
-        type: 'Office',
-        ownership: 'Own',
-        location: 'Jakarta',
-        address: 'Jl. Prof. DR. Satrio No. C4',
-        status: 'Close',
-        department: 'HRGA',
-        channel: 'Direct',
-        subLocation: 'Floor 5',
-        certificateNo: 'SHM/123/JKT',
-        acquisitionValue: '50000000000'
-    },
-    {
-        id: '2',
-        name: 'Branch Office Surabaya',
-        assetNo: 'BDG-SBY-012',
-        type: 'Branch',
-        ownership: 'Rent',
-        location: 'Surabaya',
-        address: 'Jl. Ahmad Yani No. 15',
-        status: 'Open',
-        department: 'Operation',
-        channel: 'Indirect',
-        subLocation: 'Warehouse Area',
-        landlordName: 'PT Properti Makmur',
-        rentalCost: '250000000',
-        startDate: '2024-01-01',
-        endDate: '2025-01-01'
-    }
 ];
 
 export const MOCK_REMINDER_DATA: ReminderRecord[] = [

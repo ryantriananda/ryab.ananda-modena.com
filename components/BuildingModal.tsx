@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Building, DollarSign, Home, ChevronsUpDown, Plus, Trash2, CheckCircle, MapPin, Layers, Settings, ArrowRight } from 'lucide-react';
+import { X, Building, DollarSign, Home, ChevronsUpDown, Plus, Trash2, CheckCircle, MapPin, Layers, Settings, ArrowRight, GitMerge, FileText as FileIcon } from 'lucide-react';
 import { BuildingRecord, BuildingProposal } from '../types';
 
 interface Props {
@@ -176,9 +176,11 @@ export const BuildingModal: React.FC<Props> = ({ isOpen, onClose, onSave, initia
                             <h3 className="text-[18px] font-black text-black uppercase tracking-tighter">Perbandingan Kandidat Lokasi</h3>
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Reviewing {(form.proposals || []).length} kandidat gedung baru</p>
                         </div>
-                        <button onClick={addProposal} className="bg-black text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-gray-800 transition-all shadow-xl shadow-black/10">
-                            <Plus size={18} /> Tambah Kandidat
-                        </button>
+                        {!isView && (
+                          <button onClick={addProposal} className="bg-black text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-gray-800 transition-all shadow-xl shadow-black/10">
+                              <Plus size={18} /> Tambah Kandidat
+                          </button>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -186,7 +188,7 @@ export const BuildingModal: React.FC<Props> = ({ isOpen, onClose, onSave, initia
                             <div key={prop.id} className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden group hover:border-black transition-all">
                                 <div className="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
                                     <span className="text-[10px] font-black text-black uppercase tracking-widest px-3 py-1 bg-white rounded-full shadow-sm">{prop.optionName}</span>
-                                    <button onClick={() => removeProposal(idx)} className="text-gray-300 hover:text-red-500 transition-colors"><Trash2 size={16}/></button>
+                                    {!isView && <button onClick={() => removeProposal(idx)} className="text-gray-300 hover:text-red-500 transition-colors"><Trash2 size={16}/></button>}
                                 </div>
                                 <div className="p-8 space-y-6">
                                     <div>
@@ -196,7 +198,7 @@ export const BuildingModal: React.FC<Props> = ({ isOpen, onClose, onSave, initia
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
                                             <p className="text-[8px] font-black text-gray-400 uppercase">Sewa / Tahun</p>
-                                            <p className="text-[12px] font-black text-blue-600">{prop.costs.rent ? `Rp ${parseInt(prop.costs.rent).toLocaleString()}` : 'N/A'}</p>
+                                            <p className="text-[12px] font-black text-blue-600">{prop.costs.rent ? `Rp ${parseInt(prop.costs.rent).toLocaleString('id-ID')}` : 'N/A'}</p>
                                         </div>
                                         <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
                                             <p className="text-[8px] font-black text-gray-400 uppercase">Luas Bangunan</p>
@@ -204,11 +206,17 @@ export const BuildingModal: React.FC<Props> = ({ isOpen, onClose, onSave, initia
                                         </div>
                                     </div>
                                     <button onClick={() => setEditingProposalIndex(idx)} className="w-full py-4 bg-white border border-gray-200 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all shadow-sm flex items-center justify-center gap-2">
-                                        Edit Detail <ArrowRight size={14} />
+                                        {isView ? 'Lihat Detail' : 'Edit Detail'} <ArrowRight size={14} />
                                     </button>
                                 </div>
                             </div>
                         ))}
+                        {(form.proposals || []).length === 0 && (
+                          <div className="col-span-full py-20 flex flex-col items-center justify-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+                             <FileIcon size={48} className="text-gray-200 mb-4" />
+                             <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Belum ada proposal kandidat gedung</p>
+                          </div>
+                        )}
                     </div>
                  </>
                ) : (
@@ -221,7 +229,7 @@ export const BuildingModal: React.FC<Props> = ({ isOpen, onClose, onSave, initia
                             <h3 className="text-[14px] font-black text-black uppercase tracking-widest">Detail Kandidat: {form.proposals![editingProposalIndex].optionName}</h3>
                         </div>
                         <button onClick={() => setEditingProposalIndex(null)} className="bg-black text-white px-10 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-black/20">
-                            Selesai & Simpan Opsi
+                            Kembali ke List
                         </button>
                     </div>
 
@@ -229,35 +237,64 @@ export const BuildingModal: React.FC<Props> = ({ isOpen, onClose, onSave, initia
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                             <div className="space-y-10">
                                 <SectionHeader icon={MapPin} title="1. Informasi Lokasi" />
-                                <div><Label>Alamat Lengkap (Jl.)</Label><input className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].address.jl} onChange={e => updateProposal(editingProposalIndex, { address: { ...form.proposals![editingProposalIndex].address, jl: e.target.value } })} /></div>
+                                <div><Label>Alamat Lengkap (Jl.)</Label><input disabled={isView} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].address.jl} onChange={e => updateProposal(editingProposalIndex!, { address: { ...form.proposals![editingProposalIndex!].address, jl: e.target.value } })} /></div>
                                 <div className="grid grid-cols-3 gap-4">
-                                    <div><Label>Kota</Label><input className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].address.kota} onChange={e => updateProposal(editingProposalIndex, { address: { ...form.proposals![editingProposalIndex].address, kota: e.target.value } })} /></div>
-                                    <div><Label>Kabupaten</Label><input className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].address.kabupaten} onChange={e => updateProposal(editingProposalIndex, { address: { ...form.proposals![editingProposalIndex].address, kabupaten: e.target.value } })} /></div>
-                                    <div><Label>Propinsi</Label><input className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].address.propinsi} onChange={e => updateProposal(editingProposalIndex, { address: { ...form.proposals![editingProposalIndex].address, propinsi: e.target.value } })} /></div>
+                                    <div><Label>Kota</Label><input disabled={isView} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].address.kota} onChange={e => updateProposal(editingProposalIndex!, { address: { ...form.proposals![editingProposalIndex!].address, kota: e.target.value } })} /></div>
+                                    <div><Label>Kabupaten</Label><input disabled={isView} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].address.kabupaten} onChange={e => updateProposal(editingProposalIndex!, { address: { ...form.proposals![editingProposalIndex!].address, kabupaten: e.target.value } })} /></div>
+                                    <div><Label>Propinsi</Label><input disabled={isView} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].address.propinsi} onChange={e => updateProposal(editingProposalIndex!, { address: { ...form.proposals![editingProposalIndex!].address, propinsi: e.target.value } })} /></div>
                                 </div>
                                 <SectionHeader icon={Settings} title="2. Utilitas" />
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div><Label>Daya Listrik (VA)</Label><input className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].electricity} onChange={e => updateProposal(editingProposalIndex, { electricity: e.target.value })} /></div>
-                                    <div><Label>Sumber Air</Label><select className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold bg-white" value={form.proposals![editingProposalIndex].water} onChange={e => updateProposal(editingProposalIndex, { water: e.target.value })}><option value="PAM">PAM</option><option value="Sumur">Sumur / Pompa</option></select></div>
+                                    <div><Label>Daya Listrik (VA)</Label><input disabled={isView} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].electricity} onChange={e => updateProposal(editingProposalIndex!, { electricity: e.target.value })} /></div>
+                                    <div><Label>Sumber Air</Label><select disabled={isView} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold bg-white" value={form.proposals![editingProposalIndex].water} onChange={e => updateProposal(editingProposalIndex!, { water: e.target.value })}><option value="PAM">PAM</option><option value="Sumur">Sumur / Pompa</option></select></div>
                                 </div>
                             </div>
 
                             <div className="space-y-10">
                                 <SectionHeader icon={Layers} title="3. Luas & Fisik" />
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div><Label>Luas Tanah (M²)</Label><input type="number" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].areas.land} onChange={e => updateProposal(editingProposalIndex, { areas: { ...form.proposals![editingProposalIndex].areas, land: e.target.value } })} /></div>
-                                    <div><Label>Luas Bangunan (M²)</Label><input type="number" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].areas.building} onChange={e => updateProposal(editingProposalIndex, { areas: { ...form.proposals![editingProposalIndex].areas, building: e.target.value } })} /></div>
+                                    <div><Label>Luas Tanah (M²)</Label><input disabled={isView} type="number" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].areas.land} onChange={e => updateProposal(editingProposalIndex!, { areas: { ...form.proposals![editingProposalIndex!].areas, land: e.target.value } })} /></div>
+                                    <div><Label>Luas Bangunan (M²)</Label><input disabled={isView} type="number" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].areas.building} onChange={e => updateProposal(editingProposalIndex!, { areas: { ...form.proposals![editingProposalIndex!].areas, building: e.target.value } })} /></div>
                                 </div>
                                 <SectionHeader icon={DollarSign} title="4. Biaya & Anggaran" />
                                 <div className="space-y-4">
-                                    <div><Label>Biaya Sewa per Tahun (Rp)</Label><input type="number" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-black text-blue-600" value={form.proposals![editingProposalIndex].costs.rent} onChange={e => updateProposal(editingProposalIndex, { costs: { ...form.proposals![editingProposalIndex].costs, rent: e.target.value } })} /></div>
-                                    <div><Label>Estimasi Pajak PPH (Rp)</Label><input type="number" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].costs.tax} onChange={e => updateProposal(editingProposalIndex, { costs: { ...form.proposals![editingProposalIndex].costs, tax: e.target.value } })} /></div>
+                                    <div><Label>Biaya Sewa per Tahun (Rp)</Label><input disabled={isView} type="number" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-black text-blue-600" value={form.proposals![editingProposalIndex].costs.rent} onChange={e => updateProposal(editingProposalIndex!, { costs: { ...form.proposals![editingProposalIndex!].costs, rent: e.target.value } })} /></div>
+                                    <div><Label>Estimasi Pajak PPH (Rp)</Label><input disabled={isView} type="number" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold" value={form.proposals![editingProposalIndex].costs.tax} onChange={e => updateProposal(editingProposalIndex!, { costs: { ...form.proposals![editingProposalIndex!].costs, tax: e.target.value } })} /></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                  </div>
                )}
+            </div>
+          )}
+
+          {activeTab === 'Workflow' && (
+            <div className="max-w-3xl mx-auto py-10 space-y-12">
+               <SectionHeader icon={GitMerge} title="Persetujuan Kontrak" />
+               <div className="space-y-8">
+                  <div className="flex gap-6">
+                     <div className="flex flex-col items-center">
+                        <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white shadow-lg"><CheckCircle size={20} /></div>
+                        <div className="w-0.5 h-16 bg-green-200"></div>
+                     </div>
+                     <div>
+                        <h4 className="text-[12px] font-black text-black uppercase">Pengajuan Awal</h4>
+                        <p className="text-[10px] text-gray-400 mt-1 uppercase font-bold">Oleh: Admin Facility - 10 Jan 2024</p>
+                        <div className="mt-3 px-4 py-2 bg-green-50 rounded-xl text-[10px] font-bold text-green-700 inline-block border border-green-100 uppercase">Selesai</div>
+                     </div>
+                  </div>
+                  <div className="flex gap-6 opacity-40">
+                     <div className="flex flex-col items-center">
+                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 border-4 border-white shadow-sm">2</div>
+                        <div className="w-0.5 h-16 bg-gray-100"></div>
+                     </div>
+                     <div>
+                        <h4 className="text-[12px] font-black text-gray-400 uppercase tracking-widest">Review Manager GA</h4>
+                        <p className="text-[10px] text-gray-300 mt-1 uppercase font-bold italic">Menunggu Antrian...</p>
+                     </div>
+                  </div>
+               </div>
             </div>
           )}
 
