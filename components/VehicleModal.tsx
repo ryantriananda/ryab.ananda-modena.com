@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Save, Image as ImageIcon, Trash2, UploadCloud } from 'lucide-react';
+import { X, Save, Image as ImageIcon, Trash2, UploadCloud, Car, Shield, FileText, Briefcase, Navigation, DollarSign } from 'lucide-react';
 import { VehicleRecord } from '../types';
 
 interface Props {
@@ -25,8 +25,6 @@ export const VehicleModal: React.FC<Props> = ({ isOpen, onClose, onSave, initial
   useEffect(() => {
     if (isOpen && initialData) {
       setForm(initialData);
-      // If there's an existing image in initialData (assuming we'd store the URL/Base64)
-      // For demo, we just reset it. In real app, you'd set preview here.
     } else if (isOpen) {
       setForm({ status: 'Aktif', channel: 'Human Capital Operation', cabang: 'Pusat' });
       setImagePreview(null);
@@ -76,27 +74,29 @@ export const VehicleModal: React.FC<Props> = ({ isOpen, onClose, onSave, initial
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const FormSection = ({ title, children }: { title: string, children?: React.ReactNode }) => (
-    <div className="mb-10 last:mb-0">
-      <div className="flex items-center gap-2 mb-6">
-        <h3 className="text-[11px] font-black text-black uppercase tracking-[0.2em]">{title}</h3>
-        <div className="h-[1px] flex-1 bg-gray-100"></div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
-        {children}
+  const SectionHeader = ({ icon: Icon, title, sub }: { icon: any, title: string, sub?: string }) => (
+    <div className="flex items-center gap-4 mb-8">
+      <div className="w-1 h-6 bg-black rounded-full shadow-sm"></div>
+      <div>
+          <h3 className="text-[11px] font-black text-black uppercase tracking-[0.2em] leading-none">{title}</h3>
+          {sub && <p className="text-[8px] font-bold text-gray-400 uppercase mt-1 tracking-widest">{sub}</p>}
       </div>
     </div>
   );
 
-  const InputField = ({ label, value, field, type = "text", disabled = false, placeholder = "", className = "" }: any) => (
+  const Label = ({ children, required }: { children?: React.ReactNode, required?: boolean }) => (
+    <label className="block text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2.5">
+      {children} {required && <span className="text-red-500 font-black ml-0.5">*</span>}
+    </label>
+  );
+
+  const InputField = ({ label, value, field, type = "text", disabled = false, placeholder = "", className = "", required = false }: any) => (
     <div className={className}>
-      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2 tracking-widest">
-        {label} <span className="text-red-500 font-bold">*</span>
-      </label>
+      <Label required={required}>{label}</Label>
       <input 
         type={type} 
         disabled={isView || disabled}
-        className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-xs font-bold text-black focus:border-black focus:ring-2 focus:ring-gray-100 outline-none disabled:bg-gray-50 disabled:text-gray-400 transition-all placeholder:text-gray-300 shadow-sm"
+        className="w-full bg-white border border-gray-100 rounded-2xl px-5 py-4 text-[12px] font-black text-black focus:border-black outline-none disabled:bg-gray-50 disabled:text-gray-400 transition-all placeholder:text-gray-200 shadow-sm"
         value={value || ''}
         placeholder={placeholder}
         onChange={(e) => setForm({...form, [field]: e.target.value})}
@@ -104,23 +104,21 @@ export const VehicleModal: React.FC<Props> = ({ isOpen, onClose, onSave, initial
     </div>
   );
 
-  const SelectField = ({ label, value, field, options, className = "" }: any) => (
+  const SelectField = ({ label, value, field, options, className = "", required = false }: any) => (
     <div className={className}>
-      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2 tracking-widest">
-        {label} <span className="text-red-500 font-bold">*</span>
-      </label>
+      <Label required={required}>{label}</Label>
       <div className="relative">
         <select 
             disabled={isView}
-            className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-xs font-bold text-black focus:border-black focus:ring-2 focus:ring-gray-100 outline-none disabled:bg-gray-50 appearance-none shadow-sm transition-all"
+            className="w-full bg-white border border-gray-100 rounded-2xl px-5 py-4 text-[12px] font-black text-black focus:border-black outline-none disabled:bg-gray-50 appearance-none shadow-sm transition-all cursor-pointer"
             value={value || ''}
             onChange={(e) => setForm({...form, [field]: e.target.value})}
         >
             {options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
         </select>
         {!isView && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-300">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"></path></svg>
             </div>
         )}
       </div>
@@ -128,153 +126,146 @@ export const VehicleModal: React.FC<Props> = ({ isOpen, onClose, onSave, initial
   );
 
   return (
-    <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center backdrop-blur-md p-0 md:p-6 overflow-hidden">
-      <div className="bg-white w-full max-w-[1400px] h-full md:h-auto md:max-h-[95vh] rounded-none md:rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center backdrop-blur-sm p-4 overflow-hidden animate-in fade-in duration-300">
+      <div className="bg-[#FBFBFB] w-full max-w-[1200px] rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[95vh] animate-in zoom-in-95 duration-300">
+        
         {/* Header */}
-        <div className="px-8 py-6 bg-white border-b border-gray-100 flex items-center justify-between shrink-0">
-          <h2 className="text-xl font-black tracking-tighter text-black uppercase">
-             {mode === 'edit' ? 'Edit Database Aset Kendaraan' : mode === 'view' ? 'Detail Database Aset Kendaraan' : 'Tambah Database Aset Kendaraan'}
-          </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-black p-2 rounded-full bg-gray-50 transition-all hover:rotate-90">
-            <X size={20} />
+        <div className="px-10 py-8 bg-white border-b border-gray-100 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-5">
+            <div className="p-3.5 bg-black rounded-2xl shadow-xl shadow-black/20 text-white">
+                <Car size={22} strokeWidth={2.5} />
+            </div>
+            <div>
+                <h2 className="text-[18px] font-black text-black uppercase tracking-tight leading-none">
+                   {mode === 'edit' ? 'Update Vehicle Asset' : mode === 'view' ? 'Vehicle Asset Profile' : 'New Vehicle Database Entry'}
+                </h2>
+                <p className="text-[9px] font-bold text-gray-400 mt-2 uppercase tracking-[0.3em]">Corporate Fleet Management System</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-gray-300 hover:text-black transition-all p-2 rounded-full hover:bg-gray-50">
+            <X size={28} strokeWidth={2.5} />
           </button>
         </div>
 
         {/* Form Body */}
-        <div className="flex-1 overflow-y-auto p-8 md:p-10 custom-scrollbar bg-white">
-          <div className="flex flex-col lg:flex-row gap-12">
+        <div className="flex-1 overflow-y-auto p-12 custom-scrollbar bg-[#FBFBFB]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             
             {/* Left Column */}
-            <div className="flex-1 space-y-12">
-              <FormSection title="Detil Informasi">
-                <InputField label="No. Registrasi" value={form.noRegistrasi} field="noRegistrasi" disabled={true} placeholder="301-00208" />
-                <InputField label="Deskripsi Lengkap" value={form.nama} field="nama" placeholder="Contoh: Toyota Avanza 1.3 CVT E Warna Putih..." />
-                <InputField label="No. Polisi" value={form.noPolisi} field="noPolisi" placeholder="B 1708 CZY" />
-                
-                <InputField label="Merek" value={form.merek} field="merek" placeholder="TOYOTA" />
-                <InputField label="Tipe Kendaraan" value={form.tipeKendaraan} field="tipeKendaraan" placeholder="AVANZA" />
-                <InputField label="Jenis" value={form.jenis} field="jenis" placeholder="1.3 G" />
-                
-                <InputField label="Model" value={form.model} field="model" placeholder="A/T" />
-                <InputField label="Tahun Pembuatan" value={form.tahunPembuatan} field="tahunPembuatan" placeholder="2022" />
-                <InputField label="Warna" value={form.warna} field="warna" placeholder="Putih" />
-                
-                <InputField label="Isi Silinder" value={form.isiSilinder} field="isiSilinder" placeholder="1329 CC" />
-                <InputField label="No. Rangka" value={form.noRangka} field="noRangka" placeholder="MHKAA1BY9NK008688" />
-                <InputField label="No. Mesin" value={form.noMesin} field="noMesin" placeholder="1NRG188335" />
-              </FormSection>
-
-              <FormSection title="Pengguna">
-                <SelectField label="Channel" value={form.channel} field="channel" options={['Human Capital Operation', 'Management', 'Traditional', 'HR', 'HCO']} />
-                <SelectField label="Dept / Cabang" value={form.cabang} field="cabang" options={['Pusat', 'Purwokerto', 'Pekanbaru', 'Palembang', 'Medan', 'Manado', 'Malang', 'Kediri']} />
-                <InputField label="Pengguna" value={form.pengguna} field="pengguna" placeholder="Pak Supriaji" />
-              </FormSection>
-              
-              <FormSection title="Lampiran">
-                <div className="md:col-span-3">
-                   <label className="block text-[10px] font-bold text-gray-500 uppercase mb-3 tracking-wider">Gambar <span className="text-red-500 font-bold">*</span></label>
-                   
-                   <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      className="hidden" 
-                      accept="image/*" 
-                      onChange={onFileChange} 
-                      disabled={isView}
-                   />
-
-                   <div 
-                      onClick={() => !isView && fileInputRef.current?.click()}
-                      onDragOver={onDragOver}
-                      onDragLeave={onDragLeave}
-                      onDrop={onDrop}
-                      className={`relative border-2 border-dashed rounded-2xl h-64 flex flex-col items-center justify-center transition-all overflow-hidden bg-white
-                        ${imagePreview ? 'border-gray-200' : 'border-gray-100 hover:border-black hover:bg-gray-50/50'}
-                        ${isDragging ? 'border-black bg-gray-100 scale-[0.99]' : ''}
-                        ${!isView ? 'cursor-pointer' : 'cursor-default'}
-                      `}
-                   >
-                      {imagePreview ? (
-                        <div className="relative w-full h-full group">
-                            <img src={imagePreview} alt="Preview" className="w-full h-full object-contain p-2" />
-                            {!isView && (
-                                <button 
-                                    onClick={removeImage}
-                                    className="absolute top-4 right-4 bg-black text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
-                            )}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center">
-                            <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-sm border border-gray-100 transition-all mb-4 bg-white ${isDragging ? 'scale-110' : ''}`}>
-                                <UploadCloud size={28} className={isDragging ? 'text-black' : 'text-gray-300'} />
-                            </div>
-                            <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest text-center px-6">
-                                {isDragging ? 'Lepaskan Gambar' : 'Klik atau seret gambar ke sini'}
-                            </p>
-                            <p className="text-[9px] font-bold text-gray-300 mt-2 uppercase">PNG, JPG atau WEBP (Maks. 5MB)</p>
-                        </div>
-                      )}
-                   </div>
+            <div className="space-y-12">
+              <div className="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm">
+                <SectionHeader icon={Shield} title="Vehicle Specification" sub="Core Unit Details" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <InputField label="No. Registrasi" value={form.noRegistrasi} field="noRegistrasi" disabled={true} placeholder="Auto-Generated" className="md:col-span-1" />
+                  <InputField label="No. Polisi" value={form.noPolisi} field="noPolisi" placeholder="B 1708 CZY" required />
+                  <InputField label="Description" value={form.nama} field="nama" placeholder="Toyota Avanza 1.3 CVT..." className="md:col-span-2" required />
+                  
+                  <InputField label="Merek" value={form.merek} field="merek" placeholder="TOYOTA" />
+                  <InputField label="Tipe Kendaraan" value={form.tipeKendaraan} field="tipeKendaraan" placeholder="AVANZA" />
+                  
+                  <InputField label="Model" value={form.model} field="model" placeholder="A/T" />
+                  <InputField label="Tahun Pembuatan" value={form.tahunPembuatan} field="tahunPembuatan" placeholder="2022" />
+                  
+                  <InputField label="Warna" value={form.warna} field="warna" placeholder="Putih" />
+                  <InputField label="Isi Silinder" value={form.isiSilinder} field="isiSilinder" placeholder="1329 CC" />
                 </div>
-              </FormSection>
+              </div>
+
+              <div className="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm">
+                <SectionHeader icon={Briefcase} title="Allocation & Usage" sub="Assigned Dept & User" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <SelectField label="Channel" value={form.channel} field="channel" options={['Human Capital Operation', 'Management', 'Traditional', 'HR', 'HCO']} required />
+                  <SelectField label="Dept / Cabang" value={form.cabang} field="cabang" options={['Pusat', 'Purwokerto', 'Pekanbaru', 'Palembang', 'Medan', 'Manado', 'Malang', 'Kediri']} required />
+                  <InputField label="Pengguna Utama" value={form.pengguna} field="pengguna" placeholder="Full Name" className="md:col-span-2" />
+                </div>
+              </div>
             </div>
 
             {/* Right Column */}
-            <div className="flex-1 space-y-12">
-              <FormSection title="Surat">
-                <InputField label="No. BPKB" value={form.noBpkb} field="noBpkb" placeholder="S-03714594" />
-                <InputField label="Keterangan BPKB" value={form.keteranganBpkb} field="keteranganBpkb" className="md:col-span-2" />
-                
-                <InputField label="Masa Berlaku 1 Tahun" value={form.masaBerlaku1} field="masaBerlaku1" type="date" />
-                <InputField label="Masa Berlaku 5 Tahun" value={form.masaBerlaku5} field="masaBerlaku5" type="date" />
-                <InputField label="Masa Berlaku KIR" value={form.masaBerlakuKir} field="masaBerlakuKir" type="date" />
-              </FormSection>
-
-              <FormSection title="Pembelian">
-                <InputField label="Tgl Beli" value={form.tglBeli} field="tglBeli" type="date" />
-                <div className="md:col-span-2 relative">
-                  <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2 tracking-widest">Harga Beli <span className="text-red-500 font-bold">*</span></label>
-                  <div className="relative">
-                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-black text-black">
-                        {form.hargaBeli ? `Rp${parseInt(form.hargaBeli).toLocaleString('id-ID')}` : 'Rp0'}
-                     </span>
-                     <input 
-                       type="number" 
-                       className="w-full bg-white border border-gray-200 rounded-lg pl-4 pr-32 py-3 text-xs font-bold text-black focus:border-black focus:ring-2 focus:ring-gray-100 outline-none shadow-sm transition-all"
-                       value={form.hargaBeli || ''}
-                       onChange={(e) => setForm({...form, hargaBeli: e.target.value})}
-                       disabled={isView}
-                       placeholder="0"
-                     />
-                  </div>
+            <div className="space-y-12">
+              <div className="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm">
+                <SectionHeader icon={FileText} title="Legal Documents" sub="Validity & Numbers" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <InputField label="No. BPKB" value={form.noBpkb} field="noBpkb" placeholder="S-03714594" className="md:col-span-2" />
+                  <InputField label="BPKB Remarks" value={form.keteranganBpkb} field="keteranganBpkb" className="md:col-span-2" />
+                  
+                  <InputField label="Masa Berlaku (1Y)" value={form.masaBerlaku1} field="masaBerlaku1" type="date" />
+                  <InputField label="Masa Berlaku (5Y)" value={form.masaBerlaku5} field="masaBerlaku5" type="date" />
+                  <InputField label="Masa Berlaku KIR" value={form.masaBerlakuKir} field="masaBerlakuKir" type="date" className="md:col-span-2" />
                 </div>
-              </FormSection>
+              </div>
 
-              <FormSection title="Asuransi">
-                <InputField label="No Polis" value={form.noPolisAsuransi} field="noPolisAsuransi" className="md:col-span-2" />
-                <InputField label="Jangka Pertanggungan" value={form.jangkaPertanggungan} field="jangkaPertanggungan" type="date" />
-              </FormSection>
+              <div className="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm">
+                <SectionHeader icon={DollarSign} title="Purchase & Insurance" sub="Financial Tracking" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <InputField label="Tgl Beli" value={form.tglBeli} field="tglBeli" type="date" />
+                  <div className="relative">
+                    <Label required>Harga Beli (IDR)</Label>
+                    <div className="relative">
+                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-300">RP</span>
+                       <input 
+                         type="number" 
+                         className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-10 pr-6 py-4 text-[13px] font-black text-black focus:border-black outline-none shadow-sm transition-all"
+                         value={form.hargaBeli || ''}
+                         onChange={(e) => setForm({...form, hargaBeli: e.target.value})}
+                         disabled={isView}
+                         placeholder="0"
+                       />
+                    </div>
+                  </div>
+                  <InputField label="No Polis Asuransi" value={form.noPolisAsuransi} field="noPolisAsuransi" className="md:col-span-2" />
+                  <InputField label="Jangka Pertanggungan" value={form.jangkaPertanggungan} field="jangkaPertanggungan" type="date" className="md:col-span-2" />
+                </div>
+              </div>
+
+              <div className="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm">
+                <SectionHeader icon={UploadCloud} title="Vehicle Media" sub="Visual Attachment" />
+                <div 
+                    onClick={() => !isView && fileInputRef.current?.click()}
+                    onDragOver={onDragOver}
+                    onDragLeave={onDragLeave}
+                    onDrop={onDrop}
+                    className={`relative border-2 border-dashed rounded-[1.5rem] h-56 flex flex-col items-center justify-center transition-all overflow-hidden bg-white
+                      ${imagePreview ? 'border-gray-200' : 'border-gray-100 hover:border-black hover:bg-gray-50/50'}
+                      ${isDragging ? 'border-black bg-gray-100 scale-[0.99]' : ''}
+                      ${!isView ? 'cursor-pointer' : 'cursor-default'}
+                    `}
+                 >
+                    {imagePreview ? (
+                      <div className="relative w-full h-full group">
+                          <img src={imagePreview} alt="Preview" className="w-full h-full object-contain p-4" />
+                          {!isView && (
+                              <button 
+                                  onClick={removeImage}
+                                  className="absolute top-4 right-4 bg-black text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                              >
+                                  <Trash2 size={16} />
+                              </button>
+                          )}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                          <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-sm border border-gray-100 transition-all mb-4 bg-white ${isDragging ? 'scale-110' : ''}`}>
+                              <UploadCloud size={24} className={isDragging ? 'text-black' : 'text-gray-300'} />
+                          </div>
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center px-6">
+                              {isDragging ? 'Release to Upload' : 'Click or Drag Image Here'}
+                          </p>
+                      </div>
+                    )}
+                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={onFileChange} />
+                 </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="px-8 py-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3 shrink-0">
-          <button 
-            onClick={onClose} 
-            className="px-12 py-3 text-[11px] font-black text-gray-400 bg-white border border-gray-200 rounded-xl hover:bg-gray-100 hover:text-black transition-all uppercase tracking-[0.2em]"
-          >
-            Batal
-          </button>
+        {/* Global Footer */}
+        <div className="px-10 py-8 bg-white border-t border-gray-100 flex justify-between items-center shrink-0">
+          <button onClick={onClose} className="px-12 py-4 text-[11px] font-black uppercase tracking-[0.25em] text-gray-400 hover:text-black transition-all bg-gray-50 rounded-2xl active:scale-95">Cancel</button>
           {!isView && (
-            <button 
-                onClick={() => onSave(form)} 
-                className="px-16 py-3 text-[11px] font-black text-white bg-black rounded-xl shadow-xl shadow-black/20 hover:bg-gray-900 transition-all flex items-center gap-3 uppercase tracking-[0.2em] active:scale-95"
-            >
-                <Save size={16} /> Simpan Data
+            <button onClick={() => onSave(form)} className="bg-black text-white px-20 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.25em] hover:bg-gray-800 transition-all active:scale-95 shadow-2xl shadow-black/20 flex items-center gap-4">
+              <Save size={18} strokeWidth={2.5} /> Save Vehicle Record
             </button>
           )}
         </div>

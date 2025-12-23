@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { BuildingRecord } from '../types';
-import { Eye, Pencil, Building, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronsUpDown, Eye, Pencil, Building, MapPin, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from 'lucide-react';
 
 interface Props {
   data: BuildingRecord[];
@@ -10,108 +11,121 @@ interface Props {
 
 export const BuildingTable: React.FC<Props> = ({ data, onEdit, onView }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px] text-left">
+        <table className="w-full min-w-[1200px] text-left border-collapse">
           <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
-              <th className="px-6 py-4 text-[12px] font-semibold text-gray-500">Properti / Asset No</th>
-              <th className="px-6 py-4 text-[12px] font-semibold text-gray-500">Tipe</th>
-              <th className="px-6 py-4 text-[12px] font-semibold text-gray-500">Kepemilikan</th>
-              <th className="px-6 py-4 text-[12px] font-semibold text-gray-500">Lokasi</th>
-              <th className="px-6 py-4 text-[12px] font-semibold text-gray-500">Alamat</th>
-              <th className="px-6 py-4 text-[12px] font-semibold text-gray-500 text-center">Status</th>
-              <th className="px-6 py-4 text-[12px] font-semibold text-gray-500 text-right">Aksi</th>
+            <tr className="bg-white border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+              <th className="p-5 pl-8 w-64 group cursor-pointer hover:bg-gray-50/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  PROPERTI / ASSET NO
+                  <ChevronsUpDown size={14} className="text-gray-300" />
+                </div>
+              </th>
+              <th className="p-5 w-40 group cursor-pointer hover:bg-gray-50/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  TIPE
+                  <ChevronsUpDown size={14} className="text-gray-300" />
+                </div>
+              </th>
+              <th className="p-5 w-44 group cursor-pointer hover:bg-gray-50/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  KEPEMILIKAN
+                  <ChevronsUpDown size={14} className="text-gray-300" />
+                </div>
+              </th>
+              <th className="p-5 w-56 group cursor-pointer hover:bg-gray-50/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  LOKASI / WILAYAH
+                  <ChevronsUpDown size={14} className="text-gray-300" />
+                </div>
+              </th>
+              <th className="p-5 group cursor-pointer hover:bg-gray-50/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  ALAMAT LENGKAP
+                  <ChevronsUpDown size={14} className="text-gray-300" />
+                </div>
+              </th>
+              <th className="p-5 w-32 group cursor-pointer hover:bg-gray-50/50 transition-colors text-center">
+                STATUS
+              </th>
+              <th className="p-5 w-24 pr-8 text-right">AKSI</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-gray-50 text-[12px]">
             {data.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
-                <td className="px-6 py-4">
+              <tr key={item.id} className="hover:bg-gray-50/30 transition-colors group">
+                <td className="p-5 pl-8">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
-                        <Building size={18} />
+                    <div className="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center text-black border border-gray-100">
+                        <Building size={16} />
                     </div>
                     <div>
-                        <p className="font-semibold text-gray-900 text-[13px]">{item.name}</p>
-                        <p className="text-[11px] text-gray-400 font-mono mt-0.5">{item.assetNo}</p>
+                        <div className="font-black text-black text-[13px] uppercase tracking-tight">{item.name}</div>
+                        <div className="text-[10px] text-gray-400 font-mono font-bold uppercase tracking-tighter mt-0.5">{item.assetNo}</div>
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-gray-600 text-[13px] font-medium">
+                <td className="p-5 text-gray-500 font-black uppercase">
                     {item.type}
                 </td>
-                <td className="px-6 py-4">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-[11px] font-semibold border ${
+                <td className="p-5">
+                    <span className={`inline-flex px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter border ${
                         item.ownership === 'Own' 
-                        ? 'bg-blue-50 text-blue-600 border-blue-200' 
-                        : 'bg-orange-50 text-orange-600 border-orange-200'
+                        ? 'bg-blue-50 text-blue-600 border-blue-100' 
+                        : 'bg-orange-50 text-orange-600 border-orange-100'
                     }`}>
-                        {item.ownership === 'Own' ? 'Milik Sendiri' : 'Sewa'}
+                        {item.ownership === 'Own' ? 'MILIK SENDIRI' : 'SEWA / RENTAL'}
                     </span>
                 </td>
-                <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 text-gray-600 text-[13px]">
-                        <MapPin size={14} className="text-gray-400" />
+                <td className="p-5">
+                    <div className="flex items-center gap-2 text-gray-600 font-bold uppercase">
+                        <MapPin size={12} className="text-gray-300" />
                         {item.location}
                     </div>
                 </td>
-                <td className="px-6 py-4 text-gray-500 text-[13px] max-w-[200px] truncate">
+                <td className="p-5 text-gray-400 font-medium max-w-[250px] truncate">
                     {item.address}
                 </td>
-                <td className="px-6 py-4 text-center">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-[11px] font-semibold border ${
-                        item.status === 'Open' 
-                        ? 'bg-green-50 text-green-600 border-green-200' 
-                        : 'bg-gray-100 text-gray-500 border-gray-200'
+                <td className="p-5 text-center">
+                    <span className={`inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${
+                        item.status === 'Open' ? 'bg-[#E8FDF5] text-[#059669]' : 'bg-gray-100 text-gray-400'
                     }`}>
                         {item.status}
                     </span>
                 </td>
-                <td className="px-6 py-4 text-right">
+                <td className="p-5 pr-8 text-right">
                   <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
                       onClick={(e) => { e.stopPropagation(); onView?.(item); }}
-                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                      title="Lihat Detail"
+                      className="p-1.5 text-gray-300 hover:text-black transition-all"
                     >
-                      <Eye size={16} />
+                      <Eye size={18} />
                     </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); onEdit?.(item); }}
-                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                      title="Edit"
+                      className="p-1.5 text-gray-300 hover:text-black transition-all"
                     >
-                      <Pencil size={16} />
+                      <Pencil size={18} />
                     </button>
                   </div>
                 </td>
               </tr>
             ))}
-            {data.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-6 py-16 text-center">
-                  <div className="text-gray-400">
-                    <Building size={40} className="mx-auto mb-3 opacity-30" />
-                    <p className="text-sm font-medium">Tidak ada data gedung</p>
-                    <p className="text-xs mt-1">Klik tombol "Tambah Data" untuk menambahkan gedung baru</p>
-                  </div>
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>
       
-      <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p className="text-[12px] text-gray-500">
-          Menampilkan <span className="font-semibold text-gray-700">1 - {data.length}</span> dari <span className="font-semibold text-gray-700">{data.length}</span> data
-        </p>
+      {/* Footer Pagination style consistent with Service Table */}
+      <div className="px-8 py-5 bg-white border-t border-gray-100 flex items-center justify-between">
+        <div className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+          SHOWING 1 - {data.length} OF <span className="text-black">{data.length}</span> ROW(S)
+        </div>
         
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-[12px] text-gray-500">
-            <span>Baris per halaman:</span>
-            <select className="bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-[12px] font-medium focus:outline-none focus:border-blue-500">
+        <div className="flex items-center gap-8">
+          <div className="flex items-center gap-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+            ROW PER PAGE
+            <select className="bg-transparent border-0 text-[11px] font-black text-black focus:ring-0 cursor-pointer p-0">
               <option>10</option>
               <option>25</option>
               <option>50</option>
@@ -119,16 +133,22 @@ export const BuildingTable: React.FC<Props> = ({ data, onEdit, onView }) => {
           </div>
 
           <div className="flex items-center gap-1">
-            <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all disabled:opacity-50" disabled>
+            <button className="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-black transition-all">
+              <ChevronsLeft size={16} />
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-black transition-all">
               <ChevronLeft size={16} />
             </button>
             
-            <span className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[12px] font-medium text-gray-700 mx-1">
+            <div className="px-4 py-1.5 bg-white border border-gray-100 rounded-lg text-[11px] font-black shadow-sm mx-2">
               1 / 1
-            </span>
+            </div>
 
-            <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all disabled:opacity-50" disabled>
+            <button className="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-black transition-all">
               <ChevronRight size={16} />
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-black transition-all">
+              <ChevronsRight size={16} />
             </button>
           </div>
         </div>
