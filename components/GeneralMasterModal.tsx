@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { X, Save, Database } from 'lucide-react';
 import { GeneralMasterItem } from '../types';
@@ -29,36 +30,33 @@ export const GeneralMasterModal: React.FC<Props> = ({ isOpen, onClose, onSave, i
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm p-4">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center backdrop-blur-sm p-4">
+      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-100 rounded-xl">
-              <Database size={18} className="text-blue-600" />
+            <div className="p-2 bg-gray-50 rounded-lg text-black">
+              <Database size={18} />
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900">
-                {initialData ? `Edit ${title}` : `Tambah ${title}`}
-              </h2>
-              <p className="text-sm text-gray-500">Master data</p>
-            </div>
+            <h2 className="text-[13px] font-black tracking-widest text-black uppercase">
+              {initialData ? `Edit ${title}` : `Tambah ${title}`}
+            </h2>
           </div>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all">
+          <button onClick={onClose} className="text-gray-400 hover:text-black p-2 transition-colors">
             <X size={20} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6">
+        <div className="p-8 space-y-6">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">
+            <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2 tracking-widest">
               Nama {title} <span className="text-red-500">*</span>
             </label>
             <input 
               type="text" 
               autoFocus
-              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-gray-400"
+              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-bold text-black focus:border-black focus:ring-2 focus:ring-gray-100 outline-none transition-all placeholder:text-gray-300"
               placeholder={`Masukkan nama ${title.toLowerCase()}...`}
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -68,20 +66,19 @@ export const GeneralMasterModal: React.FC<Props> = ({ isOpen, onClose, onSave, i
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 flex justify-between bg-white">
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex gap-3">
           <button 
             onClick={onClose}
-            className="px-6 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all"
+            className="flex-1 py-3 text-[11px] font-black text-gray-400 bg-white border border-gray-200 rounded-xl hover:bg-gray-100 hover:text-black transition-all uppercase tracking-widest"
           >
             Batal
           </button>
           <button 
             onClick={handleSave}
             disabled={!name.trim()}
-            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/25 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-[2] py-3 text-[11px] font-black text-white bg-black rounded-xl shadow-lg shadow-black/10 hover:bg-gray-900 transition-all flex items-center justify-center gap-2 uppercase tracking-widest active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Save size={18} />
-            Simpan
+            <Save size={16} /> Simpan Data
           </button>
         </div>
       </div>

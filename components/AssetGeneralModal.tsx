@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { X, Save, ChevronDown, Building2 } from 'lucide-react';
+import { X, Save, ChevronsUpDown, Building2 } from 'lucide-react';
 import { GeneralAssetRecord } from '../types';
 
 interface Props {
@@ -53,197 +54,184 @@ export const AssetGeneralModal: React.FC<Props> = ({
 
   const isView = mode === 'view';
 
+  // Fix: make children optional to resolve TS error where children are passed via JSX but reported as missing
+  const Label = ({ children, required }: { children?: React.ReactNode, required?: boolean }) => (
+    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] mb-2.5">
+      {children} {required && <span className="text-red-500 font-black ml-1">*</span>}
+    </label>
+  );
+
+  const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
+    <input 
+      {...props}
+      disabled={isView || props.disabled}
+      className={`w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-[12px] font-black text-black focus:border-black outline-none transition-all placeholder:text-gray-300 shadow-sm disabled:bg-gray-50/50 disabled:text-gray-400 ${props.className || ''}`}
+    />
+  );
+
+  const Select = (props: React.SelectHTMLAttributes<HTMLSelectElement>) => (
+    <div className="relative">
+      <select 
+        {...props}
+        disabled={isView || props.disabled}
+        className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-[12px] font-black text-black focus:border-black outline-none transition-all appearance-none disabled:bg-gray-50/50 disabled:text-gray-400 shadow-sm cursor-pointer"
+      >
+        {props.children}
+      </select>
+      <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+        <ChevronsUpDown size={16} strokeWidth={3} />
+      </div>
+    </div>
+  );
+
   const handleSave = () => {
     onSave(form);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-[70] flex items-center justify-center backdrop-blur-sm p-4">
-      <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 bg-black/80 z-[70] flex items-center justify-center backdrop-blur-md p-4 animate-in fade-in duration-300">
+      <div className="bg-[#FBFBFB] w-full max-w-5xl rounded-[3rem] shadow-2xl overflow-hidden flex flex-col transform transition-all scale-100 animate-in zoom-in-95 duration-300">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-100 rounded-xl">
-              <Building2 size={20} className="text-indigo-600" />
+        <div className="px-12 py-10 bg-white border-b border-gray-100 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-6">
+            <div className="w-14 h-14 bg-black rounded-[1.25rem] flex items-center justify-center text-white shadow-2xl shadow-black/20">
+              <Building2 size={28} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900">
-                {mode === 'create' ? 'Tambah Gedung Baru' : mode === 'edit' ? 'Edit Data Gedung' : 'Detail Gedung'}
-              </h2>
-              <p className="text-sm text-gray-500">Informasi umum aset gedung</p>
+              <h2 className="text-[22px] font-black text-black uppercase tracking-tight leading-none">General Information</h2>
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-2">Building Asset & Contract Details</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all">
-            <X size={20} />
+          <button onClick={onClose} className="text-gray-300 hover:text-black p-3 rounded-full hover:bg-gray-50 transition-all">
+            <X size={32} strokeWidth={2.5} />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {/* Content - Two Column Grid like Image 1 */}
+        <div className="flex-1 overflow-y-auto p-12 custom-scrollbar">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10">
             
-            {/* Asset Number */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1.5">Nomor Aset</label>
-              <input 
-                value={form.assetNumber} 
-                readOnly 
-                disabled 
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-400"
-              />
-            </div>
-            
-            {/* Asset Category */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1.5">Kategori Aset</label>
-              <input 
-                value={form.assetCategory} 
-                onChange={(e) => setForm({...form, assetCategory: e.target.value})} 
-                disabled={isView}
-                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all disabled:bg-gray-50 disabled:text-gray-400"
-              />
-            </div>
-
-            {/* Type */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                Tipe <span className="text-red-500">*</span>
-              </label>
-              <input 
-                value={form.type} 
-                onChange={(e) => setForm({...form, type: e.target.value})} 
-                placeholder="Contoh: Office, Warehouse..."
-                disabled={isView}
-                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all disabled:bg-gray-50 disabled:text-gray-400"
-              />
-            </div>
-
-            {/* Ownership */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1.5">Kepemilikan</label>
-              <div className="relative">
-                <select 
-                  value={form.ownership} 
-                  onChange={(e) => setForm({...form, ownership: e.target.value})}
-                  disabled={isView}
-                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm appearance-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all disabled:bg-gray-50 disabled:text-gray-400 cursor-pointer"
-                >
-                  <option value="Rent">Sewa</option>
-                  <option value="Own">Milik Sendiri</option>
-                </select>
-                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            {/* Left Column Fields */}
+            <div className="space-y-10">
+              <div>
+                <Label>Asset Number</Label>
+                <Input value={form.assetNumber} readOnly disabled className="bg-gray-50 text-gray-400" />
               </div>
-            </div>
+              
+              <div>
+                <Label required>Type</Label>
+                <Input 
+                  value={form.type} 
+                  onChange={(e) => setForm({...form, type: e.target.value})} 
+                  placeholder="Input Building Type..."
+                />
+              </div>
 
-            {/* Asset Location */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                Lokasi Aset <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <select 
+              <div>
+                <Label required>Asset Location</Label>
+                <Select 
                   value={form.assetLocation} 
                   onChange={(e) => setForm({...form, assetLocation: e.target.value})}
-                  disabled={isView}
-                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm appearance-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all disabled:bg-gray-50 disabled:text-gray-400 cursor-pointer"
                 >
-                  <option value="">-- Pilih Lokasi --</option>
+                  <option value="">Select Location...</option>
                   <option value="Jakarta">Jakarta</option>
                   <option value="Surabaya">Surabaya</option>
                   <option value="Bandung">Bandung</option>
-                </select>
-                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </Select>
               </div>
-            </div>
 
-            {/* Channel */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                Channel <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <select 
-                  value={form.channel} 
-                  onChange={(e) => setForm({...form, channel: e.target.value})}
-                  disabled={isView}
-                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm appearance-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all disabled:bg-gray-50 disabled:text-gray-400 cursor-pointer"
-                >
-                  <option value="">-- Pilih Channel --</option>
-                  <option value="Direct">Direct</option>
-                  <option value="Indirect">Indirect</option>
-                  <option value="HCO">HCO</option>
-                </select>
-                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* Department */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                Departemen <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <select 
+              <div>
+                <Label required>Department</Label>
+                <Select 
                   value={form.department} 
                   onChange={(e) => setForm({...form, department: e.target.value})}
-                  disabled={isView}
-                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm appearance-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all disabled:bg-gray-50 disabled:text-gray-400 cursor-pointer"
                 >
-                  <option value="">-- Pilih Departemen --</option>
+                  <option value="">Select Department...</option>
                   <option value="Finance">Finance</option>
                   <option value="Operation">Operation</option>
                   <option value="IT">IT</option>
                   <option value="HRGA">HRGA</option>
-                </select>
-                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </Select>
               </div>
             </div>
 
-            {/* Sub Location */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1.5">Sub Lokasi</label>
-              <input 
-                value={form.subLocation} 
-                onChange={(e) => setForm({...form, subLocation: e.target.value})} 
-                placeholder="Contoh: Lantai 5, Gudang A..."
-                disabled={isView}
-                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all disabled:bg-gray-50 disabled:text-gray-400"
-              />
+            {/* Right Column Fields */}
+            <div className="space-y-10">
+              <div>
+                <Label>Asset Category</Label>
+                <Input 
+                  value={form.assetCategory} 
+                  onChange={(e) => setForm({...form, assetCategory: e.target.value})} 
+                />
+              </div>
+
+              <div>
+                <Label>Ownership</Label>
+                <Input 
+                  value={form.ownership} 
+                  onChange={(e) => setForm({...form, ownership: e.target.value})} 
+                />
+              </div>
+
+              <div>
+                <Label required>Channel</Label>
+                <Select 
+                  value={form.channel} 
+                  onChange={(e) => setForm({...form, channel: e.target.value})}
+                >
+                  <option value="">Select Channel...</option>
+                  <option value="Direct">Direct</option>
+                  <option value="Indirect">Indirect</option>
+                  <option value="HCO">HCO</option>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Sub Location</Label>
+                <Input 
+                  value={form.subLocation} 
+                  onChange={(e) => setForm({...form, subLocation: e.target.value})} 
+                  placeholder="Input Sub-Location (e.g. Floor)..."
+                />
+              </div>
             </div>
 
-            {/* Address - Full Width */}
-            <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-gray-600 mb-1.5">Alamat Lengkap</label>
-              <textarea 
-                disabled={isView}
-                maxLength={255}
-                value={form.address}
-                onChange={(e) => setForm({...form, address: e.target.value})}
-                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all min-h-[100px] resize-none disabled:bg-gray-50 disabled:text-gray-400"
-                placeholder="Masukkan alamat lengkap gedung..."
-              />
-              <p className="text-xs text-gray-400 mt-1 text-right">{form.address?.length || 0}/255</p>
+            {/* Full Width Bottom Address */}
+            <div className="md:col-span-2 mt-4">
+              <Label>Address</Label>
+              <div className="relative">
+                <textarea 
+                  disabled={isView}
+                  maxLength={255}
+                  value={form.address}
+                  onChange={(e) => setForm({...form, address: e.target.value})}
+                  className="w-full bg-white border border-gray-200 rounded-[2rem] px-8 py-6 text-[13px] font-black text-black focus:border-black outline-none transition-all placeholder:text-gray-300 shadow-sm min-h-[140px] resize-none leading-relaxed"
+                  placeholder="(max. 255 characters)"
+                />
+                <div className="absolute bottom-6 right-8 text-[10px] font-black text-gray-300 uppercase tracking-widest">
+                  {form.address?.length || 0} / 255
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 flex justify-between bg-white shrink-0">
+        <div className="px-12 py-10 bg-white border-t border-gray-100 flex justify-end gap-6 shrink-0">
           <button 
             onClick={onClose} 
-            className="px-6 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all"
+            className="px-12 py-5 text-[11px] font-black uppercase tracking-[0.25em] text-gray-400 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 hover:text-black transition-all"
           >
-            Batal
+            Cancel
           </button>
           {!isView && (
             <button 
               onClick={handleSave} 
-              className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/25"
+              className="px-20 py-5 text-[11px] font-black uppercase tracking-[0.25em] text-white bg-black rounded-2xl shadow-2xl shadow-black/20 hover:bg-gray-800 transition-all active:scale-95 flex items-center gap-4"
             >
-              <Save size={18} />
-              Simpan
+              <Save size={18} strokeWidth={3} /> Save Information
             </button>
           )}
         </div>
