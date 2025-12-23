@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TaxKirRecord } from '../types';
 import { ChevronsUpDown, Eye, Pencil, Trash2, Search, Filter, Plus } from 'lucide-react';
@@ -101,6 +102,9 @@ export const TaxKirTable: React.FC<Props> = ({ data, onEdit, onView, onDelete })
                     </button>
                     <button onClick={(e) => { e.stopPropagation(); onEdit?.(item); }} className="p-1.5 text-black hover:text-gray-600 transition-colors">
                       <Pencil size={18} />
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); onDelete?.(item.id); }} className="p-1.5 text-black hover:text-red-500 transition-colors">
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 </td>

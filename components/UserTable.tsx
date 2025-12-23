@@ -1,16 +1,16 @@
 
 import React from 'react';
-import { VehicleRecord } from '../types';
-import { ChevronsUpDown, Eye, Pencil, Trash2, ChevronLeft, ChevronRight, Car, Settings } from 'lucide-react';
+import { UserRecord } from '../types';
+import { ChevronsUpDown, Eye, Pencil, Trash2, ChevronLeft, ChevronRight, Mail, Phone, Building } from 'lucide-react';
 
 interface Props {
-  data: VehicleRecord[];
-  onEdit?: (item: VehicleRecord) => void;
-  onView?: (item: VehicleRecord) => void;
-  onDelete?: (id: number) => void;
+  data: UserRecord[];
+  onEdit?: (item: UserRecord) => void;
+  onView?: (item: UserRecord) => void;
+  onDelete?: (id: string) => void;
 }
 
-export const VehicleTable: React.FC<Props> = ({ data, onEdit, onView, onDelete }) => {
+export const UserTable: React.FC<Props> = ({ data, onEdit, onView, onDelete }) => {
   return (
     <div className="bg-white rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden transition-all duration-500">
       <div className="overflow-x-auto custom-scrollbar">
@@ -18,31 +18,26 @@ export const VehicleTable: React.FC<Props> = ({ data, onEdit, onView, onDelete }
           <thead>
             <tr className="bg-[#F9FAFB] border-b border-gray-200">
               <th className="p-6 pl-8 w-16 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">#</th>
-              <th className="p-6 w-56 group cursor-pointer hover:bg-gray-100 transition-colors">
+              <th className="p-6 w-72 group cursor-pointer hover:bg-gray-100 transition-colors">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-black uppercase tracking-[0.15em]">Vehicle Info</span>
+                  <span className="text-[10px] font-black text-black uppercase tracking-[0.15em]">Employee</span>
                   <ChevronsUpDown size={12} className="text-gray-300 group-hover:text-black transition-colors"/>
                 </div>
               </th>
               <th className="p-6 w-48 group cursor-pointer hover:bg-gray-100 transition-colors">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-black uppercase tracking-[0.15em]">License Plate</span>
+                  <span className="text-[10px] font-black text-black uppercase tracking-[0.15em]">Role & Dept</span>
                   <ChevronsUpDown size={12} className="text-gray-300 group-hover:text-black transition-colors"/>
                 </div>
               </th>
               <th className="p-6 group cursor-pointer hover:bg-gray-100 transition-colors">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-black uppercase tracking-[0.15em]">Allocation</span>
-                  <ChevronsUpDown size={12} className="text-gray-300 group-hover:text-black transition-colors"/>
-                </div>
-              </th>
-              <th className="p-6 w-40 group cursor-pointer hover:bg-gray-100 transition-colors">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-black uppercase tracking-[0.15em]">Branch</span>
+                  <span className="text-[10px] font-black text-black uppercase tracking-[0.15em]">Contact</span>
                   <ChevronsUpDown size={12} className="text-gray-300 group-hover:text-black transition-colors"/>
                 </div>
               </th>
               <th className="p-6 w-36 text-center text-[10px] font-black text-black uppercase tracking-[0.15em]">Status</th>
+              <th className="p-6 w-40 text-center text-[10px] font-black text-black uppercase tracking-[0.15em]">Last Active</th>
               <th className="p-6 w-32 text-center text-[10px] font-black text-black uppercase tracking-[0.15em]">Action</th>
             </tr>
           </thead>
@@ -56,36 +51,51 @@ export const VehicleTable: React.FC<Props> = ({ data, onEdit, onView, onDelete }
                 <td className="p-6 text-center font-bold text-gray-300 text-[11px] pl-8">{index + 1}</td>
                 <td className="p-6">
                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-black border border-gray-100 shadow-sm">
-                            <Car size={18} />
+                        <div className="relative">
+                            <img 
+                                src={item.avatar} 
+                                alt={item.name} 
+                                className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                            />
+                            <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${item.status === 'Active' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
                         </div>
                         <div>
-                            <p className="font-black text-black text-[13px] uppercase tracking-tight leading-tight">{item.nama}</p>
-                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mt-1">{item.merek || 'Toyota'} • {item.tahunPembuatan || '2022'}</p>
+                            <p className="font-black text-black text-[13px] uppercase tracking-tight leading-tight">{item.name}</p>
+                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mt-1">{item.id}</p>
                         </div>
                     </div>
                 </td>
                 <td className="p-6">
-                    <div className="inline-block px-3 py-1.5 bg-black text-white rounded-lg text-[12px] font-black font-mono border border-gray-800 shadow-lg shadow-black/20">
-                        {item.noPolisi}
+                    <div className="flex flex-col gap-1">
+                        <span className="text-[11px] font-black text-black uppercase">{item.role}</span>
+                        <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                            <Building size={10} />
+                            {item.department}
+                        </div>
                     </div>
                 </td>
                 <td className="p-6">
-                    <span className="text-[11px] font-bold text-gray-500 uppercase tracking-tight">{item.channel}</span>
-                </td>
-                <td className="p-6">
-                    <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                        <span className="text-[12px] font-black text-black uppercase">{item.cabang}</span>
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2 text-[11px] font-bold text-gray-600">
+                            <Mail size={12} className="text-gray-400" />
+                            {item.email}
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400">
+                            <Phone size={10} />
+                            {item.phone}
+                        </div>
                     </div>
                 </td>
                 <td className="p-6 text-center">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.1em] border shadow-sm
-                        ${item.status === 'Aktif' 
+                        ${item.status === 'Active' 
                         ? 'bg-[#E8FDF5] text-[#059669] border-[#10B981]/20' 
-                        : 'bg-red-50 text-red-600 border-red-100'}`}>
+                        : 'bg-gray-50 text-gray-500 border-gray-200'}`}>
                         {item.status}
                     </span>
+                </td>
+                <td className="p-6 text-center">
+                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-tight">{item.lastActive}</span>
                 </td>
                 <td className="p-6 text-center">
                     <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -101,7 +111,7 @@ export const VehicleTable: React.FC<Props> = ({ data, onEdit, onView, onDelete }
                         >
                             <Pencil size={16} />
                         </button>
-                        <button 
+                         <button 
                           onClick={(e) => { e.stopPropagation(); onDelete?.(item.id); }}
                           className="p-2 text-gray-400 hover:text-red-600 bg-white hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100"
                         >
@@ -118,7 +128,7 @@ export const VehicleTable: React.FC<Props> = ({ data, onEdit, onView, onDelete }
       {/* Footer */}
       <div className="px-8 py-6 bg-[#FAFAFA] border-t border-gray-100 flex items-center justify-between">
             <div className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                Total <span className="text-black ml-1">{data.length} Vehicles</span>
+                Total <span className="text-black ml-1">{data.length} Users</span>
             </div>
             
             <div className="flex items-center gap-2">

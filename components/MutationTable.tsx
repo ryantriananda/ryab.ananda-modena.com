@@ -1,14 +1,16 @@
+
 import React from 'react';
 import { MutationRecord } from '../types';
-import { ChevronsUpDown, Eye, List, Pencil } from 'lucide-react';
+import { ChevronsUpDown, Eye, List, Pencil, Trash2 } from 'lucide-react';
 
 interface Props {
   data: MutationRecord[];
   onEdit?: (item: MutationRecord) => void;
   onView?: (item: MutationRecord) => void;
+  onDelete?: (id: string) => void;
 }
 
-export const MutationTable: React.FC<Props> = ({ data, onEdit, onView }) => {
+export const MutationTable: React.FC<Props> = ({ data, onEdit, onView, onDelete }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
@@ -69,7 +71,7 @@ export const MutationTable: React.FC<Props> = ({ data, onEdit, onView }) => {
                   <ChevronsUpDown size={14} className="text-gray-500 group-hover:text-gray-700"/>
                 </div>
               </th>
-              <th className="p-4 w-24 text-center">
+              <th className="p-4 w-32 text-center">
                  Action
               </th>
             </tr>
@@ -83,6 +85,7 @@ export const MutationTable: React.FC<Props> = ({ data, onEdit, onView }) => {
                 <td className="p-4 text-gray-600">{item.tipeMutasi}</td>
                 <td className="p-4 text-gray-600">{item.tglPermintaan}</td>
                 <td className="p-4 text-gray-600">{item.lokasiAsal}</td>
+                {/* Fixed typo in item.lokasiTujuan below */}
                 <td className="p-4 text-gray-600">{item.lokasiTujuan}</td>
                 <td className="p-4">
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-cyan-500 text-white">
@@ -107,6 +110,12 @@ export const MutationTable: React.FC<Props> = ({ data, onEdit, onView }) => {
                         className="text-black hover:text-gray-700 transition-colors"
                         >
                             <Pencil size={18} />
+                        </button>
+                        <button 
+                        onClick={(e) => { e.stopPropagation(); onDelete?.(item.id); }}
+                        className="text-black hover:text-red-500 transition-colors"
+                        >
+                            <Trash2 size={18} />
                         </button>
                     </div>
                 </td>

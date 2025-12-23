@@ -1,19 +1,20 @@
 
 import React from 'react';
 import { BuildingRecord } from '../types';
-import { ChevronsUpDown, Eye, Pencil, Building, MapPin, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from 'lucide-react';
+import { ChevronsUpDown, Eye, Pencil, Trash2, Building, MapPin, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, Calendar } from 'lucide-react';
 
 interface Props {
   data: BuildingRecord[];
   onEdit?: (item: BuildingRecord) => void;
   onView?: (item: BuildingRecord) => void;
+  onDelete?: (id: string) => void;
 }
 
-export const BuildingTable: React.FC<Props> = ({ data, onEdit, onView }) => {
+export const BuildingTable: React.FC<Props> = ({ data, onEdit, onView, onDelete }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1200px] text-left border-collapse">
+        <table className="w-full min-w-[1400px] text-left border-collapse">
           <thead>
             <tr className="bg-white border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest">
               <th className="p-5 pl-8 w-64 group cursor-pointer hover:bg-gray-50/50 transition-colors">
@@ -22,21 +23,27 @@ export const BuildingTable: React.FC<Props> = ({ data, onEdit, onView }) => {
                   <ChevronsUpDown size={14} className="text-gray-300" />
                 </div>
               </th>
-              <th className="p-5 w-40 group cursor-pointer hover:bg-gray-50/50 transition-colors">
+              <th className="p-5 w-32 group cursor-pointer hover:bg-gray-50/50 transition-colors">
                 <div className="flex items-center justify-between">
                   TIPE
                   <ChevronsUpDown size={14} className="text-gray-300" />
                 </div>
               </th>
-              <th className="p-5 w-44 group cursor-pointer hover:bg-gray-50/50 transition-colors">
+              <th className="p-5 w-48 group cursor-pointer hover:bg-gray-50/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  PERIODE KONTRAK
+                  <ChevronsUpDown size={14} className="text-gray-300" />
+                </div>
+              </th>
+              <th className="p-5 w-32 group cursor-pointer hover:bg-gray-50/50 transition-colors">
                 <div className="flex items-center justify-between">
                   KEPEMILIKAN
                   <ChevronsUpDown size={14} className="text-gray-300" />
                 </div>
               </th>
-              <th className="p-5 w-56 group cursor-pointer hover:bg-gray-50/50 transition-colors">
+              <th className="p-5 w-48 group cursor-pointer hover:bg-gray-50/50 transition-colors">
                 <div className="flex items-center justify-between">
-                  LOKASI / WILAYAH
+                  LOKASI
                   <ChevronsUpDown size={14} className="text-gray-300" />
                 </div>
               </th>
@@ -68,6 +75,19 @@ export const BuildingTable: React.FC<Props> = ({ data, onEdit, onView }) => {
                 </td>
                 <td className="p-5 text-gray-500 font-black uppercase">
                     {item.type}
+                </td>
+                <td className="p-5">
+                    {item.startDate && item.endDate ? (
+                        <div className="flex items-start gap-2">
+                            <Calendar size={14} className="text-gray-400 mt-0.5" />
+                            <div>
+                                <div className="text-[11px] font-black text-black">{item.startDate}</div>
+                                <div className="text-[10px] font-medium text-gray-400">s/d {item.endDate}</div>
+                            </div>
+                        </div>
+                    ) : (
+                        <span className="text-gray-300 font-bold text-[10px]">-</span>
+                    )}
                 </td>
                 <td className="p-5">
                     <span className={`inline-flex px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter border ${
@@ -108,6 +128,12 @@ export const BuildingTable: React.FC<Props> = ({ data, onEdit, onView }) => {
                     >
                       <Pencil size={18} />
                     </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); onDelete?.(item.id); }}
+                      className="p-1.5 text-gray-300 hover:text-red-500 transition-all"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -116,7 +142,7 @@ export const BuildingTable: React.FC<Props> = ({ data, onEdit, onView }) => {
         </table>
       </div>
       
-      {/* Footer Pagination style consistent with Service Table */}
+      {/* Footer Pagination */}
       <div className="px-8 py-5 bg-white border-t border-gray-100 flex items-center justify-between">
         <div className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
           SHOWING 1 - {data.length} OF <span className="text-black">{data.length}</span> ROW(S)

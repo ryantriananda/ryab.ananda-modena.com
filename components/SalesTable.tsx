@@ -1,14 +1,16 @@
+
 import React from 'react';
 import { SalesRecord } from '../types';
-import { ChevronsUpDown, Eye, List, Pencil } from 'lucide-react';
+import { ChevronsUpDown, Eye, List, Pencil, Trash2 } from 'lucide-react';
 
 interface Props {
   data: SalesRecord[];
   onEdit?: (item: SalesRecord) => void;
   onView?: (item: SalesRecord) => void;
+  onDelete?: (id: string) => void;
 }
 
-export const SalesTable: React.FC<Props> = ({ data, onEdit, onView }) => {
+export const SalesTable: React.FC<Props> = ({ data, onEdit, onView, onDelete }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
@@ -100,6 +102,12 @@ export const SalesTable: React.FC<Props> = ({ data, onEdit, onView }) => {
                         className="text-black hover:text-gray-700 transition-colors"
                         >
                             <Pencil size={18} />
+                        </button>
+                        <button 
+                        onClick={(e) => { e.stopPropagation(); onDelete?.(item.id); }}
+                        className="text-black hover:text-red-500 transition-colors"
+                        >
+                            <Trash2 size={18} />
                         </button>
                     </div>
                 </td>

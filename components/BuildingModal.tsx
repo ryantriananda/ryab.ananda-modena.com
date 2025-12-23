@@ -1,48 +1,66 @@
 
+// @google/genai Coding Guidelines: This file uses icons from lucide-react.
+// Non-existent 'Tooltip' import is removed as it's not exported by lucide-react.
+
 import React, { useState, useEffect } from 'react';
 import { 
-    X, Building, DollarSign, Home, Plus, Trash2, CheckCircle, MapPin, 
-    Layers, Settings, ArrowRight, GitMerge, FileText as FileIcon, 
-    LayoutGrid, Briefcase, Users, Navigation, ShieldCheck, Clock, Save
+    X, Building, Settings, MapPin, 
+    Layers, Clock, Save, 
+    Activity, ShieldCheck, Calendar, Info, 
+    Hash, Zap, Thermometer, Wind, Monitor, Trash2, Plus, UploadCloud, ChevronRight, CheckCircle2,
+    FileText, Handshake, DollarSign, UserCheck
 } from 'lucide-react';
-import { BuildingRecord, BuildingProposal } from '../types';
+import { BuildingAssetRecord, MaintenanceSchedule, MaintenanceProposal, CooperationDetail } from '../types';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: Partial<BuildingRecord>) => void;
-  initialData?: BuildingRecord;
+  onSave: (data: Partial<BuildingAssetRecord>) => void;
+  initialData?: BuildingAssetRecord;
   mode?: 'create' | 'edit' | 'view';
 }
 
 export const BuildingModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialData, mode = 'create' }) => {
   const [activeTab, setActiveTab] = useState('Informasi Umum');
-  const [editingProposalIndex, setEditingProposalIndex] = useState<number | null>(null);
-  const [form, setForm] = useState<Partial<BuildingRecord>>({
-    ownership: 'Rent',
-    status: 'Draft',
-    type: 'Office',
+  const [form, setForm] = useState<Partial<BuildingAssetRecord>>({
+    assetType: 'AC',
+    maintenanceFrequency: 'Quarterly',
+    status: 'Good',
+    ownership: 'Own',
+    buildingName: 'Head Office Satrio',
+    schedules: [],
     proposals: [],
-    channel: 'Direct',
-    department: 'GA & Facility'
+    cooperation: {
+        activeVendor: '',
+        contractStartDate: '',
+        contractEndDate: '',
+        serviceLevelAgreement: '',
+        monthlyMaintenanceFee: ''
+    }
   });
 
-  const tabs = form.ownership === 'Own' 
-    ? ['Informasi Umum', 'Dokumen'] 
-    : ['Informasi Umum', 'Proposal & Perbandingan', 'Workflow', 'Dokumen'];
+  const tabs = ['Informasi Umum', 'Jadwal Pemeliharaan', 'Riwayat Servis', 'Proposal & Kerja Sama', 'Dokumen Teknik'];
 
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
         setForm(initialData);
-        setActiveTab('Informasi Umum');
       } else {
         setForm({ 
-            ownership: 'Rent', status: 'Draft', type: 'Office', proposals: [],
-            channel: 'Direct', department: 'GA & Facility', location: 'Jakarta'
+            assetType: 'AC', maintenanceFrequency: 'Quarterly', status: 'Good', ownership: 'Own',
+            buildingName: 'Head Office Satrio', floor: 'Lantai 1',
+            schedules: [],
+            proposals: [],
+            cooperation: {
+                activeVendor: '',
+                contractStartDate: '',
+                contractEndDate: '',
+                serviceLevelAgreement: '',
+                monthlyMaintenanceFee: ''
+            }
         });
-        setActiveTab('Informasi Umum');
       }
+      setActiveTab('Informasi Umum');
     }
   }, [isOpen, initialData]);
 
@@ -50,41 +68,6 @@ export const BuildingModal: React.FC<Props> = ({ isOpen, onClose, onSave, initia
 
   const isView = mode === 'view';
 
-  const addProposal = () => {
-    const newProposal: BuildingProposal = {
-      id: Date.now().toString(),
-      optionName: `Kandidat ${(form.proposals?.length || 0) + 1}`,
-      address: { jl: '', kota: '', kabupaten: '', propinsi: '' },
-      phoneLines: '',
-      electricity: '',
-      water: '',
-      areas: { land: '', building: '', frontYard: '' },
-      conditions: { fence: '', gate: '', parking: '' },
-      security: [],
-      floors: { ground: '', f1: '', f2: '', f3: '', f4: '' },
-      materials: [],
-      legal: { shm: false, hgb: false, imb: false },
-      costs: { rent: '', tax: '', notary: '' },
-      owner: { name: '', phone: '', address: '' },
-      survey: { pros: [], cons: [] }
-    };
-    setForm({ ...form, proposals: [...(form.proposals || []), newProposal] });
-    setEditingProposalIndex((form.proposals?.length || 0));
-  };
-
-  const updateProposal = (idx: number, data: Partial<BuildingProposal>) => {
-    const newProposals = [...(form.proposals || [])];
-    newProposals[idx] = { ...newProposals[idx], ...data };
-    setForm({ ...form, proposals: newProposals });
-  };
-
-  const removeProposal = (idx: number) => {
-    const newProposals = (form.proposals || []).filter((_, i) => i !== idx);
-    setForm({ ...form, proposals: newProposals });
-    setEditingProposalIndex(null);
-  };
-
-  // Fix: make children optional to resolve TS error where children are passed via JSX but reported as missing
   const Label = ({ children, required }: { children?: React.ReactNode, required?: boolean }) => (
     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2.5">
       {children} {required && <span className="text-red-500 font-black ml-0.5">*</span>}
@@ -101,19 +84,74 @@ export const BuildingModal: React.FC<Props> = ({ isOpen, onClose, onSave, initia
     </div>
   );
 
+  const addScheduleRow = () => {
+    const newSchedule: MaintenanceSchedule = {
+        id: Date.now().toString(),
+        taskName: '',
+        plannedDate: '',
+        technician: '',
+        status: 'Scheduled'
+    };
+    setForm(prev => ({ ...prev, schedules: [...(prev.schedules || []), newSchedule] }));
+  };
+
+  const removeScheduleRow = (id: string) => {
+    setForm(prev => ({ ...prev, schedules: (prev.schedules || []).filter(s => s.id !== id) }));
+  };
+
+  const updateScheduleField = (id: string, field: keyof MaintenanceSchedule, value: string) => {
+    setForm(prev => ({
+        ...prev,
+        schedules: (prev.schedules || []).map(s => s.id === id ? { ...s, [field]: value } : s)
+    }));
+  };
+
+  const addProposalRow = () => {
+    const newProposal: MaintenanceProposal = {
+        id: `PRP-${Date.now()}`,
+        vendorName: '',
+        proposalName: '',
+        submissionDate: new Date().toISOString().split('T')[0],
+        estimatedCost: '0',
+        status: 'Pending'
+    };
+    setForm(prev => ({ ...prev, proposals: [...(prev.proposals || []), newProposal] }));
+  };
+
+  const updateProposalField = (id: string, field: keyof MaintenanceProposal, value: string) => {
+    setForm(prev => ({
+        ...prev,
+        proposals: (prev.proposals || []).map(p => p.id === id ? { ...p, [field]: value } : p)
+    }));
+  };
+
+  const removeProposalRow = (id: string) => {
+    setForm(prev => ({ ...prev, proposals: (prev.proposals || []).filter(p => p.id !== id) }));
+  };
+
+  const assetTypes = [
+    { label: 'AC (Air Conditioner)', value: 'AC', icon: <Wind size={14}/> },
+    { label: 'APAR / Fire Safety', value: 'APAR', icon: <ShieldCheck size={14}/> },
+    { label: 'CCTV / Security', value: 'CCTV', icon: <Monitor size={14}/> },
+    { label: 'Genset / Listrik', value: 'Genset', icon: <Zap size={14}/> },
+    { label: 'Lift / Eskalator', value: 'Lift', icon: <Layers size={14}/> },
+    { label: 'Pompa Air', value: 'Pompa', icon: <Activity size={14}/> },
+    { label: 'Fire Alarm System', value: 'Fire Alarm', icon: <Info size={14}/> },
+  ];
+
   return (
     <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center backdrop-blur-sm p-4">
-      <div className="bg-[#FBFBFB] w-full max-w-[1250px] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-300">
+      <div className="bg-[#FBFBFB] w-full max-w-[1250px] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-300">
         
         {/* Header Section */}
         <div className="px-10 py-8 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
           <div className="flex items-center gap-5">
             <div className="p-3.5 bg-black rounded-2xl shadow-xl shadow-black/20 text-white">
-                <Building size={22} strokeWidth={2.5} />
+                <Settings size={22} strokeWidth={2.5} />
             </div>
             <div>
-                <h2 className="text-[20px] font-black text-black uppercase tracking-tight leading-none">Manajemen Properti & Kontrak</h2>
-                <p className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-[0.3em]">Building Asset & Comparison Hub</p>
+                <h2 className="text-[20px] font-black text-black uppercase tracking-tight leading-none">Manajemen Aset Fasilitas Gedung</h2>
+                <p className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-[0.3em]">Non-Vehicle Asset Control & Monitoring</p>
             </div>
           </div>
           <button onClick={onClose} className="text-gray-300 hover:text-black transition-all p-2 rounded-full hover:bg-gray-50">
@@ -121,12 +159,12 @@ export const BuildingModal: React.FC<Props> = ({ isOpen, onClose, onSave, initia
           </button>
         </div>
 
-        {/* Navigation Tabs - Image 2 Style */}
+        {/* Navigation Tabs */}
         <div className="bg-white border-b border-gray-100 flex px-10 shrink-0 overflow-x-auto no-scrollbar gap-2">
             {tabs.map(tab => (
                 <button 
                     key={tab}
-                    onClick={() => { setActiveTab(tab); setEditingProposalIndex(null); }}
+                    onClick={() => setActiveTab(tab)}
                     className={`py-5 px-6 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-4 whitespace-nowrap
                         ${activeTab === tab ? 'border-black text-black' : 'border-transparent text-gray-300 hover:text-gray-500'}`}
                 >
@@ -140,290 +178,431 @@ export const BuildingModal: React.FC<Props> = ({ isOpen, onClose, onSave, initia
           {activeTab === 'Informasi Umum' && (
             <div className="max-w-5xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
                
-               {/* Section 1: Core Fields from Image 1 */}
+               {/* Section 1: Technical Spec */}
                <div className="bg-white p-10 rounded-[2.5rem] border border-gray-200 shadow-sm transition-all hover:shadow-md">
-                  <SectionHeader icon={LayoutGrid} title="1. Identitas Aset" sub="Asset Classification & Numbering" />
+                  <SectionHeader icon={Hash} title="1. Spesifikasi Teknis" sub="Asset Identification & Details" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
                      <div className="md:col-span-2">
-                        <Label required>Nama Properti / Gedung</Label>
-                        <input className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none shadow-sm transition-all bg-gray-50 focus:bg-white" value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Input Nama Gedung..." disabled={isView} />
+                        <Label required>Jenis Aset Gedung</Label>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {assetTypes.map(type => (
+                                <button
+                                    key={type.value}
+                                    onClick={() => !isView && setForm({...form, assetType: type.value})}
+                                    className={`flex items-center gap-3 p-4 rounded-2xl border text-[11px] font-black uppercase tracking-tighter transition-all
+                                        ${form.assetType === type.value 
+                                            ? 'bg-black text-white border-black shadow-lg scale-[1.02]' 
+                                            : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300'}`}
+                                    disabled={isView}
+                                >
+                                    {type.icon} {type.value}
+                                </button>
+                            ))}
+                        </div>
                      </div>
                      <div>
-                        <Label>Asset Number</Label>
-                        <input className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-mono font-bold text-gray-400 bg-gray-50/50" value={form.assetNo || '[AUTO-GENERATE]'} disabled />
+                        <Label required>Nama Aset / Unit</Label>
+                        <input className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none shadow-sm transition-all bg-gray-50 focus:bg-white" value={form.assetName} onChange={e => setForm({...form, assetName: e.target.value})} placeholder="Contoh: AC SPLIT MEC 1..." disabled={isView} />
                      </div>
                      <div>
-                        <Label required>Asset Category</Label>
-                        <input className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black bg-gray-50" value="Building" readOnly />
+                        <Label>Kode Aset (Internal)</Label>
+                        <input className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-mono font-bold text-gray-400 bg-gray-50/50" value={form.assetCode || '[Otomatis]'} disabled />
                      </div>
                      <div>
-                        <Label required>Tipe Gedung</Label>
-                        <select className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none bg-gray-50 appearance-none cursor-pointer" value={form.type} onChange={e => setForm({...form, type: e.target.value})} disabled={isView}>
-                            <option value="Office">Office</option>
-                            <option value="Warehouse">Warehouse</option>
-                            <option value="Showroom">Showroom</option>
-                            <option value="Home Center">Home Center</option>
-                        </select>
+                        <Label>Merk / Brand</Label>
+                        <input className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none bg-gray-50" value={form.brand} onChange={e => setForm({...form, brand: e.target.value})} placeholder="Contoh: Panasonic, Daikin..." disabled={isView} />
                      </div>
                      <div>
-                        <Label required>Model Kepemilikan</Label>
-                        <select className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none bg-gray-50 appearance-none cursor-pointer" value={form.ownership} onChange={e => setForm({...form, ownership: e.target.value as any})} disabled={isView}>
-                            <option value="Rent">Sewa / Rental</option>
-                            <option value="Own">Milik Sendiri</option>
-                        </select>
+                        <Label>Model / Seri</Label>
+                        <input className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none bg-gray-50" value={form.modelNumber} onChange={e => setForm({...form, modelNumber: e.target.value})} placeholder="Contoh: CS-PU9XKP..." disabled={isView} />
+                     </div>
+                     <div>
+                        <Label>Serial Number (S/N)</Label>
+                        <input className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-mono font-black text-black focus:border-black outline-none bg-gray-50" value={form.serialNumber} onChange={e => setForm({...form, serialNumber: e.target.value})} placeholder="Masukan nomor seri pabrik..." disabled={isView} />
+                     </div>
+                     <div>
+                        <Label>Kapasitas / Rating</Label>
+                        <input className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none bg-gray-50" value={form.capacity} onChange={e => setForm({...form, capacity: e.target.value})} placeholder="Contoh: 1.5 PK, 500 KVA..." disabled={isView} />
                      </div>
                   </div>
                </div>
 
-               {/* Section 2: Channel & Dept from Image 1 */}
+               {/* Section 2: Penempatan */}
                <div className="bg-white p-10 rounded-[2.5rem] border border-gray-200 shadow-sm">
-                  <SectionHeader icon={Briefcase} title="2. Struktur & Organisasi" sub="Department & Channel Assignment" />
+                  <SectionHeader icon={MapPin} title="2. Lokasi & Penempatan" sub="Physical Installation Details" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
                      <div>
-                        <Label required>Channel</Label>
-                        <select className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none bg-gray-50 appearance-none" value={form.channel} onChange={e => setForm({...form, channel: e.target.value})} disabled={isView}>
-                            <option value="Direct">Direct</option>
-                            <option value="Indirect">Indirect</option>
-                            <option value="HCO">HCO</option>
+                        <Label required>Nama Gedung / Cabang</Label>
+                        <select className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none bg-gray-50 appearance-none cursor-pointer" value={form.buildingName} onChange={e => setForm({...form, buildingName: e.target.value})} disabled={isView}>
+                            <option value="Head Office Satrio">Head Office Satrio</option>
+                            <option value="Warehouse Cakung">Warehouse Cakung</option>
+                            <option value="MEC Kemang">MEC Kemang</option>
                         </select>
                      </div>
                      <div>
-                        <Label required>Department</Label>
-                        <select className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none bg-gray-50 appearance-none" value={form.department} onChange={e => setForm({...form, department: e.target.value})} disabled={isView}>
-                            <option value="GA & Facility">GA & Facility</option>
-                            <option value="Sales">Sales</option>
-                            <option value="Marketing">Marketing</option>
-                            <option value="Logistics">Logistics</option>
+                        <Label required>Lantai / Area</Label>
+                        <select className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none bg-gray-50 appearance-none cursor-pointer" value={form.floor} onChange={e => setForm({...form, floor: e.target.value})} disabled={isView}>
+                            <option value="Basement">Basement</option>
+                            <option value="Lantai 1">Lantai 1</option>
+                            <option value="Lantai 2">Lantai 2</option>
+                            <option value="Lantai 3">Lantai 3</option>
+                            <option value="Roof Top">Roof Top</option>
                         </select>
+                     </div>
+                     <div className="md:col-span-2">
+                        <Label>Detail Ruangan / Posisi Spesifik</Label>
+                        <input className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none bg-gray-50 shadow-sm" value={form.roomName} onChange={e => setForm({...form, roomName: e.target.value})} placeholder="Contoh: Meeting Room GA Lt. 2..." disabled={isView} />
                      </div>
                   </div>
                </div>
 
-               {/* Section 3: Localization from Image 1 */}
+               {/* Section 3: Maintenance & Health */}
                <div className="bg-white p-10 rounded-[2.5rem] border border-gray-200 shadow-sm">
-                  <SectionHeader icon={Navigation} title="3. Lokasi & Alamat" sub="Physical Location Details" />
+                  <SectionHeader icon={Clock} title="3. Parameter Pemeliharaan" sub="Maintenance Cycles & Current State" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
                     <div>
-                        <Label required>Asset Location (City/Branch)</Label>
-                        <select className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none bg-gray-50 appearance-none" value={form.location} onChange={e => setForm({...form, location: e.target.value})} disabled={isView}>
-                            <option value="Jakarta">Jakarta</option>
-                            <option value="Surabaya">Surabaya</option>
-                            <option value="Bandung">Bandung</option>
-                            <option value="Medan">Medan</option>
+                        <Label required>Frekuensi Maintenance</Label>
+                        <select className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none bg-gray-50 appearance-none" value={form.maintenanceFrequency} onChange={e => setForm({...form, maintenanceFrequency: e.target.value as any})} disabled={isView}>
+                            <option value="Monthly">Bulanan (Monthly)</option>
+                            <option value="Quarterly">3 Bulanan (Quarterly)</option>
+                            <option value="Yearly">Tahunan (Yearly)</option>
+                            <option value="None">Insidental</option>
                         </select>
                     </div>
                     <div>
-                        <Label>Sub - Location (Building Detail)</Label>
-                        <input className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none bg-gray-50 shadow-sm" value={form.subLocation} onChange={e => setForm({...form, subLocation: e.target.value})} placeholder="Ex: Lantai 3, Sayap Barat..." disabled={isView} />
+                        <Label>Status Kondisi Aset</Label>
+                        <div className="flex gap-4">
+                            {[
+                                { label: 'Baik', value: 'Good', color: 'bg-green-500' },
+                                { label: 'Rusak Ringan', value: 'Fair', color: 'bg-orange-500' },
+                                { label: 'Rusak Berat', value: 'Critical', color: 'bg-red-500' }
+                            ].map(st => (
+                                <button
+                                    key={st.value}
+                                    onClick={() => !isView && setForm({...form, status: st.value as any})}
+                                    className={`flex-1 py-4 px-2 rounded-2xl border text-[10px] font-black uppercase transition-all
+                                        ${form.status === st.value 
+                                            ? 'bg-black text-white border-black shadow-lg' 
+                                            : 'bg-white text-gray-400 border-gray-100'}`}
+                                    disabled={isView}
+                                >
+                                    <div className="flex items-center justify-center gap-2">
+                                        <div className={`w-2 h-2 rounded-full ${st.color}`}></div>
+                                        {st.label}
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                    <div className="md:col-span-2">
-                        <Label>Alamat Lengkap</Label>
-                        <textarea className="w-full border border-gray-100 rounded-3xl px-8 py-6 text-[13px] font-medium focus:border-black outline-none min-h-[140px] shadow-sm bg-gray-50 leading-relaxed resize-none" value={form.address} onChange={e => setForm({...form, address: e.target.value})} placeholder="Input alamat lengkap sesuai sertifikat/kontrak..." disabled={isView} />
+                    <div>
+                        <Label>Tgl Pemeliharaan Terakhir</Label>
+                        <input type="date" className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none bg-gray-50 shadow-sm" value={form.lastMaintenanceDate} onChange={e => setForm({...form, lastMaintenanceDate: e.target.value})} disabled={isView} />
+                    </div>
+                    <div>
+                        <Label>Tgl Rencana Berikutnya</Label>
+                        <input type="date" className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-blue-600 focus:border-black outline-none bg-gray-50 shadow-sm" value={form.nextMaintenanceDate} onChange={e => setForm({...form, nextMaintenanceDate: e.target.value})} disabled={isView} />
                     </div>
                   </div>
                </div>
             </div>
           )}
 
-          {activeTab === 'Proposal & Perbandingan' && (
-            <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
-               {editingProposalIndex === null ? (
-                 <>
-                    <div className="flex justify-between items-end mb-8 bg-black/5 p-8 rounded-[2rem]">
-                        <div>
-                            <h3 className="text-[20px] font-black text-black uppercase tracking-tighter">Perbandingan Kandidat Lokasi</h3>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-2">Meninjau {(form.proposals || []).length} opsi properti terbaik</p>
-                        </div>
+          {activeTab === 'Jadwal Pemeliharaan' && (
+            <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
+                 <div className="bg-white p-10 rounded-[2.5rem] border border-gray-200 shadow-sm">
+                    <div className="flex items-center justify-between mb-10">
+                        <SectionHeader icon={Calendar} title="Agenda Pemeliharaan Manual" sub="Manual Schedule Entry & Tracking" />
                         {!isView && (
-                          <button onClick={addProposal} className="bg-black text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-gray-800 transition-all shadow-2xl shadow-black/20 active:scale-95">
-                              <Plus size={18} strokeWidth={3} /> Tambah Kandidat Opsi
-                          </button>
-                        )}
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                        {(form.proposals || []).map((prop, idx) => (
-                            <div key={prop.id} className="bg-white rounded-[2.5rem] border border-gray-100 shadow-xl overflow-hidden group hover:border-black transition-all duration-500 hover:-translate-y-2">
-                                <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/40">
-                                    <span className="text-[10px] font-black text-black uppercase tracking-[0.15em] px-4 py-1.5 bg-white rounded-full shadow-sm border border-gray-100">{prop.optionName}</span>
-                                    {!isView && <button onClick={() => removeProposal(idx)} className="text-gray-200 hover:text-red-500 transition-all transform hover:rotate-90 p-1"><Trash2 size={18}/></button>}
-                                </div>
-                                <div className="p-10 space-y-8">
-                                    <div>
-                                        <Label>Alamat Penawaran</Label>
-                                        <p className="text-[13px] font-black text-black uppercase leading-relaxed line-clamp-2 min-h-[3rem]">{prop.address.jl || 'Belum diisi'}</p>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-5">
-                                        <div className="bg-gray-50 p-5 rounded-[1.5rem] border border-gray-100 group-hover:bg-blue-50/30 group-hover:border-blue-100 transition-colors">
-                                            <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Sewa / Tahun</p>
-                                            <p className="text-[14px] font-black text-blue-600">{prop.costs.rent ? `Rp ${parseInt(prop.costs.rent).toLocaleString('id-ID')}` : 'N/A'}</p>
-                                        </div>
-                                        <div className="bg-gray-50 p-5 rounded-[1.5rem] border border-gray-100 group-hover:bg-black/5 transition-colors">
-                                            <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Luas Bangunan</p>
-                                            <p className="text-[14px] font-black text-black">{prop.areas.building || '0'} M²</p>
-                                        </div>
-                                    </div>
-                                    <button onClick={() => setEditingProposalIndex(idx)} className="w-full py-5 bg-black text-white rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-800 transition-all shadow-xl shadow-black/5 flex items-center justify-center gap-3">
-                                        {isView ? 'Lihat Spesifikasi' : 'Edit Spesifikasi'} <ArrowRight size={16} />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                        {(form.proposals || []).length === 0 && (
-                          <div className="col-span-full py-32 flex flex-col items-center justify-center bg-gray-50/50 rounded-[3rem] border-2 border-dashed border-gray-200">
-                             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg mb-6"><FileIcon size={32} className="text-gray-200" /></div>
-                             <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em]">Belum ada proposal kandidat gedung</p>
-                          </div>
-                        )}
-                    </div>
-                 </>
-               ) : (
-                 /* Detailed Proposal Editor */
-                 <div className="bg-white rounded-[3rem] border border-gray-200 shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8 duration-700">
-                    <div className="p-10 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
-                        <div className="flex items-center gap-6">
-                            <button onClick={() => setEditingProposalIndex(null)} className="p-3 hover:bg-gray-50 rounded-full transition-all text-gray-300 hover:text-black border border-transparent hover:border-gray-100">
-                                <X size={28} strokeWidth={2.5} />
+                            <button 
+                                onClick={addScheduleRow}
+                                className="bg-black text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 hover:bg-gray-800 transition-all shadow-xl shadow-black/10 active:scale-95"
+                            >
+                                <Plus size={16} strokeWidth={3} /> Tambah Agenda
                             </button>
-                            <div>
-                                <h3 className="text-[16px] font-black text-black uppercase tracking-[0.15em]">Detail Teknis & Survey: {form.proposals![editingProposalIndex].optionName}</h3>
-                                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Deep Comparison Matrix</p>
-                            </div>
-                        </div>
-                        <button onClick={() => setEditingProposalIndex(null)} className="bg-black text-white px-12 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-black/20 transition-all hover:bg-gray-800">
-                            Simpan & Kembali
-                        </button>
+                        )}
                     </div>
 
-                    <div className="p-14 bg-[#FBFBFB]">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-                            <div className="space-y-12">
-                                <SectionHeader icon={MapPin} title="1. Lokasi & Utilitas" />
-                                <div className="space-y-8">
-                                    <div><Label>Alamat Lengkap (Jl.)</Label><input disabled={isView} className="w-full border border-gray-200 rounded-2xl px-6 py-4 text-[13px] font-black bg-white" value={form.proposals![editingProposalIndex].address.jl} onChange={e => updateProposal(editingProposalIndex!, { address: { ...form.proposals![editingProposalIndex!].address, jl: e.target.value } })} /></div>
-                                    <div className="grid grid-cols-3 gap-5">
-                                        <div><Label>Kota</Label><input disabled={isView} className="w-full border border-gray-200 rounded-2xl px-4 py-4 text-[12px] font-bold bg-white" value={form.proposals![editingProposalIndex].address.kota} onChange={e => updateProposal(editingProposalIndex!, { address: { ...form.proposals![editingProposalIndex!].address, kota: e.target.value } })} /></div>
-                                        <div><Label>Kabupaten</Label><input disabled={isView} className="w-full border border-gray-200 rounded-2xl px-4 py-4 text-[12px] font-bold bg-white" value={form.proposals![editingProposalIndex].address.kabupaten} onChange={e => updateProposal(editingProposalIndex!, { address: { ...form.proposals![editingProposalIndex!].address, kabupaten: e.target.value } })} /></div>
-                                        <div><Label>Propinsi</Label><input disabled={isView} className="w-full border border-gray-200 rounded-2xl px-4 py-4 text-[12px] font-bold bg-white" value={form.proposals![editingProposalIndex].address.propinsi} onChange={e => updateProposal(editingProposalIndex!, { address: { ...form.proposals![editingProposalIndex!].address, propinsi: e.target.value } })} /></div>
-                                    </div>
-                                </div>
-                                <SectionHeader icon={Settings} title="2. Fasilitas Teknis" />
-                                <div className="grid grid-cols-2 gap-6">
-                                    <div><Label>Daya Listrik (VA)</Label><input disabled={isView} className="w-full border border-gray-200 rounded-2xl px-6 py-4 text-[13px] font-black bg-white" value={form.proposals![editingProposalIndex].electricity} onChange={e => updateProposal(editingProposalIndex!, { electricity: e.target.value })} /></div>
-                                    <div><Label>Sumber Air</Label><select disabled={isView} className="w-full border border-gray-200 rounded-2xl px-6 py-4 text-[13px] font-black bg-white appearance-none" value={form.proposals![editingProposalIndex].water} onChange={e => updateProposal(editingProposalIndex!, { water: e.target.value })}><option value="PAM">PAM</option><option value="Sumur">Sumur / Pompa</option><option value="Dual">PAM & Sumur</option></select></div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-12">
-                                <SectionHeader icon={Layers} title="3. Luas & Struktur" />
-                                <div className="grid grid-cols-2 gap-6">
-                                    <div><Label>Luas Tanah (M²)</Label><input disabled={isView} type="number" className="w-full border border-gray-200 rounded-2xl px-6 py-4 text-[13px] font-black bg-white" value={form.proposals![editingProposalIndex].areas.land} onChange={e => updateProposal(editingProposalIndex!, { areas: { ...form.proposals![editingProposalIndex!].areas, land: e.target.value } })} /></div>
-                                    <div><Label>Luas Bangunan (M²)</Label><input disabled={isView} type="number" className="w-full border border-gray-200 rounded-2xl px-6 py-4 text-[13px] font-black bg-white" value={form.proposals![editingProposalIndex].areas.building} onChange={e => updateProposal(editingProposalIndex!, { areas: { ...form.proposals![editingProposalIndex!].areas, building: e.target.value } })} /></div>
-                                </div>
-                                <SectionHeader icon={DollarSign} title="4. Analisa Anggaran" />
-                                <div className="space-y-6">
-                                    <div className="bg-white p-8 rounded-[2rem] border border-gray-200 shadow-sm space-y-6">
-                                        <div><Label>Biaya Sewa / Tahun (Gross)</Label><div className="relative"><span className="absolute left-0 top-1/2 -translate-y-1/2 font-black text-gray-300">Rp</span><input disabled={isView} type="number" className="w-full border-b border-gray-100 py-3 pl-8 text-[18px] font-black text-blue-600 outline-none focus:border-blue-600 transition-all" value={form.proposals![editingProposalIndex].costs.rent} onChange={e => updateProposal(editingProposalIndex!, { costs: { ...form.proposals![editingProposalIndex!].costs, rent: e.target.value } })} /></div></div>
-                                        <div><Label>Estimasi Pajak PPH Final (10%)</Label><div className="relative"><span className="absolute left-0 top-1/2 -translate-y-1/2 font-black text-gray-300">Rp</span><input disabled={isView} type="number" className="w-full border-b border-gray-100 py-3 pl-8 text-[14px] font-bold text-gray-500 outline-none" value={form.proposals![editingProposalIndex].costs.tax} onChange={e => updateProposal(editingProposalIndex!, { costs: { ...form.proposals![editingProposalIndex!].costs, tax: e.target.value } })} /></div></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="overflow-hidden border border-gray-100 rounded-[2rem]">
+                        <table className="w-full text-left">
+                            <thead className="bg-gray-50/50 border-b border-gray-100">
+                                <tr className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                    <th className="p-6 w-14 text-center">#</th>
+                                    <th className="p-6">Agenda / Tugas</th>
+                                    <th className="p-6 w-56">Tgl Rencana</th>
+                                    <th className="p-6 w-56">Teknisi / PIC</th>
+                                    <th className="p-6 w-44 text-center">Status</th>
+                                    {!isView && <th className="p-6 w-14 text-center"></th>}
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {(form.schedules || []).map((sch, idx) => (
+                                    <tr key={sch.id} className="hover:bg-gray-50/30 transition-colors">
+                                        <td className="p-6 text-center font-black text-gray-300 text-[12px]">{idx + 1}</td>
+                                        <td className="p-6">
+                                            <input 
+                                                className="w-full bg-transparent border-none p-0 text-[13px] font-black text-black focus:ring-0 placeholder:text-gray-200" 
+                                                value={sch.taskName}
+                                                onChange={e => updateScheduleField(sch.id, 'taskName', e.target.value)}
+                                                placeholder="Contoh: Cuci Kondensor AC..."
+                                                disabled={isView}
+                                            />
+                                        </td>
+                                        <td className="p-6">
+                                            <input 
+                                                type="date"
+                                                className="w-full bg-transparent border-none p-0 text-[12px] font-bold text-gray-600 focus:ring-0" 
+                                                value={sch.plannedDate}
+                                                onChange={e => updateScheduleField(sch.id, 'plannedDate', e.target.value)}
+                                                disabled={isView}
+                                            />
+                                        </td>
+                                        <td className="p-6">
+                                            <input 
+                                                className="w-full bg-transparent border-none p-0 text-[12px] font-bold text-gray-600 focus:ring-0 placeholder:text-gray-200" 
+                                                value={sch.technician}
+                                                onChange={e => updateScheduleField(sch.id, 'technician', e.target.value)}
+                                                placeholder="Nama Vendor / Internal..."
+                                                disabled={isView}
+                                            />
+                                        </td>
+                                        <td className="p-6">
+                                            <select 
+                                                className={`w-full bg-transparent border-none p-0 text-[10px] font-black uppercase tracking-widest text-center focus:ring-0 cursor-pointer
+                                                    ${sch.status === 'Completed' ? 'text-green-500' : sch.status === 'Missed' ? 'text-red-500' : 'text-blue-500'}`}
+                                                value={sch.status}
+                                                onChange={e => updateScheduleField(sch.id, 'status', e.target.value as any)}
+                                                disabled={isView}
+                                            >
+                                                <option value="Scheduled">Scheduled</option>
+                                                <option value="Completed">Completed</option>
+                                                <option value="Missed">Missed</option>
+                                            </select>
+                                        </td>
+                                        {!isView && (
+                                            <td className="p-6 text-center">
+                                                <button 
+                                                    onClick={() => removeScheduleRow(sch.id)}
+                                                    className="text-gray-200 hover:text-red-500 transition-colors"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </td>
+                                        )}
+                                    </tr>
+                                ))}
+                                {(form.schedules || []).length === 0 && (
+                                    <tr>
+                                        <td colSpan={6} className="p-20 text-center">
+                                            <div className="flex flex-col items-center opacity-30">
+                                                <Calendar size={40} className="text-gray-400 mb-4" />
+                                                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">Belum ada agenda terdaftar</p>
+                                                {!isView && <p className="text-[9px] font-bold mt-2 text-gray-400 uppercase tracking-widest">Klik "Tambah Agenda" untuk membuat jadwal manual</p>}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                  </div>
-               )}
             </div>
           )}
 
-          {activeTab === 'Workflow' && (
-            <div className="max-w-4xl mx-auto py-12 space-y-12 animate-in fade-in duration-500">
-               <SectionHeader icon={GitMerge} title="Persetujuan Kontrak Aset" sub="Status Alur Kerja Real-time" />
-               <div className="space-y-0 pl-4">
-                  
-                  {/* Step 1 - Completed */}
-                  <div className="flex gap-10">
-                     <div className="flex flex-col items-center">
-                        <div className="w-14 h-14 rounded-2xl bg-green-500 flex items-center justify-center text-white shadow-xl shadow-green-100"><CheckCircle size={24} strokeWidth={2.5} /></div>
-                        <div className="w-1 h-24 bg-green-200"></div>
-                     </div>
-                     <div className="pt-2">
-                        <h4 className="text-[13px] font-black text-black uppercase tracking-widest">Pengajuan Awal GA</h4>
-                        <p className="text-[10px] text-gray-400 mt-2 uppercase font-bold tracking-widest flex items-center gap-2"><Users size={12} /> Admin Facility - 10 Jan 2024</p>
-                        <div className="mt-4 px-6 py-2.5 bg-green-50 rounded-xl text-[10px] font-black text-green-700 inline-flex items-center gap-2 border border-green-100 uppercase tracking-[0.15em]">Selesai Dikirim</div>
-                     </div>
-                  </div>
-
-                  {/* Step 2 - Active */}
-                  <div className="flex gap-10">
-                     <div className="flex flex-col items-center">
-                        <div className="w-14 h-14 rounded-2xl bg-black flex items-center justify-center text-white shadow-2xl shadow-black/20 ring-4 ring-gray-50 animate-pulse"><Clock size={24} strokeWidth={2.5} /></div>
-                        <div className="w-1 h-24 bg-gray-100"></div>
-                     </div>
-                     <div className="pt-2">
-                        <h4 className="text-[13px] font-black text-black uppercase tracking-widest">Review Manager GA</h4>
-                        <p className="text-[10px] text-gray-400 mt-2 uppercase font-bold tracking-widest flex items-center gap-2"><Users size={12} /> Ibnu Faisal - HRGA Manager</p>
-                        <div className="mt-4 px-6 py-2.5 bg-black text-white rounded-xl text-[10px] font-black inline-flex items-center gap-2 border border-black uppercase tracking-[0.15em] shadow-lg">Sedang Ditinjau</div>
-                     </div>
-                  </div>
-
-                  {/* Step 3 - Future */}
-                  <div className="flex gap-10 opacity-30">
-                     <div className="flex flex-col items-center">
-                        <div className="w-14 h-14 rounded-2xl bg-white border-2 border-gray-100 flex items-center justify-center text-gray-300">3</div>
-                     </div>
-                     <div className="pt-2">
-                        <h4 className="text-[13px] font-black text-gray-400 uppercase tracking-widest">Approval Direksi</h4>
-                        <p className="text-[10px] text-gray-400 mt-2 uppercase font-bold italic tracking-widest">Menunggu Antrian...</p>
-                     </div>
-                  </div>
-               </div>
-            </div>
+          {activeTab === 'Riwayat Servis' && (
+             <div className="max-w-5xl mx-auto space-y-6">
+                <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <h4 className="text-[14px] font-black text-black uppercase">Service Log Table</h4>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">Audit trail pemeliharaan unit</p>
+                    </div>
+                    {!isView && (
+                        <button className="bg-black text-white px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-gray-800 transition-all">
+                            <Plus size={16} /> Catat Servis Baru
+                        </button>
+                    )}
+                </div>
+                {/* Empty State Table */}
+                <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden">
+                    <table className="w-full text-left">
+                        <thead className="bg-gray-50 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">
+                            <tr>
+                                <th className="p-6">Tgl Servis</th>
+                                <th className="p-6">Teknisi / Vendor</th>
+                                <th className="p-6">Deskripsi Pekerjaan</th>
+                                <th className="p-6 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colSpan={4} className="p-20 text-center text-gray-300 font-black text-[11px] uppercase tracking-widest">Belum ada riwayat perbaikan tercatat</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+             </div>
           )}
 
-          {activeTab === 'Dokumen' && (
-            <div className="max-w-5xl mx-auto py-12 space-y-10 animate-in zoom-in-95 duration-500">
-                <SectionHeader icon={ShieldCheck} title="Lampiran & Berkas" sub="Legalitas & Kontrak Kerjasama" />
+          {activeTab === 'Proposal & Kerja Sama' && (
+            <div className="max-w-5xl mx-auto space-y-12 animate-in fade-in duration-500">
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Upload Zone */}
-                    <div className="flex flex-col items-center justify-center p-16 border-2 border-dashed border-gray-200 rounded-[3rem] bg-white group hover:border-black transition-all cursor-pointer">
-                        <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-8 shadow-sm group-hover:scale-110 transition-transform duration-500">
-                            <Plus size={40} className="text-gray-300 group-hover:text-black transition-colors" />
+                {/* Cooperation Section */}
+                <div className="bg-white p-10 rounded-[2.5rem] border border-gray-200 shadow-sm">
+                    <SectionHeader icon={Handshake} title="Detail Kerja Sama Aktif" sub="Active Vendor & Contract" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                        <div className="md:col-span-2">
+                            <Label>Vendor Pemeliharaan Aktif</Label>
+                            <input 
+                                className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black focus:border-black outline-none bg-gray-50" 
+                                value={form.cooperation?.activeVendor} 
+                                onChange={e => setForm({...form, cooperation: {...form.cooperation, activeVendor: e.target.value}})}
+                                placeholder="Contoh: PT Servis AC Jaya Utama" 
+                                disabled={isView} 
+                            />
                         </div>
-                        <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] group-hover:text-black transition-colors">Unggah Dokumen Baru</p>
-                        <p className="text-[9px] font-bold text-gray-300 mt-3 uppercase tracking-widest italic">PDF, DOCX atau Zip (Max 50MB)</p>
+                        <div>
+                            <Label>Tgl Mulai Kontrak</Label>
+                            <input type="date" className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black outline-none bg-gray-50" value={form.cooperation?.contractStartDate} onChange={e => setForm({...form, cooperation: {...form.cooperation, contractStartDate: e.target.value}})} disabled={isView} />
+                        </div>
+                        <div>
+                            <Label>Tgl Berakhir Kontrak</Label>
+                            <input type="date" className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black outline-none bg-gray-50" value={form.cooperation?.contractEndDate} onChange={e => setForm({...form, cooperation: {...form.cooperation, contractEndDate: e.target.value}})} disabled={isView} />
+                        </div>
+                        <div>
+                            <Label>Biaya Bulanan (Avg)</Label>
+                            <div className="relative">
+                                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[11px] font-black text-gray-300">RP</span>
+                                <input className="w-full border border-gray-100 rounded-2xl pl-12 pr-6 py-4 text-[13px] font-black text-black outline-none bg-gray-50" value={form.cooperation?.monthlyMaintenanceFee} onChange={e => setForm({...form, cooperation: {...form.cooperation, monthlyMaintenanceFee: e.target.value}})} placeholder="0" disabled={isView} />
+                            </div>
+                        </div>
+                        <div>
+                            <Label>SLA / Respons Time</Label>
+                            <input className="w-full border border-gray-100 rounded-2xl px-6 py-4 text-[13px] font-black text-black outline-none bg-gray-50" value={form.cooperation?.serviceLevelAgreement} onChange={e => setForm({...form, cooperation: {...form.cooperation, serviceLevelAgreement: e.target.value}})} placeholder="Contoh: 1x24 Jam" disabled={isView} />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Proposals Section */}
+                <div className="bg-white p-10 rounded-[2.5rem] border border-gray-200 shadow-sm">
+                    <div className="flex items-center justify-between mb-10">
+                        <SectionHeader icon={FileText} title="Log Proposal Penawaran" sub="Maintenance & Upgrade Proposals" />
+                        {!isView && (
+                            <button 
+                                onClick={addProposalRow}
+                                className="bg-black text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 hover:bg-gray-800 transition-all shadow-xl shadow-black/10 active:scale-95"
+                            >
+                                <Plus size={16} strokeWidth={3} /> Tambah Proposal
+                            </button>
+                        )}
                     </div>
 
-                    {/* File List Simulated */}
-                    <div className="space-y-4">
-                        {[
-                            { name: 'Surat_Perjanjian_Sewa.pdf', size: '2.4 MB', date: '12 Jan 2024' },
-                            { name: 'Sertifikat_Bangunan_HGB.pdf', size: '1.1 MB', date: '12 Jan 2024' },
-                            { name: 'Foto_Survey_Opsi_1.zip', size: '15.8 MB', date: '14 Jan 2024' }
-                        ].map((file, i) => (
-                            <div key={i} className="flex items-center justify-between p-6 bg-white rounded-2xl border border-gray-100 hover:border-black transition-all group">
-                                <div className="flex items-center gap-5">
-                                    <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 group-hover:text-black group-hover:bg-black/5 transition-all"><FileIcon size={20} /></div>
-                                    <div>
-                                        <h5 className="text-[11px] font-black text-black uppercase tracking-tight">{file.name}</h5>
-                                        <p className="text-[9px] font-bold text-gray-400 uppercase mt-1">{file.size} • {file.date}</p>
-                                    </div>
+                    <div className="overflow-hidden border border-gray-100 rounded-[2rem]">
+                        <table className="w-full text-left">
+                            <thead className="bg-gray-50/50 border-b border-gray-100">
+                                <tr className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                    <th className="p-6">Vendor & Judul</th>
+                                    <th className="p-6 w-40">Tgl Kirim</th>
+                                    <th className="p-6 w-44 text-right">Nilai Estimasi</th>
+                                    <th className="p-6 w-44 text-center">Status</th>
+                                    {!isView && <th className="p-6 w-14"></th>}
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {(form.proposals || []).map((prop) => (
+                                    <tr key={prop.id} className="hover:bg-gray-50/30 transition-colors">
+                                        <td className="p-6">
+                                            <input 
+                                                className="w-full bg-transparent border-none p-0 text-[13px] font-black text-black focus:ring-0" 
+                                                value={prop.vendorName}
+                                                onChange={e => updateProposalField(prop.id, 'vendorName', e.target.value)}
+                                                placeholder="Nama Vendor..."
+                                                disabled={isView}
+                                            />
+                                            <input 
+                                                className="w-full bg-transparent border-none p-0 text-[10px] font-bold text-gray-400 uppercase tracking-tighter mt-1 focus:ring-0" 
+                                                value={prop.proposalName}
+                                                onChange={e => updateProposalField(prop.id, 'proposalName', e.target.value)}
+                                                placeholder="Nama Project / Penawaran..."
+                                                disabled={isView}
+                                            />
+                                        </td>
+                                        <td className="p-6">
+                                            <input 
+                                                type="date"
+                                                className="w-full bg-transparent border-none p-0 text-[12px] font-bold text-gray-600 focus:ring-0" 
+                                                value={prop.submissionDate}
+                                                onChange={e => updateProposalField(prop.id, 'submissionDate', e.target.value)}
+                                                disabled={isView}
+                                            />
+                                        </td>
+                                        <td className="p-6 text-right">
+                                            <input 
+                                                className="w-full bg-transparent border-none p-0 text-[12px] font-black text-right focus:ring-0" 
+                                                value={prop.estimatedCost}
+                                                onChange={e => updateProposalField(prop.id, 'estimatedCost', e.target.value)}
+                                                disabled={isView}
+                                            />
+                                        </td>
+                                        <td className="p-6">
+                                            <select 
+                                                className={`w-full bg-transparent border-none p-0 text-[10px] font-black uppercase tracking-widest text-center focus:ring-0 cursor-pointer
+                                                    ${prop.status === 'Approved' ? 'text-green-500' : prop.status === 'Rejected' ? 'text-red-500' : 'text-blue-500'}`}
+                                                value={prop.status}
+                                                onChange={e => updateProposalField(prop.id, 'status', e.target.value as any)}
+                                                disabled={isView}
+                                            >
+                                                <option value="Pending">Pending</option>
+                                                <option value="Reviewing">Reviewing</option>
+                                                <option value="Approved">Approved</option>
+                                                <option value="Rejected">Rejected</option>
+                                            </select>
+                                        </td>
+                                        {!isView && (
+                                            <td className="p-6 text-center">
+                                                <button onClick={() => removeProposalRow(prop.id)} className="text-gray-200 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                                            </td>
+                                        )}
+                                    </tr>
+                                ))}
+                                {(form.proposals || []).length === 0 && (
+                                    <tr><td colSpan={5} className="p-20 text-center text-gray-300 font-black text-[11px] uppercase tracking-widest italic opacity-30">Belum ada proposal masuk</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+          )}
+
+          {activeTab === 'Dokumen Teknik' && (
+            <div className="max-w-5xl mx-auto py-12 space-y-10 animate-in zoom-in-95 duration-500">
+                <SectionHeader icon={ShieldCheck} title="Berkas Pendukung" sub="Technical Manuals & Warranty" />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="flex flex-col items-center justify-center p-16 border-2 border-dashed border-gray-200 rounded-[3rem] bg-white group hover:border-black transition-all cursor-pointer">
+                        <UploadCloud size={40} className="text-gray-300 group-hover:text-black mb-4 transition-colors" />
+                        <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em]">Unggah Buku Manual / Kartu Garansi</p>
+                        <p className="text-[9px] font-bold text-gray-300 mt-3 uppercase tracking-widest italic">PDF atau JPG (Max 10MB)</p>
+                    </div>
+                    <div className="bg-gray-50 p-10 rounded-[3rem] border border-gray-100 flex flex-col justify-center">
+                         <div className="space-y-4">
+                            <div className="p-5 bg-white rounded-2xl border border-gray-100 flex items-center gap-4">
+                                <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center text-gray-300"><Settings size={18}/></div>
+                                <div>
+                                    <div className="text-[11px] font-black text-black">TECHNICAL_SPEC.PDF</div>
+                                    <div className="text-[9px] font-bold text-gray-400 uppercase">Uploaded by Admin</div>
                                 </div>
-                                <button className="text-[10px] font-black text-gray-300 hover:text-red-500 p-2"><Trash2 size={16} /></button>
                             </div>
-                        ))}
+                         </div>
                     </div>
                 </div>
             </div>
           )}
         </div>
 
-        {/* Global Footer - Premium Style */}
+        {/* Global Footer */}
         <div className="px-10 py-8 bg-white border-t border-gray-100 flex justify-between items-center shrink-0">
           <button onClick={onClose} className="px-12 py-4 text-[11px] font-black uppercase tracking-[0.25em] text-gray-400 hover:text-black transition-all bg-gray-50 rounded-2xl hover:bg-gray-100 active:scale-95">Batal</button>
           {!isView && (
             <button onClick={() => onSave(form)} className="bg-black text-white px-20 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.25em] hover:bg-gray-800 transition-all active:scale-95 shadow-2xl shadow-black/20 flex items-center gap-4">
-              <Save size={18} strokeWidth={2.5} /> Simpan Kontrak Properti
+              <Save size={18} strokeWidth={2.5} /> Simpan Data Aset Gedung
             </button>
           )}
         </div>

@@ -1,15 +1,16 @@
 
 import React from 'react';
 import { ServiceRecord } from '../types';
-import { Eye, Pencil, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, History } from 'lucide-react';
+import { Eye, Pencil, Trash2, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, History } from 'lucide-react';
 
 interface Props {
   data: ServiceRecord[];
   onEdit?: (item: ServiceRecord) => void;
   onView?: (item: ServiceRecord) => void;
+  onDelete?: (id: string) => void;
 }
 
-export const ServiceLogTable: React.FC<Props> = ({ data, onEdit, onView }) => {
+export const ServiceLogTable: React.FC<Props> = ({ data, onEdit, onView, onDelete }) => {
   const getStatusStyle = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'selesai':
@@ -80,6 +81,12 @@ export const ServiceLogTable: React.FC<Props> = ({ data, onEdit, onView }) => {
                     >
                       <Pencil size={18} />
                     </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); onDelete?.(item.id); }}
+                      className="p-1.5 text-gray-300 hover:text-red-500 transition-all"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -95,7 +102,7 @@ export const ServiceLogTable: React.FC<Props> = ({ data, onEdit, onView }) => {
         </table>
       </div>
       
-      {/* Footer Pagination sesuai gambar */}
+      {/* Footer Pagination */}
       <div className="px-8 py-5 bg-white border-t border-gray-100 flex items-center justify-between">
         <div className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
           SHOWING 1 - {data.length} OF <span className="text-black">{data.length}</span> ROW(S)

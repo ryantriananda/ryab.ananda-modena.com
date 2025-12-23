@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Bell, ChevronDown, Menu } from 'lucide-react';
+import { Bell, ChevronDown, Menu, Search } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface Props {
@@ -18,75 +18,94 @@ export const TopBar: React.FC<Props> = ({ breadcrumbs = ['Home', 'Asset Monitori
   };
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-20 shadow-sm">
-      <div className="flex items-center gap-3">
+    <header className="h-20 bg-[#FBFBFB] flex items-center justify-between px-8 sticky top-0 z-30 transition-all">
+      <div className="flex items-center gap-6">
         {/* Hamburger Menu for Mobile */}
         <button 
           onClick={onMenuClick} 
-          className="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-600"
+          className="lg:hidden p-2 hover:bg-white rounded-xl text-black shadow-sm"
         >
-          <Menu size={20} />
+          <Menu size={24} />
         </button>
 
-        <div className="hidden sm:flex items-center gap-2 text-xs md:text-sm text-gray-500 truncate max-w-[200px] md:max-w-none">
+        {/* Breadcrumbs - Stylish */}
+        <div className="hidden sm:flex items-center gap-3 text-sm">
            {breadcrumbs.map((item, index) => (
                <React.Fragment key={index}>
-                   <span className="font-medium text-gray-900 whitespace-nowrap">{item}</span>
-                   {index < breadcrumbs.length - 1 && <span>/</span>}
+                   <span className={`font-black uppercase tracking-tight ${index === breadcrumbs.length - 1 ? 'text-black text-[14px]' : 'text-gray-300 text-[12px]'}`}>
+                     {item}
+                   </span>
+                   {index < breadcrumbs.length - 1 && <span className="text-gray-300">/</span>}
                </React.Fragment>
            ))}
         </div>
       </div>
 
-      <div className="flex items-center gap-2 md:gap-6">
-        {/* Language Switcher - Simplified for Mobile */}
+      <div className="flex items-center gap-6">
+        {/* Search Bar (Visual Only) */}
+        <div className="hidden md:flex items-center bg-white px-4 py-2.5 rounded-full border border-gray-100 shadow-sm w-64">
+            <Search size={14} className="text-gray-300" />
+            <input type="text" placeholder="Search anything..." className="bg-transparent border-none outline-none text-[11px] font-bold ml-2 w-full placeholder:text-gray-300" />
+        </div>
+
+        {/* Language Switcher */}
         <div className="relative">
           <button 
             onClick={() => setIsLangOpen(!isLangOpen)}
-            className="flex items-center gap-1 md:gap-2 px-1.5 md:px-2 py-1 rounded hover:bg-gray-100 transition-colors border border-gray-200"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-gray-100 shadow-sm hover:border-gray-300 transition-all"
           >
             {language === 'id' ? (
-                <img src="https://flagcdn.com/w40/id.png" alt="Indonesia" className="w-5 md:w-6 h-auto rounded-sm object-cover" />
+                <img src="https://flagcdn.com/w40/id.png" alt="Indonesia" className="w-5 h-auto rounded-sm" />
             ) : (
-                <img src="https://flagcdn.com/w40/us.png" alt="English" className="w-5 md:w-6 h-auto rounded-sm object-cover" />
+                <img src="https://flagcdn.com/w40/us.png" alt="English" className="w-5 h-auto rounded-sm" />
             )}
-            <span className="text-[10px] md:text-xs font-semibold text-gray-600 uppercase">{language}</span>
+            <span className="text-[10px] font-black text-black uppercase">{language}</span>
+            <ChevronDown size={12} className="text-gray-400" />
           </button>
 
           {isLangOpen && (
-            <div className="absolute top-full right-0 mt-2 w-36 md:w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+            <div className="absolute top-full right-0 mt-2 w-36 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 py-2 z-50 overflow-hidden">
                 <button 
                   onClick={() => toggleLanguage('id')}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-50"
+                  className="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors"
                 >
-                    <img src="https://flagcdn.com/w40/id.png" alt="Indonesia" className="w-6 h-auto" />
-                    <span>Indonesia</span>
+                    <img src="https://flagcdn.com/w40/id.png" alt="Indonesia" className="w-5 h-auto" />
+                    <span className="text-[11px] font-bold">Indonesia</span>
                 </button>
                 <button 
                   onClick={() => toggleLanguage('en')}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-50"
+                  className="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors"
                 >
-                    <img src="https://flagcdn.com/w40/us.png" alt="English" className="w-6 h-auto" />
-                    <span>English</span>
+                    <img src="https://flagcdn.com/w40/us.png" alt="English" className="w-5 h-auto" />
+                    <span className="text-[11px] font-bold">English</span>
                 </button>
             </div>
           )}
         </div>
 
-        <div className="relative cursor-pointer p-1">
-          <Bell size={18} className="text-gray-400" />
-          <span className="absolute top-0 right-0 bg-red-500 text-white text-[8px] font-bold px-1 rounded-full">3</span>
-        </div>
+        {/* Notifications */}
+        <button className="relative p-2.5 bg-white rounded-xl border border-gray-100 shadow-sm hover:bg-gray-50 transition-all group">
+          <Bell size={18} className="text-gray-400 group-hover:text-black transition-colors" />
+          <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+        </button>
         
-        <div className="h-6 w-[1px] bg-gray-200 mx-1 md:mx-0"></div>
+        {/* Divider */}
+        <div className="h-8 w-[1px] bg-gray-200"></div>
 
-        <div className="flex items-center gap-2 cursor-pointer">
-          <img 
-            src="https://picsum.photos/id/1005/100/100" 
-            alt="Profile" 
-            className="w-8 h-8 rounded-full border border-gray-200 object-cover"
-          />
-          <ChevronDown size={14} className="text-gray-400 hidden sm:block" />
+        {/* User Profile */}
+        <div className="flex items-center gap-3 cursor-pointer pl-2">
+          <div className="text-right hidden sm:block">
+            <p className="text-[12px] font-black text-black leading-tight uppercase">Ibnu Faisal</p>
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Facility Manager</p>
+          </div>
+          <div className="relative">
+             <img 
+                src="https://picsum.photos/id/1005/100/100" 
+                alt="Profile" 
+                className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md"
+            />
+            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+          </div>
         </div>
       </div>
     </header>

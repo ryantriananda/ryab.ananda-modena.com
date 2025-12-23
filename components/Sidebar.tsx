@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, 
   FileText, 
@@ -14,17 +15,14 @@ import {
   Send,
   DollarSign,
   ChevronDown,
-  ChevronUp,
   X,
   Building,
   Briefcase,
   Bell,
-  ShieldCheck,
-  CreditCard,
-  Settings,
-  UserCheck,
   Box,
-  House
+  House,
+  Settings,
+  UserCog
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -52,7 +50,16 @@ export const Sidebar: React.FC<Props> = ({
   onCloseMobile 
 }) => {
   const { t } = useLanguage();
-  const [expandedMenus, setExpandedMenus] = useState<string[]>(['Kendaraan', 'Gedung', 'ATK', 'ARK', 'Master Data']);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
+
+  // Auto-expand menu based on activeItem
+  useEffect(() => {
+    menuItems.forEach(item => {
+        if (item.subItems && item.subItems.some(sub => sub.label === activeItem)) {
+            setExpandedMenus(prev => prev.includes(item.label) ? prev : [...prev, item.label]);
+        }
+    });
+  }, [activeItem]);
 
   const toggleMenu = (label: string) => {
     if (isCollapsed) {
@@ -70,90 +77,96 @@ export const Sidebar: React.FC<Props> = ({
   const menuItems: MenuItem[] = [
     { label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { 
-        label: 'Kendaraan', 
-        icon: <Car size={20} />,
-        subItems: [
-            { label: 'Daftar Aset', icon: <Database size={18} /> },
-            { label: 'Kontrak Kendaraan', icon: <Briefcase size={18} /> },
-            { label: 'Servis', icon: <Wrench size={18} /> },
-            { label: 'Pajak & KIR', icon: <FileText size={18} /> },
-            { label: 'Mutasi', icon: <Send size={18} /> },
-            { label: 'Penjualan', icon: <DollarSign size={18} /> },
-        ]
-    },
-    { 
         label: 'ATK', 
         icon: <Box size={20} />,
         subItems: [
-            { label: 'Request ATK', icon: <Database size={18} /> },
-            { label: 'Stationery Request Approval', icon: <UserCheck size={18} /> },
-            { label: 'Master ATK', icon: <Settings size={18} /> },
+            { label: 'Request ATK', icon: <Database size={16} /> },
+            { label: 'Stationery Request Approval', icon: <FileText size={16} /> },
+            { label: 'Master ATK', icon: <Settings size={16} /> },
         ]
     },
     { 
         label: 'ARK', 
         icon: <House size={20} />,
         subItems: [
-            { label: 'Daftar ARK', icon: <Database size={18} /> },
-            { label: 'Household Request Approval', icon: <UserCheck size={18} /> },
-            { label: 'Master ARK', icon: <Settings size={18} /> },
+            { label: 'Daftar ARK', icon: <Database size={16} /> },
+            { label: 'Household Request Approval', icon: <FileText size={16} /> },
+            { label: 'Master ARK', icon: <Settings size={16} /> },
         ]
     },
     { label: 'Log Book', icon: <BookOpen size={20} /> },
     { 
+        label: 'Kendaraan', 
+        icon: <Car size={20} />,
+        subItems: [
+            { label: 'Daftar Aset', icon: <Database size={16} /> },
+            { label: 'Kontrak Kendaraan', icon: <Briefcase size={16} /> },
+            { label: 'Servis', icon: <Wrench size={16} /> },
+            { label: 'Pajak & KIR', icon: <FileText size={16} /> },
+            { label: 'Mutasi', icon: <Send size={16} /> },
+            { label: 'Penjualan', icon: <DollarSign size={16} /> },
+        ]
+    },
+    { 
         label: 'Gedung', 
         icon: <Building size={20} />,
         subItems: [
-             { label: 'Kontrak Gedung', icon: <FileText size={18} /> },
-             { label: 'List Reminder Dokumen', icon: <Bell size={18} /> },
+             { label: 'Building Asset Management', icon: <Database size={16} /> },
+             { label: 'Branch Improvement', icon: <FileText size={16} /> },
+             { label: 'List Reminder Dokumen', icon: <Bell size={16} /> },
+             { label: 'List Reminder Pemeliharaan', icon: <Clock size={16} /> },
         ]
     },
     { label: 'Timesheet', icon: <Clock size={20} /> },
     { label: 'Vendor', icon: <Users size={20} /> },
+    { label: 'Manajemen User', icon: <UserCog size={20} /> },
     { 
       label: 'Master Data', 
       icon: <Home size={20} />,
       subItems: [
-        { label: 'Jenis Pajak', icon: <Wrench size={18} /> },
-        { label: 'Jenis Pembayaran', icon: <Wrench size={18} /> },
-        { label: 'Jenis Servis', icon: <Wrench size={18} /> },
-        { label: 'Status Mutasi', icon: <Wrench size={18} /> },
-        { label: 'Status Penjualan', icon: <Wrench size={18} /> },
-        { label: 'Status Request', icon: <Wrench size={18} /> },
-        { label: 'Tipe Mutasi', icon: <Wrench size={18} /> },
-        { label: 'Tipe Vendor', icon: <Wrench size={18} /> },
-        { label: 'Peran', icon: <Wrench size={18} /> },
-        { label: 'Master Vendor', icon: <Users size={18} /> },
+        { label: 'Jenis Pajak', icon: <Settings size={16} /> },
+        { label: 'Jenis Pembayaran', icon: <Settings size={16} /> },
+        { label: 'Jenis Servis', icon: <Settings size={16} /> },
+        { label: 'Jenis Kendaraan', icon: <Car size={16} /> },
+        { label: 'Status Mutasi', icon: <Settings size={16} /> },
+        { label: 'Status Penjualan', icon: <Settings size={16} /> },
+        { label: 'Status Request', icon: <Settings size={16} /> },
+        { label: 'Tipe Mutasi', icon: <Settings size={16} /> },
+        { label: 'Tipe Vendor', icon: <Settings size={16} /> },
+        { label: 'Peran', icon: <Settings size={16} /> },
+        { label: 'Master Vendor', icon: <Users size={16} /> },
       ]
     },
   ];
 
   const sidebarClasses = `
-    fixed inset-y-0 left-0 z-40 bg-black text-gray-400 flex flex-col transition-all duration-300 border-r border-gray-800
-    ${isMobileOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0'}
-    ${isCollapsed && !isMobileOpen ? 'lg:w-20' : 'lg:w-64'}
+    fixed inset-y-0 left-0 z-40 bg-[#0A0A0A] text-gray-400 flex flex-col transition-all duration-300 border-r border-gray-900
+    ${isMobileOpen ? 'translate-x-0 w-[280px]' : '-translate-x-full lg:translate-x-0'}
+    ${isCollapsed && !isMobileOpen ? 'lg:w-[90px]' : 'lg:w-[280px]'}
   `;
 
   return (
     <div className={sidebarClasses}>
-      <div className={`p-6 flex items-center justify-between text-white mb-2`}>
+      {/* Logo Section */}
+      <div className={`h-20 flex items-center px-8 border-b border-white/5 ${isCollapsed ? 'justify-center px-0' : 'justify-between'}`}>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 min-w-8 bg-white text-black rounded-full flex items-center justify-center font-bold text-xl">M</div>
+          <div className="w-10 h-10 bg-white text-black rounded-xl flex items-center justify-center font-black text-xl shadow-[0_0_15px_rgba(255,255,255,0.1)]">M</div>
           {(!isCollapsed || isMobileOpen) && (
-              <div className="overflow-hidden whitespace-nowrap">
-                  <h1 className="font-bold text-lg leading-none">MODENA</h1>
-                  <p className="text-xs text-gray-500">Asset Management</p>
+              <div className="flex flex-col">
+                  <h1 className="font-black text-white text-[16px] tracking-tight leading-none">MODENA</h1>
+                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-[0.2em] mt-1">Asset Manager</p>
               </div>
           )}
         </div>
         {isMobileOpen && (
-          <button onClick={onCloseMobile} className="lg:hidden p-1 hover:bg-gray-800 rounded">
+          <button onClick={onCloseMobile} className="lg:hidden p-2 text-gray-400 hover:text-white transition-colors">
             <X size={20} />
           </button>
         )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto custom-scrollbar px-2 space-y-1 mt-4">
+      {/* Menu Section */}
+      <nav className="flex-1 overflow-y-auto custom-scrollbar px-4 py-6 space-y-1">
         {menuItems.map((item, index) => {
           const hasSub = item.subItems && item.subItems.length > 0;
           const isExpanded = expandedMenus.includes(item.label);
@@ -161,37 +174,50 @@ export const Sidebar: React.FC<Props> = ({
 
           if (hasSub) {
               return (
-                  <div key={index} className="space-y-1">
+                  <div key={index} className="space-y-1 mb-2">
                       <button
                         onClick={() => toggleMenu(item.label)}
-                        className={`w-full flex items-center ${(isCollapsed && !isMobileOpen) ? 'justify-center px-0' : 'justify-between px-4'} py-3 text-sm font-medium rounded-lg transition-colors duration-200 hover:bg-[#1a1a1a] hover:text-white ${isParentActive ? 'text-white bg-[#1a1a1a]' : 'text-gray-500'}`}
+                        className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-4 py-3.5 rounded-xl transition-all duration-200 group relative
+                        ${isParentActive ? 'text-white bg-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                       >
-                         <div className={`flex items-center ${(isCollapsed && !isMobileOpen) ? 'gap-0' : 'gap-4'}`}>
-                            <span>{item.icon}</span>
-                            {(!isCollapsed || isMobileOpen) && t(item.label)}
+                         <div className="flex items-center gap-4">
+                            <span className={`${isParentActive ? 'text-white' : 'text-gray-500 group-hover:text-white'} transition-colors`}>{item.icon}</span>
+                            {!isCollapsed && <span className="text-[12px] font-bold uppercase tracking-wide">{t(item.label)}</span>}
                          </div>
-                         {(!isCollapsed || isMobileOpen) && (isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />)}
+                         {!isCollapsed && (
+                             <ChevronDown 
+                                size={14} 
+                                className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-white' : 'text-gray-600'}`} 
+                             />
+                         )}
+                         
+                         {/* Active Indicator Line */}
+                         {isParentActive && !isCollapsed && (
+                             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full"></div>
+                         )}
                       </button>
 
-                      {isExpanded && (!isCollapsed || isMobileOpen) && (
-                          <div className="space-y-1">
+                      {/* Submenu */}
+                      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded && !isCollapsed ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                          <div className="pt-1 pb-2 pl-4 space-y-1">
                               {item.subItems!.map((sub, subIndex) => {
                                   const isSubActive = activeItem === sub.label;
                                   return (
                                     <button
                                         key={subIndex}
                                         onClick={() => onNavigate(sub.label)}
-                                        className={`w-full flex items-center gap-4 pl-12 pr-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200
+                                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ml-2
                                             ${isSubActive
-                                            ? 'bg-[#1a1a1a] text-white border-l-4 border-white' 
-                                            : 'hover:bg-[#1a1a1a] hover:text-white border-l-4 border-transparent text-gray-500'}`}
+                                            ? 'text-white bg-white/10' 
+                                            : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
                                     >
-                                        {t(sub.label)}
+                                        <div className={`w-1.5 h-1.5 rounded-full ${isSubActive ? 'bg-white' : 'bg-gray-700'}`}></div>
+                                        <span className="text-[11px] font-bold uppercase tracking-wider">{t(sub.label)}</span>
                                     </button>
                                   )
                               })}
                           </div>
-                      )}
+                      </div>
                   </div>
               );
           }
@@ -200,27 +226,28 @@ export const Sidebar: React.FC<Props> = ({
             <button
               key={index}
               onClick={() => onNavigate(item.label)}
-              className={`w-full flex items-center ${(isCollapsed && !isMobileOpen) ? 'justify-center px-0' : 'gap-4 px-4'} py-3 text-sm font-medium rounded-lg transition-colors duration-200
-                ${isParentActive
-                  ? 'bg-[#1a1a1a] text-white border-l-4 border-white' 
-                  : 'hover:bg-[#1a1a1a] hover:text-white border-l-4 border-transparent text-gray-500'}`}
+              className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start gap-4'} px-4 py-3.5 rounded-xl transition-all duration-200 group relative mb-1
+                ${isParentActive 
+                  ? 'bg-white text-black shadow-[0_4px_20px_rgba(255,255,255,0.15)]' 
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
             >
-              <span>{item.icon}</span>
-              {(!isCollapsed || isMobileOpen) && t(item.label)}
+              <span className={`${isParentActive ? 'text-black' : 'text-gray-500 group-hover:text-white'} transition-colors`}>{item.icon}</span>
+              {!isCollapsed && <span className="text-[12px] font-bold uppercase tracking-wide">{t(item.label)}</span>}
             </button>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-gray-900 hidden lg:block">
+      {/* Footer Toggle */}
+      <div className="p-6 border-t border-white/5 hidden lg:block">
         <button 
             onClick={onToggle}
-            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-2'} text-sm text-gray-500 hover:text-white transition-colors`}
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-4'} p-3 rounded-xl hover:bg-white/5 text-gray-500 hover:text-white transition-all`}
         >
-          <div className="bg-gray-900 p-1 rounded-full">
+          <div className="bg-white/10 p-1.5 rounded-lg">
             {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
           </div>
-          {!isCollapsed && t('Minimize menu')}
+          {!isCollapsed && <span className="text-[10px] font-black uppercase tracking-[0.15em]">Collapse Menu</span>}
         </button>
       </div>
     </div>

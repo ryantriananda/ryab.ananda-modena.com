@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 type Language = 'id' | 'en';
@@ -32,17 +33,23 @@ const translations: Record<string, Record<Language, string>> = {
 
   'Log Book': { id: 'Log Book', en: 'Log Book' },
   'Gedung': { id: 'Gedung', en: 'Building' },
+  'Building Asset Management': { id: 'Manajemen Aset Gedung', en: 'Building Asset Management' },
+  'Branch Improvement': { id: 'Branch Improvement', en: 'Branch Improvement' },
+  'List Reminder Dokumen': { id: 'Reminder Dokumen', en: 'Document Reminder' },
+  'List Reminder Pemeliharaan': { id: 'Reminder Pemeliharaan', en: 'Maintenance Reminder' },
   'Contract': { id: 'Kontrak', en: 'Contract' },
   'Timesheet': { id: 'Absensi', en: 'Timesheet' },
   'Vendor': { id: 'Vendor', en: 'Vendor' },
   'Credit Card': { id: 'Kartu Kredit', en: 'Credit Card' },
   'Master Data': { id: 'Master Data', en: 'Master Data' },
   'Project Mgmt': { id: 'Manajemen Proyek', en: 'Project Mgmt' },
+  'Manajemen User': { id: 'Manajemen User', en: 'User Management' },
   
   // Master Sub-items
   'Jenis Pajak': { id: 'Jenis Pajak', en: 'Tax Type' },
   'Jenis Pembayaran': { id: 'Jenis Pembayaran', en: 'Payment Type' },
   'Jenis Servis': { id: 'Jenis Servis', en: 'Service Type' },
+  'Jenis Kendaraan': { id: 'Jenis Kendaraan', en: 'Vehicle Type' },
   'Status Mutasi': { id: 'Status Mutasi', en: 'Mutation Status' },
   'Status Penjualan': { id: 'Status Penjualan', en: 'Sales Status' },
   'Status Request': { id: 'Status Request', en: 'Request Status' },

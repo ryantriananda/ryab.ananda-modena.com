@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Save, Wrench, Plus, Upload, Trash2, Calendar, Clock, ChevronRight, Info } from 'lucide-react';
+import { X, Save, Wrench, Plus, Upload, Trash2, Calendar, Clock, ChevronRight, Info, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { ServiceRecord, VehicleRecord, SparePart } from '../types';
 
 interface Props {
@@ -27,6 +27,7 @@ export const ServiceModal: React.FC<Props> = ({
     vendor: '',
     kmKendaraan: '',
     masalah: '',
+    jenisServis: 'Servis Rutin',
     spareParts: []
   });
 
@@ -45,6 +46,7 @@ export const ServiceModal: React.FC<Props> = ({
           vendor: '',
           kmKendaraan: '',
           masalah: '',
+          jenisServis: 'Servis Rutin',
           spareParts: []
         });
         setParts([]);
@@ -140,6 +142,35 @@ export const ServiceModal: React.FC<Props> = ({
                       <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                   </div>
+                </div>
+
+                {/* Jenis Servis Flagging */}
+                <div>
+                    <Label>Kategori Pemeliharaan</Label>
+                    <div className="flex gap-4">
+                        {['Servis Rutin', 'Non-Rutin'].map(type => {
+                            const isSelected = form.jenisServis === type;
+                            const isRutin = type === 'Servis Rutin';
+                            return (
+                                <button
+                                    key={type}
+                                    onClick={() => !isView && setForm({...form, jenisServis: type})}
+                                    disabled={isView}
+                                    className={`flex-1 py-4 rounded-xl border transition-all relative overflow-hidden group ${
+                                        isSelected 
+                                        ? 'bg-black text-white border-black shadow-lg' 
+                                        : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-center gap-2 relative z-10">
+                                        {isRutin ? <CheckCircle2 size={16} className={isSelected ? 'text-green-400' : 'text-gray-300'} /> : <AlertTriangle size={16} className={isSelected ? 'text-orange-400' : 'text-gray-300'} />}
+                                        <span className="text-[11px] font-black uppercase tracking-widest">{type}</span>
+                                    </div>
+                                    {isSelected && <div className="absolute inset-0 bg-white/10" />}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
