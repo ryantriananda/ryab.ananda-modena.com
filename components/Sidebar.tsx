@@ -1,4 +1,4 @@
- import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   LayoutDashboard, 
   FileText, 
@@ -73,12 +73,12 @@ export const Sidebar: React.FC<Props> = ({
         label: 'Kendaraan', 
         icon: <Car size={20} />,
         subItems: [
-            { label: 'Daftar Kendaraan', icon: <Database size={18} /> },
-            { label: 'Permintaan Servis', icon: <Wrench size={18} /> },
-            { label: 'Perpanjangan Pajak/KIR', icon: <FileText size={18} /> },
-            { label: 'Mutasi Kendaraan', icon: <Send size={18} /> },
-            { label: 'Kontrak Sewa', icon: <Briefcase size={18} /> },
-            { label: 'Penjualan Aset', icon: <DollarSign size={18} /> },
+            { label: 'Daftar Aset', icon: <Database size={18} /> },
+            { label: 'Kontrak Kendaraan', icon: <Briefcase size={18} /> },
+            { label: 'Servis', icon: <Wrench size={18} /> },
+            { label: 'Pajak & KIR', icon: <FileText size={18} /> },
+            { label: 'Mutasi', icon: <Send size={18} /> },
+            { label: 'Penjualan', icon: <DollarSign size={18} /> },
         ]
     },
     { 

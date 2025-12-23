@@ -59,7 +59,7 @@ import { useLanguage } from './contexts/LanguageContext';
 
 const App: React.FC = () => {
   const { t } = useLanguage();
-  const [activeModule, setActiveModule] = useState('Permintaan Servis');
+  const [activeModule, setActiveModule] = useState('Servis');
   const [activeTab, setActiveTab] = useState('Semua');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -160,10 +160,10 @@ const App: React.FC = () => {
   const handleModuleNavigate = (module: string) => {
     setActiveModule(module);
     if (module === 'Kontrak Gedung') setActiveTab('Milik Sendiri');
-    else if (module === 'Daftar Kendaraan') setActiveTab('Aktif');
+    else if (module === 'Daftar Aset') setActiveTab('Aktif');
     else if (module.includes('Master')) setActiveTab('Items');
     else if (module === 'Log Book') setActiveTab(''); 
-    else if (module === 'Permintaan Servis') setActiveTab('Semua');
+    else if (module === 'Servis') setActiveTab('Semua');
     else setActiveTab('Semua');
     setIsMobileMenuOpen(false); 
   };
@@ -179,9 +179,9 @@ const App: React.FC = () => {
 
     if (activeModule === 'Kontrak Gedung') {
         setIsBuildingModalOpen(true); // Fixed: Open BuildingModal for comparison feature
-    } else if (activeModule === 'Permintaan Servis') {
+    } else if (activeModule === 'Servis') {
         setIsServiceModalOpen(true);
-    } else if (activeModule === 'Daftar Kendaraan') {
+    } else if (activeModule === 'Daftar Aset') {
         setIsVehicleModalOpen(true);
     } else if (activeModule === 'Master ATK' || activeModule === 'Master ARK') {
         if (activeTab === 'UOM' || activeTab === 'Category') setIsMasterModalOpen(true);
@@ -318,7 +318,7 @@ const App: React.FC = () => {
      }
 
      switch(activeModule) {
-         case 'Daftar Kendaraan': return (
+         case 'Daftar Aset': return (
             <VehicleTable 
                 data={vehicleData.filter(v => v.status === activeTab)} 
                 onEdit={(v) => { setSelectedVehicle(v); setModalMode('edit'); setIsVehicleModalOpen(true); }} 
@@ -333,15 +333,15 @@ const App: React.FC = () => {
             />
          );
          case 'List Reminder Dokumen': return <ReminderTable data={reminderData} />;
-         case 'Kontrak Sewa': return <VehicleContractTable data={vehicleContractData} />;
-         case 'Permintaan Servis': return (
+         case 'Kontrak Kendaraan': return <VehicleContractTable data={vehicleContractData} />;
+         case 'Servis': return (
             <ServiceLogTable 
               data={serviceData} 
               onEdit={(s) => { setSelectedService(s); setModalMode('edit'); setIsServiceModalOpen(true); }}
               onView={(s) => { setSelectedService(s); setModalMode('view'); setIsServiceModalOpen(true); }}
             />
          );
-         case 'Perpanjangan Pajak/KIR': return <TaxKirTable data={taxKirData} />;
+         case 'Pajak & KIR': return <TaxKirTable data={taxKirData} />;
          case 'Master Vendor': return <MasterVendorTable data={masterVendors} />;
          case 'Request ATK':
          case 'Stationery Request Approval':
@@ -361,9 +361,9 @@ const App: React.FC = () => {
 
   const mainTabs = useMemo(() => {
     if (activeModule === 'Kontrak Gedung') return ['Milik Sendiri', 'Sewa'];
-    if (activeModule === 'Daftar Kendaraan') return ['Aktif', 'Tidak Aktif'];
+    if (activeModule === 'Daftar Aset') return ['Aktif', 'Tidak Aktif'];
     if (activeModule === 'Master ATK' || activeModule === 'Master ARK') return ['Items', 'UOM', 'Category', 'Delivery Location'];
-    if (activeModule === 'Permintaan Servis') return ['Semua', 'Persetujuan'];
+    if (activeModule === 'Servis') return ['Semua', 'Persetujuan'];
     if (activeModule.includes('Daftar') || activeModule.includes('Approval') || activeModule.includes('Request')) return ['Semua', 'Draft', 'On Progress', 'Pending', 'Approved', 'Rejected', 'Closed'];
     return ['Semua'];
   }, [activeModule]);

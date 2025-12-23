@@ -83,7 +83,8 @@ export const ServiceModal: React.FC<Props> = ({
 
   if (!isOpen) return null;
 
-  const Label = ({ children }: { children: React.ReactNode }) => (
+  // Fix: make children optional to resolve TS error where children are passed via JSX but reported as missing
+  const Label = ({ children }: { children?: React.ReactNode }) => (
     <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">
       {children}
     </label>
