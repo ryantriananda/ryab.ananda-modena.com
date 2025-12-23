@@ -383,13 +383,13 @@ const App: React.FC = () => {
         onCloseMobile={toggleMobileMenu}
       />
       
-      <div className={`flex-1 flex flex-col transition-all duration-300 w-full ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300 w-full ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'}`}>
         <TopBar breadcrumbs={['Beranda', t(activeModule)]} onMenuClick={toggleMobileMenu} />
         
-        <main className="flex-1 p-8 overflow-y-auto">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto bg-gray-50/50">
           <div className="max-w-[1600px] mx-auto">
-            <div className="flex items-center justify-between mb-8">
-                <h1 className="text-[20px] font-bold text-black tracking-tight">
+            <div className="flex items-center justify-between mb-6">
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900">
                     {activeModule === 'Kontrak Gedung' ? 'Daftar Gedung' : t(activeModule)}
                 </h1>
             </div>

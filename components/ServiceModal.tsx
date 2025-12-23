@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Save, Wrench, Plus, Upload, Trash2, Calendar, Clock, ChevronRight, Info } from 'lucide-react';
+import { X, Wrench, Plus, Upload, Trash2, Calendar, Clock, ChevronRight, Info, Save } from 'lucide-react';
 import { ServiceRecord, VehicleRecord, SparePart } from '../types';
 
 interface Props {
@@ -83,136 +82,129 @@ export const ServiceModal: React.FC<Props> = ({
 
   if (!isOpen) return null;
 
-  const Label = ({ children }: { children: React.ReactNode }) => (
-    <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">
-      {children}
-    </label>
-  );
-
   return (
-    <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center backdrop-blur-sm p-4">
-      <div className="bg-white w-full max-w-[1100px] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center backdrop-blur-sm p-4">
+      <div className="bg-white w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gray-50 rounded-lg">
-                <Wrench size={18} className="text-black" />
+            <div className="p-2.5 bg-blue-100 rounded-xl">
+              <Wrench size={20} className="text-blue-600" />
             </div>
-            <h2 className="text-[14px] font-black text-black uppercase tracking-widest">Input Catatan Pemeliharaan</h2>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">
+                {mode === 'create' ? 'Buat Permintaan Servis' : mode === 'edit' ? 'Edit Permintaan' : 'Detail Permintaan'}
+              </h2>
+              <p className="text-sm text-gray-500">Catatan pemeliharaan kendaraan</p>
+            </div>
           </div>
-          <button onClick={onClose} className="text-gray-300 hover:text-black transition-colors">
-            <X size={24} />
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all">
+            <X size={20} />
           </button>
         </div>
 
-        {/* Content Area */}
-        <div className="flex-1 overflow-hidden flex flex-col lg:flex-row bg-[#FBFBFB]">
+        {/* Content */}
+        <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
           
-          {/* Main Form (Left) */}
-          <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-8">
+          {/* Main Form */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
             
-            {/* Vehicle Unit Data */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-1 h-6 bg-black rounded-full"></div>
-                <h3 className="text-[11px] font-black text-black uppercase tracking-widest">Data Unit Kendaraan</h3>
-              </div>
+            {/* Vehicle Info Card */}
+            <div className="bg-gray-50 rounded-xl p-5 space-y-5">
+              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <span className="w-1.5 h-5 bg-blue-600 rounded-full"></span>
+                Data Unit Kendaraan
+              </h3>
               
-              <div className="grid grid-cols-1 gap-6">
-                <div>
-                  <Label>Pilih Unit</Label>
-                  <div className="relative">
-                    <select 
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-bold bg-white focus:border-black outline-none appearance-none shadow-sm"
-                      value={form.noPolisi}
-                      onChange={(e) => {
-                        const v = vehicleList.find(x => x.noPolisi === e.target.value);
-                        setForm({...form, noPolisi: e.target.value, aset: v?.nama});
-                      }}
-                      disabled={isView}
-                    >
-                      <option value="">(Pilih Unit)</option>
-                      {vehicleList.map(v => <option key={v.id} value={v.noPolisi}>{v.noPolisi} - {v.nama}</option>)}
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Label>Odometer (KM)</Label>
-                    <input 
-                      type="text"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-bold placeholder:text-gray-300 focus:border-black outline-none shadow-sm"
-                      placeholder="Contoh: 45000"
-                      value={form.kmKendaraan}
-                      onChange={(e) => setForm({...form, kmKendaraan: e.target.value})}
-                      disabled={isView}
-                    />
-                  </div>
-                  <div>
-                    <Label>Bengkel / Rekanan</Label>
-                    <input 
-                      type="text"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-bold placeholder:text-gray-300 focus:border-black outline-none shadow-sm"
-                      placeholder="Nama Bengkel"
-                      value={form.vendor}
-                      onChange={(e) => setForm({...form, vendor: e.target.value})}
-                      disabled={isView}
-                    />
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">Pilih Unit Kendaraan</label>
+                  <select 
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                    value={form.noPolisi}
+                    onChange={(e) => {
+                      const v = vehicleList.find(x => x.noPolisi === e.target.value);
+                      setForm({...form, noPolisi: e.target.value, aset: v?.nama});
+                    }}
+                    disabled={isView}
+                  >
+                    <option value="">-- Pilih Kendaraan --</option>
+                    {vehicleList.map(v => <option key={v.id} value={v.noPolisi}>{v.noPolisi} - {v.nama}</option>)}
+                  </select>
                 </div>
 
                 <div>
-                  <Label>Bukti Kwitansi / Foto (IMG)</Label>
-                  <div className="border-2 border-dashed border-gray-100 rounded-2xl py-12 flex flex-col items-center justify-center bg-gray-50/20 hover:bg-gray-50/50 transition-colors cursor-pointer group">
-                    <Upload size={32} className="text-gray-300 group-hover:text-black mb-3 transition-colors" />
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover:text-black transition-colors">Klik untuk unggah lampiran</p>
-                  </div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">Odometer (KM)</label>
+                  <input 
+                    type="text"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                    placeholder="Contoh: 45000"
+                    value={form.kmKendaraan}
+                    onChange={(e) => setForm({...form, kmKendaraan: e.target.value})}
+                    disabled={isView}
+                  />
                 </div>
-
                 <div>
-                  <Label>Deskripsi Masalah</Label>
-                  <textarea 
-                    className="w-full border border-gray-200 rounded-2xl px-4 py-4 text-sm font-medium min-h-[120px] focus:border-black outline-none transition-all placeholder:text-gray-300 shadow-sm"
-                    placeholder="Jelaskan keluhan unit..."
-                    value={form.masalah}
-                    onChange={(e) => setForm({...form, masalah: e.target.value})}
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">Bengkel / Rekanan</label>
+                  <input 
+                    type="text"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                    placeholder="Nama Bengkel"
+                    value={form.vendor}
+                    onChange={(e) => setForm({...form, vendor: e.target.value})}
                     disabled={isView}
                   />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1.5">Lampiran Kwitansi</label>
+                <div className="border-2 border-dashed border-gray-200 rounded-xl py-8 flex flex-col items-center justify-center bg-white hover:bg-gray-50 hover:border-blue-300 transition-all cursor-pointer group">
+                  <Upload size={28} className="text-gray-300 group-hover:text-blue-500 mb-2 transition-colors" />
+                  <p className="text-sm text-gray-500 group-hover:text-blue-600 transition-colors">Klik untuk upload file</p>
+                  <p className="text-xs text-gray-400 mt-1">PNG, JPG, PDF (max 5MB)</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1.5">Deskripsi Masalah</label>
+                <textarea 
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white min-h-[100px] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-gray-400 resize-none"
+                  placeholder="Jelaskan keluhan atau masalah pada kendaraan..."
+                  value={form.masalah}
+                  onChange={(e) => setForm({...form, masalah: e.target.value})}
+                  disabled={isView}
+                />
+              </div>
             </div>
 
-            {/* Spare Parts Section */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="w-1 h-6 bg-black rounded-full"></div>
-                  <h3 className="text-[11px] font-black text-black uppercase tracking-widest">Rincian Suku Cadang</h3>
-                </div>
+            {/* Spare Parts */}
+            <div className="bg-gray-50 rounded-xl p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  <span className="w-1.5 h-5 bg-blue-600 rounded-full"></span>
+                  Rincian Suku Cadang
+                </h3>
                 {!isView && (
                   <button 
                     onClick={addPart}
-                    className="bg-black text-white px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/10"
+                    className="flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-all"
                   >
-                    <Plus size={14} strokeWidth={3} /> Tambah Item
+                    <Plus size={16} /> Tambah
                   </button>
                 )}
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50">
-                      <th className="pb-4 px-2">NAMA BARANG / DESKRIPSI</th>
-                      <th className="pb-4 px-2 text-center w-24">QTY</th>
-                      <th className="pb-4 px-2 text-right w-40">HARGA (RP)</th>
-                      <th className="pb-4 px-2 text-right w-40">SUBTOTAL</th>
-                      {!isView && <th className="pb-4 w-12"></th>}
+                    <tr className="bg-gray-50 border-b border-gray-100">
+                      <th className="text-left p-3 text-xs font-semibold text-gray-500">Nama Barang</th>
+                      <th className="text-center p-3 text-xs font-semibold text-gray-500 w-20">Qty</th>
+                      <th className="text-right p-3 text-xs font-semibold text-gray-500 w-32">Harga</th>
+                      <th className="text-right p-3 text-xs font-semibold text-gray-500 w-32">Subtotal</th>
+                      {!isView && <th className="w-12"></th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
@@ -221,41 +213,41 @@ export const ServiceModal: React.FC<Props> = ({
                       const price = parseInt(priceStr) || 0;
                       const subtotal = part.qty * price;
                       return (
-                        <tr key={idx} className="group">
-                          <td className="py-4 px-2">
+                        <tr key={idx} className="hover:bg-gray-50/50">
+                          <td className="p-3">
                             <input 
                               type="text"
-                              className="w-full border-none p-0 text-[12px] font-bold text-black focus:ring-0 placeholder:text-gray-300 bg-transparent"
-                              placeholder="Input Nama Barang..."
+                              className="w-full border-0 p-0 text-sm text-gray-900 focus:ring-0 bg-transparent placeholder:text-gray-400"
+                              placeholder="Nama barang..."
                               value={part.name}
                               onChange={(e) => updatePart(idx, 'name', e.target.value)}
                               disabled={isView}
                             />
                           </td>
-                          <td className="py-4 px-2">
+                          <td className="p-3">
                             <input 
                               type="number"
-                              className="w-full border-none p-0 text-[12px] font-black text-center focus:ring-0 bg-transparent"
+                              className="w-full border-0 p-0 text-sm text-center font-medium focus:ring-0 bg-transparent"
                               value={part.qty}
                               onChange={(e) => updatePart(idx, 'qty', parseInt(e.target.value) || 0)}
                               disabled={isView}
                             />
                           </td>
-                          <td className="py-4 px-2 text-right">
+                          <td className="p-3 text-right">
                             <input 
                               type="text"
-                              className="w-full border-none p-0 text-[12px] font-black text-right focus:ring-0 bg-transparent"
+                              className="w-full border-0 p-0 text-sm text-right font-medium focus:ring-0 bg-transparent"
                               value={part.price}
                               onChange={(e) => updatePart(idx, 'price', e.target.value)}
                               disabled={isView}
                             />
                           </td>
-                          <td className="py-4 px-2 text-right font-black text-[12px] text-gray-400">
+                          <td className="p-3 text-right font-semibold text-gray-600">
                             Rp {subtotal.toLocaleString('id-ID')}
                           </td>
                           {!isView && (
-                            <td className="py-4 px-2 text-right">
-                              <button onClick={() => removePart(idx)} className="text-gray-200 hover:text-red-500 transition-colors">
+                            <td className="p-3 text-center">
+                              <button onClick={() => removePart(idx)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
                                 <Trash2 size={16} />
                               </button>
                             </td>
@@ -265,86 +257,78 @@ export const ServiceModal: React.FC<Props> = ({
                     })}
                     {parts.length === 0 && (
                       <tr>
-                        <td colSpan={5} className="py-12 text-center">
-                          <p className="text-[11px] font-medium text-gray-300 italic">Belum ada rincian penggantian suku cadang.</p>
+                        <td colSpan={5} className="p-8 text-center text-gray-400 text-sm">
+                          Belum ada suku cadang ditambahkan
                         </td>
                       </tr>
                     )}
                   </tbody>
-                  <tfoot>
-                    <tr>
-                      <td colSpan={3} className="pt-10 pb-4 text-right">
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">TOTAL BIAYA PERBAIKAN</span>
-                      </td>
-                      <td className="pt-10 pb-4 text-right">
-                        <span className="text-[18px] font-black text-blue-600">Rp {totalBiaya.toLocaleString('id-ID')}</span>
-                      </td>
-                      {!isView && <td className="pt-10"></td>}
-                    </tr>
-                  </tfoot>
                 </table>
+                
+                {/* Total */}
+                <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-100">
+                  <span className="text-sm font-medium text-gray-600">Total Biaya</span>
+                  <span className="text-xl font-bold text-blue-600">Rp {totalBiaya.toLocaleString('id-ID')}</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Sidebar (Right) */}
-          <div className="w-full lg:w-[320px] bg-white border-l border-gray-100 p-8 overflow-y-auto shrink-0 custom-scrollbar">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <Clock size={16} className="text-black" />
-                <h3 className="text-[11px] font-black text-black uppercase tracking-widest">Riwayat Sebelumnya</h3>
-              </div>
-              <span className="bg-blue-600 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase">1 LOG</span>
+          {/* Sidebar - History */}
+          <div className="w-full lg:w-80 bg-gray-50 border-l border-gray-100 p-5 overflow-y-auto shrink-0">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <Clock size={16} className="text-gray-500" />
+                Riwayat Servis
+              </h3>
+              <span className="bg-blue-100 text-blue-600 text-xs font-semibold px-2 py-1 rounded-lg">1 Log</span>
             </div>
 
-            <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 mb-8 flex gap-3">
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-4 flex gap-2">
               <Info size={16} className="text-blue-600 shrink-0 mt-0.5" />
-              <p className="text-[10px] font-bold text-blue-600 leading-relaxed">
-                Klik log di bawah untuk melihat rincian riwayat servis sebelumnya.
+              <p className="text-xs text-blue-700 leading-relaxed">
+                Klik log untuk melihat detail riwayat servis sebelumnya.
               </p>
             </div>
 
-            <div className="space-y-4">
-              {/* History Card 1 */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:border-black transition-all cursor-pointer group">
-                <div className="flex justify-between items-start mb-3">
-                  <span className="text-[9px] font-mono font-black text-black bg-gray-50 px-2 py-0.5 rounded">SRV/2024/001</span>
-                  <div className="flex items-center gap-1.5 text-[8px] font-bold text-gray-300">
-                    <Calendar size={10} />
-                    10 FEB 2024
+            <div className="space-y-3">
+              {/* History Card */}
+              <div className="bg-white border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer group">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-xs font-mono font-semibold text-gray-900 bg-gray-100 px-2 py-1 rounded">SRV/2024/001</span>
+                  <div className="flex items-center gap-1 text-xs text-gray-400">
+                    <Calendar size={12} />
+                    10 Feb 2024
                   </div>
                 </div>
-                <h4 className="text-[11px] font-black text-black uppercase mb-1">Servis Rutin</h4>
-                <p className="text-[10px] text-gray-400 italic line-clamp-2 mb-4 leading-relaxed">
+                <h4 className="text-sm font-semibold text-gray-900 mb-1">Servis Rutin</h4>
+                <p className="text-xs text-gray-500 line-clamp-2 mb-3">
                   "Suara mesin kasar dan tarikan berat pada tanjakan"
                 </p>
-                <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                  <div className="text-[10px] font-black text-orange-600">45.000 KM</div>
-                  <div className="text-[10px] font-black text-black">Rp 1.250.000</div>
+                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                  <span className="text-xs font-semibold text-orange-600">45.000 KM</span>
+                  <span className="text-xs font-bold text-gray-900">Rp 1.250.000</span>
                 </div>
-              </div>
-              
-              <div className="h-24 border-2 border-dashed border-gray-50 rounded-2xl flex items-center justify-center opacity-30">
-                <ChevronRight size={24} className="text-gray-100" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-8 py-5 border-t border-gray-100 flex justify-between bg-white shrink-0">
+        <div className="px-6 py-4 border-t border-gray-100 flex justify-between bg-white shrink-0">
           <button 
             onClick={onClose}
-            className="px-10 py-3 text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-all bg-gray-50 rounded-xl"
+            className="px-6 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all"
           >
             Batal
           </button>
           {!isView && (
             <button 
               onClick={handleSave}
-              className="bg-black text-white px-16 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all active:scale-95 shadow-xl shadow-black/20"
+              className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/25"
             >
-              Simpan Laporan Servis
+              <Save size={18} />
+              Simpan
             </button>
           )}
         </div>
