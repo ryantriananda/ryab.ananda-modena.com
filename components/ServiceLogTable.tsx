@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { ServiceRecord } from '../types';
-import { Eye, Pencil, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, History } from 'lucide-react';
+import { Eye, Pencil, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from 'lucide-react';
 
 interface Props {
   data: ServiceRecord[];
@@ -13,72 +12,75 @@ export const ServiceLogTable: React.FC<Props> = ({ data, onEdit, onView }) => {
   const getStatusStyle = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'selesai':
-        return 'bg-[#E8FDF5] text-[#059669]';
+        return 'bg-green-100 text-green-700 border-green-200';
       case 'draf':
       case 'draft':
-        return 'bg-[#F3F4F6] text-[#374151]';
+        return 'bg-gray-100 text-gray-600 border-gray-200';
       default:
-        return 'bg-[#FEF3C7] text-[#D97706]';
+        return 'bg-amber-100 text-amber-700 border-amber-200';
     }
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1100px] text-left border-collapse">
+        <table className="w-full min-w-[900px] text-left">
           <thead>
-            <tr className="bg-white border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-              <th className="p-5 pl-8 w-44">NO REQUEST</th>
-              <th className="p-5 w-44">NO POLISI</th>
-              <th className="p-5 w-56">TGL REQUEST</th>
-              <th className="p-5">CHANNEL</th>
-              <th className="p-5 w-40">CABANG</th>
-              <th className="p-5 w-32">STATUS</th>
-              <th className="p-5 w-40">STATUS APPROVAL</th>
-              <th className="p-5 w-24 pr-8"></th>
+            <tr className="bg-gray-50 border-b border-gray-100">
+              <th className="px-6 py-4 text-[12px] font-semibold text-gray-500">No Request</th>
+              <th className="px-6 py-4 text-[12px] font-semibold text-gray-500">No Polisi</th>
+              <th className="px-6 py-4 text-[12px] font-semibold text-gray-500">Tgl Request</th>
+              <th className="px-6 py-4 text-[12px] font-semibold text-gray-500">Channel</th>
+              <th className="px-6 py-4 text-[12px] font-semibold text-gray-500">Cabang</th>
+              <th className="px-6 py-4 text-[12px] font-semibold text-gray-500">Status</th>
+              <th className="px-6 py-4 text-[12px] font-semibold text-gray-500">Approval</th>
+              <th className="px-6 py-4 text-[12px] font-semibold text-gray-500 text-right">Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50 text-[12px]">
+          <tbody className="divide-y divide-gray-50">
             {data.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-50/30 transition-colors group">
-                <td className="p-5 pl-8">
-                  <span className="font-bold text-black">{item.id}</span>
+              <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
+                <td className="px-6 py-4">
+                  <span className="font-semibold text-gray-900 text-[13px]">{item.id}</span>
                 </td>
-                <td className="p-5">
-                  <span className="font-black text-black uppercase">{item.noPolisi || '-'}</span>
+                <td className="px-6 py-4">
+                  <span className="font-bold text-gray-900 text-[13px]">{item.noPolisi || '-'}</span>
                 </td>
-                <td className="p-5 text-gray-500 font-medium">
+                <td className="px-6 py-4 text-gray-600 text-[13px]">
                   {item.tglRequest}
                 </td>
-                <td className="p-5 text-gray-500 font-medium uppercase">
+                <td className="px-6 py-4 text-gray-600 text-[13px]">
                   {item.channel}
                 </td>
-                <td className="p-5 text-gray-500 font-medium">
+                <td className="px-6 py-4 text-gray-600 text-[13px]">
                   {item.cabang}
                 </td>
-                <td className="p-5">
-                  <span className={`inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${getStatusStyle(item.status)}`}>
+                <td className="px-6 py-4">
+                  <span className={`inline-flex px-3 py-1 rounded-full text-[11px] font-semibold border ${getStatusStyle(item.status)}`}>
                     {item.status}
                   </span>
                 </td>
-                <td className="p-5">
-                  <div className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#F3F4F6] text-gray-400 font-black text-[10px] uppercase">
-                    {item.statusApproval === 'Approved' ? 'A' : (item.statusApproval || '-')}
-                  </div>
+                <td className="px-6 py-4">
+                  <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-[11px] font-bold
+                    ${item.statusApproval === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                    {item.statusApproval === 'Approved' ? '✓' : '-'}
+                  </span>
                 </td>
-                <td className="p-5 pr-8 text-right">
+                <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
                       onClick={(e) => { e.stopPropagation(); onView?.(item); }}
-                      className="p-1.5 text-gray-300 hover:text-black transition-all"
+                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                      title="Lihat Detail"
                     >
-                      <Eye size={18} />
+                      <Eye size={16} />
                     </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); onEdit?.(item); }}
-                      className="p-1.5 text-gray-300 hover:text-black transition-all"
+                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                      title="Edit"
                     >
-                      <Pencil size={18} />
+                      <Pencil size={16} />
                     </button>
                   </div>
                 </td>
@@ -86,8 +88,11 @@ export const ServiceLogTable: React.FC<Props> = ({ data, onEdit, onView }) => {
             ))}
             {data.length === 0 && (
               <tr>
-                <td colSpan={8} className="p-20 text-center">
-                  <p className="text-[11px] font-black text-gray-300 uppercase tracking-widest italic">Data tidak ditemukan</p>
+                <td colSpan={8} className="px-6 py-16 text-center">
+                  <div className="text-gray-400">
+                    <p className="text-sm font-medium">Tidak ada data</p>
+                    <p className="text-xs mt-1">Data yang Anda cari tidak ditemukan</p>
+                  </div>
                 </td>
               </tr>
             )}
@@ -95,16 +100,15 @@ export const ServiceLogTable: React.FC<Props> = ({ data, onEdit, onView }) => {
         </table>
       </div>
       
-      {/* Footer Pagination sesuai gambar */}
-      <div className="px-8 py-5 bg-white border-t border-gray-100 flex items-center justify-between">
-        <div className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-          SHOWING 1 - {data.length} OF <span className="text-black">{data.length}</span> ROW(S)
-        </div>
+      <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p className="text-[12px] text-gray-500">
+          Menampilkan <span className="font-semibold text-gray-700">1 - {data.length}</span> dari <span className="font-semibold text-gray-700">{data.length}</span> data
+        </p>
         
-        <div className="flex items-center gap-8">
-          <div className="flex items-center gap-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-            ROW PER PAGE
-            <select className="bg-transparent border-0 text-[11px] font-black text-black focus:ring-0 cursor-pointer p-0">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 text-[12px] text-gray-500">
+            <span>Baris per halaman:</span>
+            <select className="bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-[12px] font-medium focus:outline-none focus:border-blue-500">
               <option>10</option>
               <option>25</option>
               <option>50</option>
@@ -112,21 +116,21 @@ export const ServiceLogTable: React.FC<Props> = ({ data, onEdit, onView }) => {
           </div>
 
           <div className="flex items-center gap-1">
-            <button className="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-black transition-all">
+            <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all disabled:opacity-50" disabled>
               <ChevronsLeft size={16} />
             </button>
-            <button className="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-black transition-all">
+            <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all disabled:opacity-50" disabled>
               <ChevronLeft size={16} />
             </button>
             
-            <div className="px-4 py-1.5 bg-white border border-gray-100 rounded-lg text-[11px] font-black shadow-sm mx-2">
+            <span className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[12px] font-medium text-gray-700 mx-1">
               1 / 1
-            </div>
+            </span>
 
-            <button className="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-black transition-all">
+            <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all disabled:opacity-50" disabled>
               <ChevronRight size={16} />
             </button>
-            <button className="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-black transition-all">
+            <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all disabled:opacity-50" disabled>
               <ChevronsRight size={16} />
             </button>
           </div>
