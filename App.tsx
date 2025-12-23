@@ -369,7 +369,7 @@ const App: React.FC = () => {
   }, [activeModule]);
 
   return (
-    <div className="flex bg-gray-50 min-h-screen font-sans relative overflow-x-hidden">
+    <div className="flex bg-[#fbfbfb] min-h-screen font-sans relative overflow-x-hidden text-black">
       {isMobileMenuOpen && (
         <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={toggleMobileMenu} />
       )}
@@ -383,13 +383,13 @@ const App: React.FC = () => {
         onCloseMobile={toggleMobileMenu}
       />
       
-      <div className={`flex-1 flex flex-col transition-all duration-300 w-full ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'}`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300 w-full ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
         <TopBar breadcrumbs={['Beranda', t(activeModule)]} onMenuClick={toggleMobileMenu} />
         
-        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto">
+        <main className="flex-1 p-8 overflow-y-auto">
           <div className="max-w-[1600px] mx-auto">
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+            <div className="flex items-center justify-between mb-8">
+                <h1 className="text-[20px] font-bold text-black tracking-tight">
                     {activeModule === 'Kontrak Gedung' ? 'Daftar Gedung' : t(activeModule)}
                 </h1>
             </div>
