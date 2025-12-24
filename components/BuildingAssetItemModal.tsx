@@ -4,7 +4,7 @@ import {
     X, Save, Box, MapPin, Tag, Activity, FileText, 
     GitBranch, Users, Plus, UploadCloud, Download, 
     Trash2, CheckCircle2, Clock, AlertCircle, Calendar,
-    DollarSign, FileCheck
+    DollarSign, FileCheck, QrCode
 } from 'lucide-react';
 import { BuildingAssetRecord, MaintenanceProposal } from '../types';
 
@@ -118,36 +118,56 @@ export const BuildingAssetItemModal: React.FC<Props> = ({ isOpen, onClose, onSav
             {/* TAB: GENERAL INFO */}
             {activeTab === 'GENERAL INFO' && (
                 <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    {/* Identity */}
-                    <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                        <div className="flex items-center gap-4 mb-8">
-                            <div className="p-2 bg-gray-50 rounded-xl"><Tag size={18} className="text-black"/></div>
-                            <h3 className="text-[12px] font-black text-black uppercase tracking-[0.2em]">Identitas Aset</h3>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <InputField label="Nama Aset" value={form.assetName} field="assetName" placeholder="Contoh: AC Split Daikin 1PK" />
-                            <InputField label="Kode Aset" value={form.assetCode} field="assetCode" disabled={true} />
-                            
-                            <div>
-                                <Label>Tipe Aset</Label>
-                                <select 
-                                    disabled={isView}
-                                    className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-[13px] font-black text-black focus:border-black outline-none disabled:bg-gray-50 shadow-sm cursor-pointer appearance-none"
-                                    value={form.assetType || ''}
-                                    onChange={(e) => setForm({...form, assetType: e.target.value})}
-                                >
-                                    <option value="">Pilih Tipe</option>
-                                    <option value="AC">AC</option>
-                                    <option value="APAR">APAR</option>
-                                    <option value="CCTV">CCTV</option>
-                                    <option value="Genset">Genset</option>
-                                    <option value="Lift">Lift</option>
-                                    <option value="Pompa">Pompa Air</option>
-                                    <option value="Furniture">Furniture</option>
-                                </select>
+                    {/* Identity & QR Section */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Main Info */}
+                        <div className="lg:col-span-2 bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="p-2 bg-gray-50 rounded-xl"><Tag size={18} className="text-black"/></div>
+                                <h3 className="text-[12px] font-black text-black uppercase tracking-[0.2em]">Identitas Aset</h3>
                             </div>
-                            
-                            <InputField label="Merek / Brand" value={form.brand} field="brand" placeholder="Daikin, Toto, dll" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <InputField label="Nama Aset" value={form.assetName} field="assetName" placeholder="Contoh: AC Split Daikin 1PK" />
+                                <InputField label="Kode Aset" value={form.assetCode} field="assetCode" disabled={true} />
+                                
+                                <div>
+                                    <Label>Tipe Aset</Label>
+                                    <select 
+                                        disabled={isView}
+                                        className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-[13px] font-black text-black focus:border-black outline-none disabled:bg-gray-50 shadow-sm cursor-pointer appearance-none"
+                                        value={form.assetType || ''}
+                                        onChange={(e) => setForm({...form, assetType: e.target.value})}
+                                    >
+                                        <option value="">Pilih Tipe</option>
+                                        <option value="AC">AC</option>
+                                        <option value="APAR">APAR</option>
+                                        <option value="CCTV">CCTV</option>
+                                        <option value="Genset">Genset</option>
+                                        <option value="Lift">Lift</option>
+                                        <option value="Pompa">Pompa Air</option>
+                                        <option value="Furniture">Furniture</option>
+                                    </select>
+                                </div>
+                                
+                                <InputField label="Merek / Brand" value={form.brand} field="brand" placeholder="Daikin, Toto, dll" />
+                            </div>
+                        </div>
+
+                        {/* Feature 1: QR Code Section */}
+                        <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center">
+                            <div className="w-32 h-32 bg-gray-900 rounded-2xl flex items-center justify-center text-white mb-6 shadow-2xl shadow-black/20 relative group overflow-hidden">
+                                <QrCode size={64} />
+                                <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-white">Print</span>
+                                </div>
+                            </div>
+                            <h3 className="text-[14px] font-black text-black uppercase tracking-tight">Digital Asset Tag</h3>
+                            <p className="text-[10px] text-gray-400 mt-2 font-medium px-4">
+                                Scan QR ini untuk akses history maintenance & lapor kerusakan.
+                            </p>
+                            <button className="mt-6 px-6 py-3 bg-gray-50 hover:bg-black hover:text-white text-black text-[10px] font-black uppercase tracking-widest rounded-xl transition-all w-full flex items-center justify-center gap-2">
+                                <Download size={14} /> Download QR
+                            </button>
                         </div>
                     </div>
 

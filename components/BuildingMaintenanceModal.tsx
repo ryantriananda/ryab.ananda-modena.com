@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { X, Save, Wrench, Calendar, DollarSign, FileText, Building, User, UploadCloud, Trash2, Clock, CheckCircle2, AlertCircle, PlayCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Save, Wrench, Calendar, DollarSign, FileText, Building, User, UploadCloud, Trash2, Clock, CheckCircle2, AlertCircle, PlayCircle, Star, Image as ImageIcon } from 'lucide-react';
 import { BuildingMaintenanceRecord, BuildingAssetRecord } from '../types';
 
 interface Props {
@@ -25,8 +25,12 @@ export const BuildingMaintenanceModal: React.FC<Props> = ({
     maintenanceType: 'Preventive',
     status: 'Scheduled',
     approvalStatus: 'Pending Approval',
-    cost: '0'
+    cost: '0',
+    rating: 0
   });
+
+  const beforeInputRef = useRef<HTMLInputElement>(null);
+  const afterInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -38,7 +42,8 @@ export const BuildingMaintenanceModal: React.FC<Props> = ({
             maintenanceType: 'Preventive',
             status: 'Scheduled',
             approvalStatus: 'Pending Approval',
-            cost: '0'
+            cost: '0',
+            rating: 0
         });
       }
     }
@@ -47,6 +52,33 @@ export const BuildingMaintenanceModal: React.FC<Props> = ({
   if (!isOpen) return null;
 
   const isView = mode === 'view';
+
+  // Feature 3: SLA Logic
+  const getSLABadge = () => {
+      if (!form.requestDate) return null;
+      
+      const start = new Date(form.requestDate);
+      const end = form.completionDate ? new Date(form.completionDate) : new Date();
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+      
+      let status = 'On Track';
+      let color = 'bg-green-100 text-green-700';
+
+      if (diffDays > 7) {
+          status = 'Overdue (>7 Days)';
+          color = 'bg-red-100 text-red-700';
+      } else if (diffDays > 3) {
+          status = 'Warning (>3 Days)';
+          color = 'bg-orange-100 text-orange-700';
+      }
+
+      return (
+          <div className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${color} flex items-center gap-2`}>
+              <Clock size={12} /> {status} ({diffDays} Days)
+          </div>
+      );
+  };
 
   const handleAssetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const selectedAssetId = e.target.value;
@@ -65,6 +97,18 @@ export const BuildingMaintenanceModal: React.FC<Props> = ({
               assetName: '',
               buildingLocation: ''
           });
+      }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'before' | 'after') => {
+      const file = e.target.files?.[0];
+      if (file) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+              if (type === 'before') setForm(prev => ({...prev, evidenceBefore: ev.target?.result as string}));
+              else setForm(prev => ({...prev, evidenceAfter: ev.target?.result as string}));
+          };
+          reader.readAsDataURL(file);
       }
   };
 
@@ -133,9 +177,12 @@ export const BuildingMaintenanceModal: React.FC<Props> = ({
                 <p className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-[0.3em]">Building Asset Maintenance</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-gray-300 hover:text-black transition-all p-3 rounded-full hover:bg-gray-50">
-            <X size={32} />
-          </button>
+          <div className="flex items-center gap-4">
+              {getSLABadge()}
+              <button onClick={onClose} className="text-gray-300 hover:text-black transition-all p-3 rounded-full hover:bg-gray-50">
+                <X size={32} />
+              </button>
+          </div>
         </div>
 
         {/* Content Body */}
@@ -269,6 +316,81 @@ export const BuildingMaintenanceModal: React.FC<Props> = ({
                                 <option value="Rejected">Rejected</option>
                                 <option value="Revised">Revised</option>
                             </select>
+                        </div>
+                    </div>
+
+                    {/* Feature 2: Evidence Based Maintenance */}
+                    <div className="md:col-span-2 space-y-8 pt-8 border-t border-gray-100">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                                <ImageIcon size={16} className="text-black"/>
+                                <h3 className="text-[11px] font-black text-black uppercase tracking-widest">Evidence Based Maintenance</h3>
+                            </div>
+                            {/* Feature 3: Vendor Rating (Only show if completed) */}
+                            {form.status === 'Completed' && (
+                                <div className="flex items-center gap-3 bg-yellow-50 px-4 py-2 rounded-xl border border-yellow-100">
+                                    <span className="text-[10px] font-black text-yellow-700 uppercase tracking-widest">Vendor Rating</span>
+                                    <div className="flex gap-1">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button 
+                                                key={star}
+                                                type="button"
+                                                onClick={() => !isView && setForm({...form, rating: star})}
+                                                disabled={isView}
+                                                className={`${(form.rating || 0) >= star ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'} transition-colors`}
+                                            >
+                                                <Star size={16} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-8">
+                            {/* Before Photo */}
+                            <div>
+                                <Label>Before Maintenance</Label>
+                                <div 
+                                    onClick={() => !isView && beforeInputRef.current?.click()}
+                                    className={`relative h-48 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center bg-gray-50 overflow-hidden transition-all
+                                        ${!isView ? 'cursor-pointer hover:border-black hover:bg-gray-100' : ''}
+                                        ${form.evidenceBefore ? 'border-green-200' : 'border-gray-200'}
+                                    `}
+                                >
+                                    {form.evidenceBefore ? (
+                                        <img src={form.evidenceBefore} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="flex flex-col items-center text-gray-400">
+                                            <UploadCloud size={24} className="mb-2" />
+                                            <span className="text-[9px] font-black uppercase tracking-widest">Upload Photo</span>
+                                        </div>
+                                    )}
+                                    <input type="file" ref={beforeInputRef} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'before')} />
+                                </div>
+                            </div>
+
+                            {/* After Photo */}
+                            <div>
+                                <Label>After Maintenance</Label>
+                                <div 
+                                    onClick={() => !isView && afterInputRef.current?.click()}
+                                    className={`relative h-48 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center bg-gray-50 overflow-hidden transition-all
+                                        ${!isView ? 'cursor-pointer hover:border-black hover:bg-gray-100' : ''}
+                                        ${form.evidenceAfter ? 'border-green-200' : 'border-gray-200'}
+                                    `}
+                                >
+                                    {form.evidenceAfter ? (
+                                        <img src={form.evidenceAfter} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="flex flex-col items-center text-gray-400">
+                                            <UploadCloud size={24} className="mb-2" />
+                                            <span className="text-[9px] font-black uppercase tracking-widest">Upload Photo</span>
+                                        </div>
+                                    )}
+                                    <input type="file" ref={afterInputRef} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'after')} />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

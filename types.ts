@@ -173,6 +173,7 @@ export interface BuildingAssetRecord {
   ownership: 'Own' | 'Leased';
   vendorMaintenance?: string;
   attachmentUrl?: string;
+  qrCodeUrl?: string; // New Field for QR
 }
 
 export interface BuildingMaintenanceRecord {
@@ -190,6 +191,12 @@ export interface BuildingMaintenanceRecord {
   status: 'Scheduled' | 'In Progress' | 'Completed' | 'Pending';
   approvalStatus?: 'Draft' | 'Pending Approval' | 'Approved' | 'Rejected' | 'Revised';
   attachmentUrl?: string;
+  
+  // New Fields for Suggestions
+  rating?: number; // 1-5 stars
+  evidenceBefore?: string; // URL image
+  evidenceAfter?: string; // URL image
+  slaStatus?: 'On Track' | 'Overdue' | 'Warning';
 }
 
 export interface WorkflowStep {
@@ -198,6 +205,14 @@ export interface WorkflowStep {
   date?: string;
   approver?: string;
   comment?: string;
+}
+
+export interface FloorPlanPin {
+    id: string;
+    x: number; // Percentage
+    y: number; // Percentage
+    label: string;
+    type: 'Asset' | 'Room';
 }
 
 export interface BuildingRecord {
@@ -225,6 +240,14 @@ export interface BuildingRecord {
   workflow?: WorkflowStep[];
   currentWorkflowStep?: number; // 0 to 3
   isLeaseProposalFilled?: boolean;
+
+  // New Fields
+  floorPlanImage?: string;
+  floorPlanPins?: FloorPlanPin[];
+  
+  // Cost Analysis Data (Mocked)
+  totalMaintenanceCost?: string;
+  utilityCost?: string; // Electricity, Water
 }
 
 export interface BuildingProposal {
