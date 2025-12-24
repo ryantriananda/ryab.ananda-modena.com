@@ -1,5 +1,5 @@
 
-import { AssetRecord, MasterItem, VehicleRecord, TaxKirRecord, MasterVendorRecord, DeliveryLocationRecord, LogBookRecord, BuildingRecord, ReminderRecord, VehicleContractRecord, GeneralMasterItem, UserRecord, BuildingAssetRecord, BuildingMaintenanceRecord } from './types';
+import { AssetRecord, MasterItem, VehicleRecord, TaxKirRecord, MasterVendorRecord, DeliveryLocationRecord, LogBookRecord, BuildingRecord, ReminderRecord, VehicleContractRecord, GeneralMasterItem, UserRecord, BuildingAssetRecord, BuildingMaintenanceRecord, UtilityRecord } from './types';
 
 export const MOCK_BUILDING_DATA: BuildingRecord[] = [
     {
@@ -383,24 +383,68 @@ export const MOCK_ATK_CATEGORY: GeneralMasterItem[] = [{id: 1, name: 'STATIONERY
 export const MOCK_ARK_CATEGORY: GeneralMasterItem[] = [{id: 1, name: 'HOUSEHOLD'}, {id: 2, name: 'PANTRY'}];
 export const MOCK_DELIVERY_LOCATIONS: DeliveryLocationRecord[] = [{ id: 1, name: 'MODENA Head Office', address: 'Jl. Prof Dr Satrio No 10', type: 'HO' }];
 
+// CALCULATED DATES FOR DEMO PURPOSES (Assuming Today is March 2024 for example, or dynamic)
+const today = new Date();
+const addDays = (date: Date, days: number) => {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result.toISOString().split('T')[0];
+}
+
 export const MOCK_REMINDER_DATA: ReminderRecord[] = [
   {
-    id: 'DOC-2024-001',
-    documentName: 'HGB SATRIO OFFICE',
+    id: 'DOC-EXP-001',
+    documentName: 'SHGB CERTIFICATE SATRIO',
     buildingName: 'HO SATRIO',
     assetNo: 'BDG-JKT-01',
-    expiryDate: '2024-05-15',
-    daysRemaining: 12,
+    expiryDate: addDays(today, -5), // Expired
+    daysRemaining: -5,
     status: 'Urgent'
   },
   {
-    id: 'DOC-2024-002',
+    id: 'DOC-URG-002',
     documentName: 'FIRE SAFETY PERMIT',
     buildingName: 'WAREHOUSE CAKUNG',
     assetNo: 'BDG-CKG-05',
-    expiryDate: '2024-06-20',
+    expiryDate: addDays(today, 15), // < 1 Month
+    daysRemaining: 15,
+    status: 'Urgent'
+  },
+  {
+    id: 'DOC-ATT-003',
+    documentName: 'REKLAME BILLBOARD TAX',
+    buildingName: 'MEC SURYO',
+    assetNo: 'BDG-JKT-02',
+    expiryDate: addDays(today, 45), // < 2 Months
     daysRemaining: 45,
     status: 'Warning'
+  },
+  {
+    id: 'DOC-WARN-004',
+    documentName: 'RENTAL AGREEMENT',
+    buildingName: 'MHC BINTARO',
+    assetNo: 'BDG-TNG-01',
+    expiryDate: addDays(today, 80), // < 3 Months
+    daysRemaining: 80,
+    status: 'Warning'
+  },
+  {
+    id: 'DOC-UPC-005',
+    documentName: 'INSURANCE POLICY',
+    buildingName: 'HO SATRIO',
+    assetNo: 'BDG-JKT-01',
+    expiryDate: addDays(today, 150), // < 6 Months
+    daysRemaining: 150,
+    status: 'Safe'
+  },
+  {
+    id: 'DOC-SAFE-006',
+    documentName: 'DOMISILI PERUSAHAAN',
+    buildingName: 'WAREHOUSE MAKASSAR',
+    assetNo: 'BDG-MKS-01',
+    expiryDate: addDays(today, 300), // > 6 Months
+    daysRemaining: 300,
+    status: 'Safe'
   }
 ];
 
@@ -410,7 +454,7 @@ export const MOCK_MAINTENANCE_REMINDER: ReminderRecord[] = [
     documentName: 'AC CHILLER SERVIS',
     buildingName: 'HO SATRIO - LT 1',
     assetNo: 'AC-CHL-001',
-    expiryDate: '2024-04-10',
+    expiryDate: addDays(today, 5), // Critical
     daysRemaining: 5,
     status: 'Urgent'
   },
@@ -419,10 +463,56 @@ export const MOCK_MAINTENANCE_REMINDER: ReminderRecord[] = [
     documentName: 'GENSET 500KVA INSPEKSI',
     buildingName: 'WAREHOUSE CAKUNG',
     assetNo: 'GNS-CKG-01',
-    expiryDate: '2024-05-30',
+    expiryDate: addDays(today, 55), // Attention
     daysRemaining: 55,
     status: 'Safe'
   }
+];
+
+// Utility Mock Data
+export const MOCK_UTILITY_DATA: UtilityRecord[] = [
+    {
+        id: 'UTIL-2024-001',
+        period: 'Februari 2024',
+        date: '2024-02-28',
+        location: 'Head Office Satrio',
+        type: 'Listrik (PLN)',
+        meterStart: 124500,
+        meterEnd: 125800,
+        usage: 1300,
+        unit: 'kWh',
+        cost: '21500000',
+        status: 'Paid',
+        recordedBy: 'Agus Teknisi'
+    },
+    {
+        id: 'UTIL-2024-002',
+        period: 'Februari 2024',
+        date: '2024-02-28',
+        location: 'Warehouse Cakung',
+        type: 'Listrik (PLN)',
+        meterStart: 45000,
+        meterEnd: 46200,
+        usage: 1200,
+        unit: 'kWh',
+        cost: '19800000',
+        status: 'Pending Review',
+        recordedBy: 'Budi Santoso'
+    },
+    {
+        id: 'UTIL-2024-003',
+        period: 'Februari 2024',
+        date: '2024-02-28',
+        location: 'Head Office Satrio',
+        type: 'Air (PDAM)',
+        meterStart: 3400,
+        meterEnd: 3450,
+        usage: 50,
+        unit: 'm3',
+        cost: '750000',
+        status: 'Paid',
+        recordedBy: 'Agus Teknisi'
+    }
 ];
 
 // New Mock Data for Master Sub-items

@@ -4,9 +4,9 @@ import {
     X, Save, Box, MapPin, Tag, Activity, FileText, 
     GitBranch, Users, Plus, UploadCloud, Download, 
     Trash2, CheckCircle2, Clock, AlertCircle, Calendar,
-    DollarSign, FileCheck, QrCode
+    DollarSign, FileCheck, QrCode, Building
 } from 'lucide-react';
-import { BuildingAssetRecord, MaintenanceProposal } from '../types';
+import { BuildingAssetRecord, MaintenanceProposal, BuildingRecord } from '../types';
 
 interface Props {
   isOpen: boolean;
@@ -14,16 +14,25 @@ interface Props {
   onSave: (data: Partial<BuildingAssetRecord>) => void;
   initialData?: BuildingAssetRecord | null;
   mode?: 'create' | 'edit' | 'view';
+  buildingList?: BuildingRecord[]; // New Prop for Data Relation
 }
 
-export const BuildingAssetItemModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialData, mode = 'create' }) => {
+export const BuildingAssetItemModal: React.FC<Props> = ({ 
+    isOpen, 
+    onClose, 
+    onSave, 
+    initialData, 
+    mode = 'create',
+    buildingList = [] // Default empty array
+}) => {
   const [activeTab, setActiveTab] = useState('GENERAL INFO');
   const [form, setForm] = useState<Partial<BuildingAssetRecord>>({
     assetCode: '[AUTO]',
     status: 'Good',
     approvalStatus: 'Approved',
     maintenanceFrequency: 'Quarterly',
-    ownership: 'Own'
+    ownership: 'Own',
+    buildingName: ''
   });
 
   // Mock data for proposals if not exists
@@ -43,7 +52,8 @@ export const BuildingAssetItemModal: React.FC<Props> = ({ isOpen, onClose, onSav
             status: 'Good',
             approvalStatus: 'Approved',
             maintenanceFrequency: 'Quarterly',
-            ownership: 'Own'
+            ownership: 'Own',
+            buildingName: ''
         });
         setProposals([]);
       }
@@ -179,7 +189,34 @@ export const BuildingAssetItemModal: React.FC<Props> = ({ isOpen, onClose, onSav
                                 <h3 className="text-[12px] font-black text-black uppercase tracking-[0.2em]">Lokasi</h3>
                             </div>
                             <div className="space-y-6">
-                                <InputField label="Gedung / Cabang" value={form.buildingName} field="buildingName" placeholder="Head Office" />
+                                {/* Linked Data Dropdown */}
+                                <div>
+                                    <Label required>Lokasi Gedung / Cabang</Label>
+                                    <div className="relative">
+                                        <select 
+                                            disabled={isView}
+                                            className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-[13px] font-black text-black focus:border-black outline-none disabled:bg-gray-50 shadow-sm cursor-pointer appearance-none"
+                                            value={form.buildingName || ''}
+                                            onChange={(e) => setForm({...form, buildingName: e.target.value})}
+                                        >
+                                            <option value="">-- Pilih Lokasi Gedung --</option>
+                                            {buildingList.length > 0 ? (
+                                                buildingList.map((building) => (
+                                                    <option key={building.id} value={building.name}>{building.name}</option>
+                                                ))
+                                            ) : (
+                                                <option value={form.buildingName} disabled>{form.buildingName || "Tidak ada data gedung"}</option>
+                                            )}
+                                        </select>
+                                        <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                            <Building size={16} />
+                                        </div>
+                                    </div>
+                                    <p className="text-[9px] text-gray-400 mt-2 font-medium ml-1">
+                                        *Data gedung diambil dari modul Branch Improvement / Master Gedung
+                                    </p>
+                                </div>
+
                                 <div className="grid grid-cols-2 gap-6">
                                     <InputField label="Lantai" value={form.floor} field="floor" placeholder="Lantai 1" />
                                     <InputField label="Ruangan" value={form.roomName} field="roomName" placeholder="Lobby" />

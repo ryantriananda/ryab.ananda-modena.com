@@ -14,7 +14,8 @@ import { MasterVendorTable } from './components/MasterVendorTable';
 import { VehicleContractTable } from './components/VehicleContractTable';
 import { BuildingTable } from './components/BuildingTable';
 import { BuildingAssetTable } from './components/BuildingAssetTable';
-import { BuildingMaintenanceTable } from './components/BuildingMaintenanceTable'; // Import New Table
+import { BuildingMaintenanceTable } from './components/BuildingMaintenanceTable';
+import { UtilityTable } from './components/UtilityTable'; // Import UtilityTable
 import { ReminderTable } from './components/ReminderTable';
 import { GeneralMasterTable } from './components/GeneralMasterTable';
 import { StationeryRequestTable } from './components/StationeryRequestTable';
@@ -25,7 +26,7 @@ import { UserTable } from './components/UserTable';
 import { VehicleModal } from './components/VehicleModal';
 import { BuildingModal } from './components/BuildingModal';
 import { BuildingAssetItemModal } from './components/BuildingAssetItemModal';
-import { BuildingMaintenanceModal } from './components/BuildingMaintenanceModal'; // Import New Modal
+import { BuildingMaintenanceModal } from './components/BuildingMaintenanceModal'; 
 import { GeneralMasterModal } from './components/GeneralMasterModal';
 import { AddStockModal } from './components/AddStockModal';
 import { MasterItemModal } from './components/MasterItemModal';
@@ -35,6 +36,8 @@ import { ServiceModal } from './components/ServiceModal';
 import { TaxKirModal } from './components/TaxKirModal';
 import { VehicleContractModal } from './components/VehicleContractModal';
 import { UserModal } from './components/UserModal';
+import { UtilityModal } from './components/UtilityModal'; // Import Utility Modal
+import { Zap, Droplets, TrendingUp } from 'lucide-react';
 import { 
   MOCK_VEHICLE_DATA, 
   MOCK_TAX_KIR_DATA, 
@@ -42,8 +45,9 @@ import {
   MOCK_VEHICLE_CONTRACT_DATA, 
   MOCK_BUILDING_DATA, 
   MOCK_BUILDING_ASSETS,
-  MOCK_BUILDING_MAINTENANCE_DATA, // Import Maintenance Mock
+  MOCK_BUILDING_MAINTENANCE_DATA, 
   MOCK_BRANCH_IMPROVEMENT_DATA,
+  MOCK_UTILITY_DATA, // Import Utility Mock
   MOCK_REMINDER_DATA, 
   MOCK_MAINTENANCE_REMINDER,
   MOCK_GENERAL_MASTER_DATA,
@@ -67,6 +71,7 @@ import {
   BuildingRecord, 
   BuildingAssetRecord,
   BuildingMaintenanceRecord,
+  UtilityRecord, // Import Type
   ReminderRecord, 
   GeneralMasterItem,
   AssetRecord,
@@ -94,6 +99,7 @@ const App: React.FC = () => {
   const [buildingData, setBuildingData] = useState<BuildingRecord[]>(MOCK_BUILDING_DATA);
   const [buildingAssetData, setBuildingAssetData] = useState<BuildingAssetRecord[]>(MOCK_BUILDING_ASSETS);
   const [buildingMaintenanceData, setBuildingMaintenanceData] = useState<BuildingMaintenanceRecord[]>(MOCK_BUILDING_MAINTENANCE_DATA);
+  const [utilityData, setUtilityData] = useState<UtilityRecord[]>(MOCK_UTILITY_DATA);
   const [branchImprovementData, setBranchImprovementData] = useState<BuildingRecord[]>(MOCK_BRANCH_IMPROVEMENT_DATA);
   const [serviceData, setServiceData] = useState<ServiceRecord[]>([]);
   const [taxKirData, setTaxKirData] = useState<TaxKirRecord[]>(MOCK_TAX_KIR_DATA);
@@ -117,6 +123,7 @@ const App: React.FC = () => {
   const [isVehicleContractModalOpen, setIsVehicleContractModalOpen] = useState(false);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isGeneralMasterModalOpen, setIsGeneralMasterModalOpen] = useState(false);
+  const [isUtilityModalOpen, setIsUtilityModalOpen] = useState(false); // NEW STATE
   
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedAsset, setSelectedAsset] = useState<AssetRecord | null>(null);
@@ -126,13 +133,21 @@ const App: React.FC = () => {
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingRecord | null>(null);
   const [selectedBuildingAsset, setSelectedBuildingAsset] = useState<BuildingAssetRecord | null>(null);
   const [selectedBuildingMaintenance, setSelectedBuildingMaintenance] = useState<BuildingMaintenanceRecord | null>(null);
+  const [selectedUtility, setSelectedUtility] = useState<UtilityRecord | null>(null); // NEW STATE
 
   const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
   const handleModuleNavigate = (module: string) => {
     setActiveModule(module);
-    setActiveTab('SEMUA'); 
+    // Set default tab based on module
+    if (module === 'Compliance & Legal') {
+      setActiveTab('DOKUMEN');
+    } else if (module === 'Utility Monitoring') {
+      setActiveTab('OVERVIEW');
+    } else {
+      setActiveTab('SEMUA'); 
+    }
     setIsMobileMenuOpen(false); 
   };
 
@@ -164,6 +179,9 @@ const App: React.FC = () => {
     } else if (activeModule === 'Jenis Kendaraan') {
       setSelectedGeneralItem(null);
       setIsGeneralMasterModalOpen(true);
+    } else if (activeModule === 'Utility Monitoring') {
+      setSelectedUtility(null);
+      setIsUtilityModalOpen(true);
     }
   };
 
@@ -238,6 +256,28 @@ const App: React.FC = () => {
           setBuildingMaintenanceData(prev => prev.map(m => m.id === selectedBuildingMaintenance.id ? { ...m, ...data } as BuildingMaintenanceRecord : m));
       }
       setIsBuildingMaintenanceModalOpen(false);
+  };
+
+  const handleSaveUtility = (data: Partial<UtilityRecord>) => {
+      if (modalMode === 'create') {
+          const newUtility: UtilityRecord = {
+              id: `UTIL-${Date.now()}`,
+              period: data.period || '',
+              date: data.date || '',
+              location: data.location || '',
+              type: data.type || 'Listrik (PLN)',
+              usage: data.usage || 0,
+              unit: data.unit || 'kWh',
+              cost: data.cost || '0',
+              status: data.status || 'Pending Review',
+              recordedBy: 'Admin',
+              ...data
+          } as UtilityRecord;
+          setUtilityData(prev => [newUtility, ...prev]);
+      } else if (selectedUtility) {
+          setUtilityData(prev => prev.map(u => u.id === selectedUtility.id ? { ...u, ...data } as UtilityRecord : u));
+      }
+      setIsUtilityModalOpen(false);
   };
 
   const handleSaveGeneralMaster = (name: string) => {
@@ -349,11 +389,15 @@ const App: React.FC = () => {
         });
      }, [branchImprovementData, activeTab]);
 
-     // Filter logic for reminders
-     const filterReminders = (records: ReminderRecord[]) => {
-        if (activeTab === 'SEMUA') return records;
-        return records.filter(r => r.status.toUpperCase() === activeTab);
-     };
+     // Filter Logic for Utility
+     const filteredUtility = useMemo(() => {
+         if (activeTab === 'OVERVIEW' || activeTab === 'SEMUA') return utilityData;
+         const target = activeTab.toLowerCase();
+         if (target === 'listrik') return utilityData.filter(u => u.type.toLowerCase().includes('listrik'));
+         if (target === 'air') return utilityData.filter(u => u.type.toLowerCase().includes('air'));
+         if (target === 'internet') return utilityData.filter(u => u.type.toLowerCase().includes('internet'));
+         return utilityData;
+     }, [utilityData, activeTab]);
 
      switch(activeModule) {
          case 'Request ATK':
@@ -394,6 +438,58 @@ const App: React.FC = () => {
                 onDelete={(id) => setBranchImprovementData(prev => prev.filter(b => b.id !== id))}
                 onAction={handleBuildingWorkflowAction}
             />;
+         case 'Utility Monitoring':
+            return (
+                <div className="space-y-8 animate-in fade-in duration-300">
+                    {/* KPI Cards for Utility */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Electricity (Feb)</p>
+                                <h3 className="text-[24px] font-black text-black">2,500 <span className="text-[12px] font-bold text-gray-400">kWh</span></h3>
+                            </div>
+                            <div className="w-12 h-12 bg-yellow-50 rounded-2xl flex items-center justify-center text-yellow-600">
+                                <Zap size={24} />
+                            </div>
+                        </div>
+                        <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Water (Feb)</p>
+                                <h3 className="text-[24px] font-black text-black">150 <span className="text-[12px] font-bold text-gray-400">m3</span></h3>
+                            </div>
+                            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                                <Droplets size={24} />
+                            </div>
+                        </div>
+                        <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Cost (Feb)</p>
+                                <h3 className="text-[24px] font-black text-black">Rp 42.050.000</h3>
+                            </div>
+                            <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-600">
+                                <TrendingUp size={24} />
+                            </div>
+                        </div>
+                    </div>
+
+                    <UtilityTable 
+                        data={filteredUtility} 
+                        onEdit={(item) => { setSelectedUtility(item); setModalMode('edit'); setIsUtilityModalOpen(true); }} 
+                        onView={(item) => { setSelectedUtility(item); setModalMode('view'); setIsUtilityModalOpen(true); }} 
+                        onDelete={(id) => setUtilityData(prev => prev.filter(u => u.id !== id))} 
+                    />
+                </div>
+            );
+         case 'Compliance & Legal':
+            const dataToShow = activeTab === 'PEMELIHARAAN' ? maintenanceReminderData : reminderData;
+            return <ReminderTable 
+                data={dataToShow} 
+                onView={()=>{}} 
+                onDelete={(id) => {
+                    if (activeTab === 'PEMELIHARAAN') setMaintenanceReminderData(prev => prev.filter(r => r.id !== id));
+                    else setReminderData(prev => prev.filter(r => r.id !== id));
+                }}
+            />;
          case 'Master Gedung':
             return <BuildingTable 
                 data={buildingData} 
@@ -401,15 +497,15 @@ const App: React.FC = () => {
                 onView={(item) => { setSelectedBuilding(item); setModalMode('view'); setIsBuildingModalOpen(true); }} 
                 onDelete={(id) => setBuildingData(prev => prev.filter(b => b.id !== id))}
             />;
-         case 'List Reminder Dokumen':
+         case 'List Reminder Dokumen': // Fallback for old menu if needed
             return <ReminderTable 
-                data={filterReminders(reminderData)} 
+                data={reminderData} 
                 onView={()=>{}} 
                 onDelete={(id) => setReminderData(prev => prev.filter(r => r.id !== id))}
             />;
-         case 'List Reminder Pemeliharaan':
+         case 'List Reminder Pemeliharaan': // Fallback for old menu if needed
             return <ReminderTable 
-                data={filterReminders(maintenanceReminderData)} 
+                data={maintenanceReminderData} 
                 onView={()=>{}} 
                 onDelete={(id) => setMaintenanceReminderData(prev => prev.filter(r => r.id !== id))}
             />;
@@ -455,11 +551,13 @@ const App: React.FC = () => {
      }
   };
 
-  const isReminderModule = activeModule.includes('Reminder');
+  const isReminderModule = activeModule.includes('Reminder') || activeModule === 'Compliance & Legal';
   const isBuildingAssetModule = activeModule === 'Building Asset Management';
   const isMaintenanceModule = activeModule === 'Pemeliharaan Asset';
 
   const getModuleTabs = () => {
+    if (activeModule === 'Compliance & Legal') return ['DOKUMEN', 'PEMELIHARAAN'];
+    if (activeModule === 'Utility Monitoring') return ['OVERVIEW', 'LISTRIK', 'AIR', 'INTERNET'];
     if (isReminderModule) return ['SEMUA', 'URGENT', 'WARNING', 'SAFE'];
     if (isBuildingAssetModule) return ['SEMUA', 'PENDING', 'REVISED', 'APPROVED', 'REJECTED'];
     if (isMaintenanceModule) return ['SEMUA', 'PENDING', 'APPROVED', 'REJECTED', 'REVISED'];
@@ -497,7 +595,7 @@ const App: React.FC = () => {
                 onAddClick={handleAddClick}
                 moduleName={activeModule}
                 hideAdd={isReminderModule}
-                hideImport={isReminderModule}
+                hideImport={isReminderModule || activeModule === 'Utility Monitoring'}
             />
             
             {renderContent()}
@@ -535,6 +633,7 @@ const App: React.FC = () => {
         onSave={handleSaveBuildingAssetItem}
         initialData={selectedBuildingAsset}
         mode={modalMode}
+        buildingList={[...buildingData, ...branchImprovementData]}
       />
 
       <BuildingMaintenanceModal
@@ -583,6 +682,16 @@ const App: React.FC = () => {
         onSave={handleSaveGeneralMaster}
         initialData={selectedGeneralItem}
         title={activeModule}
+      />
+
+      {/* Utility Modal */}
+      <UtilityModal 
+        isOpen={isUtilityModalOpen}
+        onClose={() => setIsUtilityModalOpen(false)}
+        onSave={handleSaveUtility}
+        initialData={selectedUtility}
+        mode={modalMode}
+        buildingList={[...buildingData, ...branchImprovementData]}
       />
     </div>
   );

@@ -22,7 +22,9 @@ import {
   Box,
   House,
   Settings,
-  UserCog
+  UserCog,
+  Zap,
+  ShieldCheck
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -113,9 +115,9 @@ export const Sidebar: React.FC<Props> = ({
         subItems: [
              { label: 'Building Asset Management', icon: <Database size={16} /> },
              { label: 'Pemeliharaan Asset', icon: <Wrench size={16} /> },
+             { label: 'Utility Monitoring', icon: <Zap size={16} /> },
              { label: 'Branch Improvement', icon: <FileText size={16} /> },
-             { label: 'List Reminder Dokumen', icon: <Bell size={16} /> },
-             { label: 'List Reminder Pemeliharaan', icon: <Clock size={16} /> },
+             { label: 'Compliance & Legal', icon: <ShieldCheck size={16} /> },
         ]
     },
     { label: 'Timesheet', icon: <Clock size={20} /> },

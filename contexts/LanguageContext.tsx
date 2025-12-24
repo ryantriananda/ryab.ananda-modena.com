@@ -36,6 +36,8 @@ const translations: Record<string, Record<Language, string>> = {
   'Building Asset Management': { id: 'Manajemen Aset Gedung', en: 'Building Asset Management' },
   'Branch Improvement': { id: 'Branch Improvement', en: 'Branch Improvement' },
   'Pemeliharaan Asset': { id: 'Pemeliharaan Asset', en: 'Asset Maintenance' },
+  'Utility Monitoring': { id: 'Pemantauan Utilitas', en: 'Utility Monitoring' },
+  'Compliance & Legal': { id: 'Kepatuhan & Legal', en: 'Compliance & Legal' },
   'List Reminder Dokumen': { id: 'Reminder Dokumen', en: 'Document Reminder' },
   'List Reminder Pemeliharaan': { id: 'Reminder Pemeliharaan', en: 'Maintenance Reminder' },
   'Contract': { id: 'Kontrak', en: 'Contract' },

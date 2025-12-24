@@ -620,12 +620,110 @@ export const BuildingModal: React.FC<Props> = ({
               </div>
           )}
 
-          {/* WORKFLOW TAB (Existing) */}
+          {/* WORKFLOW TAB */}
           {activeTab === 'WORKFLOW' && (
              <div className="max-w-6xl mx-auto space-y-10 p-14 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                {/* ... Existing Workflow UI ... */}
-                <div className="bg-white p-12 rounded-[2.5rem] border border-gray-100 shadow-sm relative">
-                    <p className="text-center text-gray-400 font-bold uppercase tracking-widest text-[12px]">Workflow visualization...</p>
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 className="text-[18px] font-black text-black uppercase tracking-tight">APPROVAL WORKFLOW</h3>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-2">Track approval progress</p>
+                    </div>
+                    {/* Action buttons for simulation */}
+                    {!isView && !isWorkflowCompleted && form.status !== 'Rejected' && (
+                        <div className="flex gap-4">
+                            <button 
+                                onClick={() => handleWorkflowAction('Reject')}
+                                className="px-6 py-3 bg-red-50 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-100 transition-all"
+                            >
+                                Reject
+                            </button>
+                            <button 
+                                onClick={() => handleWorkflowAction('Approve')}
+                                className="px-6 py-3 bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all shadow-xl shadow-black/20"
+                            >
+                                Approve Step
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                <div className="bg-white p-12 rounded-[3.5rem] border border-gray-100 shadow-sm relative overflow-hidden">
+                    <div className="absolute left-[70px] top-12 bottom-12 w-0.5 bg-gray-100"></div>
+                    
+                    <div className="space-y-12 relative z-10">
+                        {form.workflow?.map((step, index) => {
+                            const isCompleted = step.status === 'Approved';
+                            const isRejected = step.status === 'Rejected';
+                            const isCurrent = index === form.currentWorkflowStep && !isRejected && !isCompleted;
+                            const isPending = step.status === 'Pending';
+
+                            return (
+                                <div key={index} className="flex gap-8 group">
+                                    {/* Icon/Status Indicator */}
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border-4 transition-all duration-300
+                                        ${isCompleted ? 'bg-green-500 border-white text-white shadow-xl shadow-green-200' : 
+                                          isRejected ? 'bg-red-500 border-white text-white shadow-xl shadow-red-200' :
+                                          isCurrent ? 'bg-black border-white text-white shadow-xl shadow-black/20 ring-4 ring-gray-50' :
+                                          'bg-white border-gray-100 text-gray-300'
+                                        }
+                                    `}>
+                                        {isCompleted ? <CheckCircle2 size={20} /> : 
+                                         isRejected ? <XCircle size={20} /> :
+                                         isCurrent ? <Clock size={20} className="animate-pulse" /> :
+                                         <div className="w-2 h-2 rounded-full bg-gray-200" />
+                                        }
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className={`flex-1 pt-1 ${isPending && !isCurrent ? 'opacity-50' : 'opacity-100'}`}>
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h4 className={`text-[14px] font-black uppercase tracking-tight ${isCurrent ? 'text-black' : 'text-gray-800'}`}>
+                                                    {step.role}
+                                                </h4>
+                                                <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-wider">
+                                                    {isCompleted ? 'Approved' : isRejected ? 'Rejected' : isCurrent ? 'Waiting for Approval' : 'Pending'}
+                                                </p>
+                                            </div>
+                                            {step.date && (
+                                                <div className="text-right">
+                                                    <span className="text-[10px] font-black text-gray-400 bg-gray-50 px-3 py-1 rounded-lg uppercase tracking-widest">
+                                                        {step.date}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Approver Detail Box */}
+                                        {(isCompleted || isRejected) && (
+                                            <div className={`mt-4 p-4 rounded-2xl border flex items-center gap-4
+                                                ${isRejected ? 'bg-red-50 border-red-100' : 'bg-gray-50 border-gray-100'}
+                                            `}>
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-black
+                                                    ${isRejected ? 'bg-red-400' : 'bg-black'}
+                                                `}>
+                                                    {step.approver?.charAt(0) || 'U'}
+                                                </div>
+                                                <div>
+                                                    <p className="text-[11px] font-black text-black uppercase">{step.approver}</p>
+                                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">
+                                                        {isRejected ? 'Rejected this request' : 'Approved this request'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+                                        
+                                        {/* Comment if any */}
+                                        {step.comment && (
+                                            <div className="mt-3 text-[11px] font-medium text-red-500 bg-red-50 p-3 rounded-xl border border-red-100">
+                                                "{step.comment}"
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
              </div>
           )}

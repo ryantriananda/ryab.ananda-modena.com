@@ -302,6 +302,22 @@ export interface BuildingProposal {
   };
 }
 
+export interface UtilityRecord {
+  id: string;
+  period: string; // e.g. "January 2024" or specific date
+  date: string;
+  location: string; // Branch/Building name
+  type: 'Listrik (PLN)' | 'Air (PDAM)' | 'Internet' | 'Gas';
+  meterStart?: number;
+  meterEnd?: number;
+  usage: number; // calculated
+  unit: 'kWh' | 'm3' | 'Mbps' | 'L';
+  cost: string; // IDR
+  status: 'Paid' | 'Unpaid' | 'Pending Review';
+  attachmentUrl?: string; // Bill or Meter Photo
+  recordedBy: string; // Technician Name
+}
+
 export interface ServiceRecord {
   id: string;
   noPolisi: string;
