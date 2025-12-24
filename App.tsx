@@ -590,8 +590,14 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex bg-[#fbfbfb] min-h-screen font-sans relative overflow-x-hidden text-black">
-      {isMobileMenuOpen && <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={toggleMobileMenu} />}
+    <div className="bg-[#fbfbfb] min-h-screen font-sans relative text-black selection:bg-black/10">
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+            className="fixed inset-0 bg-black/60 z-30 lg:hidden backdrop-blur-sm transition-opacity" 
+            onClick={toggleMobileMenu} 
+        />
+      )}
 
       <Sidebar 
         activeItem={activeModule} 
@@ -602,10 +608,14 @@ const App: React.FC = () => {
         onCloseMobile={toggleMobileMenu}
       />
       
-      <div className={`flex-1 flex flex-col transition-all duration-300 w-full ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+      {/* Main Content Wrapper - Adjusted margins for fixed sidebar */}
+      <div 
+        className={`flex flex-col min-h-screen transition-all duration-300 ease-in-out
+        ${isSidebarCollapsed ? 'lg:ml-[90px]' : 'lg:ml-[280px]'}`}
+      >
         <TopBar breadcrumbs={['Beranda', t(activeModule)]} onMenuClick={toggleMobileMenu} />
         
-        <main className="flex-1 p-8 overflow-y-auto">
+        <main className="flex-1 p-6 lg:p-10 overflow-x-hidden">
           <div className="max-w-[1600px] mx-auto">
             <div className="flex items-center justify-between mb-8">
                 <h1 className="text-[20px] font-bold text-black tracking-tight">{t(activeModule)}</h1>
