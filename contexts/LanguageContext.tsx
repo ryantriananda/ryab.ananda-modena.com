@@ -35,6 +35,7 @@ const translations: Record<string, Record<Language, string>> = {
   'Gedung': { id: 'Gedung', en: 'Building' },
   'Building Asset Management': { id: 'Manajemen Aset Gedung', en: 'Building Asset Management' },
   'Branch Improvement': { id: 'Branch Improvement', en: 'Branch Improvement' },
+  'Pemeliharaan Asset': { id: 'Pemeliharaan Asset', en: 'Asset Maintenance' },
   'List Reminder Dokumen': { id: 'Reminder Dokumen', en: 'Document Reminder' },
   'List Reminder Pemeliharaan': { id: 'Reminder Pemeliharaan', en: 'Maintenance Reminder' },
   'Contract': { id: 'Kontrak', en: 'Contract' },
@@ -44,7 +45,6 @@ const translations: Record<string, Record<Language, string>> = {
   'Master Data': { id: 'Master Data', en: 'Master Data' },
   'Project Mgmt': { id: 'Manajemen Proyek', en: 'Project Mgmt' },
   'Manajemen User': { id: 'Manajemen User', en: 'User Management' },
-  'Master Gedung': { id: 'Master Gedung', en: 'Master Building' },
   
   // Master Sub-items
   'Jenis Pajak': { id: 'Jenis Pajak', en: 'Tax Type' },

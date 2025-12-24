@@ -22,7 +22,7 @@ export const ReminderTable: React.FC<Props> = ({ data, onView, onDelete, title }
             <tr className="bg-[#F2F2F2] border-b border-gray-200">
               <th className="p-5 pl-8 w-1/4 group cursor-pointer hover:bg-gray-200/50 transition-colors">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em]">DOCUMENT NAME</span>
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em]">ID & DOCUMENT NAME</span>
                   <ChevronsUpDown size={12} className="text-gray-300" />
                 </div>
               </th>

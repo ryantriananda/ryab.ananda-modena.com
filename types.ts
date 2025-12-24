@@ -175,13 +175,40 @@ export interface BuildingAssetRecord {
   attachmentUrl?: string;
 }
 
+export interface BuildingMaintenanceRecord {
+  id: string;
+  requestDate: string;
+  completionDate?: string;
+  assetId: string;
+  assetName: string;
+  buildingLocation: string; // derived from asset
+  maintenanceType: 'Preventive' | 'Corrective' | 'Emergency';
+  description: string;
+  vendor: string;
+  technician?: string;
+  cost: string;
+  status: 'Scheduled' | 'In Progress' | 'Completed' | 'Pending';
+  approvalStatus?: 'Draft' | 'Pending Approval' | 'Approved' | 'Rejected' | 'Revised';
+  attachmentUrl?: string;
+}
+
+export interface WorkflowStep {
+  role: 'BM' | 'Regional Branches' | 'AVP Dealership' | 'Owner';
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Skipped';
+  date?: string;
+  approver?: string;
+  comment?: string;
+}
+
 export interface BuildingRecord {
   id: string;
   name: string;
   assetNo: string;
+  assetCategory?: string;
   type: string;
   ownership: 'Own' | 'Rent';
   location: string;
+  subLocation?: string;
   address: string;
   status: string;
   startDate?: string;
@@ -189,7 +216,15 @@ export interface BuildingRecord {
   proposals?: BuildingProposal[];
   channel?: string;
   department?: string;
-  subLocation?: string;
+  
+  // Financials
+  assetValue?: string;
+  rentCost?: string;
+
+  // Workflow
+  workflow?: WorkflowStep[];
+  currentWorkflowStep?: number; // 0 to 3
+  isLeaseProposalFilled?: boolean;
 }
 
 export interface BuildingProposal {
@@ -305,6 +340,7 @@ export interface SalesRecord {
   hargaTertinggi: string;
   status: string;
   statusApproval: string;
+  
 }
 
 export interface MasterVendorRecord {
@@ -401,14 +437,14 @@ export interface VendorRecord {
 export interface GeneralMasterItem {
   id: number;
   name: string;
-}
+  }
 
 export interface DeliveryLocationRecord {
   id: number;
   name: string;
   address: string;
   type: string;
-}
+  }
 
 export interface ReminderRecord {
   id: string | number;

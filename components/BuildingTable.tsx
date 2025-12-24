@@ -1,25 +1,95 @@
 
 import React from 'react';
 import { BuildingRecord } from '../types';
-import { ChevronsUpDown, Eye, Pencil, Trash2, Building, MapPin, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, Calendar } from 'lucide-react';
+import { ChevronsUpDown, Eye, Pencil, Trash2, Building, MapPin, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, Calendar, CheckCircle, RotateCcw, XCircle } from 'lucide-react';
 
 interface Props {
   data: BuildingRecord[];
   onEdit?: (item: BuildingRecord) => void;
   onView?: (item: BuildingRecord) => void;
   onDelete?: (id: string) => void;
+  onAction?: (item: BuildingRecord, action: 'Approve' | 'Reject' | 'Revise') => void;
 }
 
-export const BuildingTable: React.FC<Props> = ({ data, onEdit, onView, onDelete }) => {
+export const BuildingTable: React.FC<Props> = ({ data, onEdit, onView, onDelete, onAction }) => {
+  
+  const renderStatusBadge = (status: string) => {
+    const s = (status || 'Draft').toUpperCase();
+    
+    let styles = 'bg-gray-50 text-gray-500 border-gray-200';
+    if (s === 'APPROVED' || s === 'COMPLETED') {
+        styles = 'bg-[#E8FDF5] text-[#059669] border-[#10B981]/20';
+    } else if (s === 'PENDING' || s === 'PENDING APPROVAL') {
+        styles = 'bg-[#FFF7ED] text-[#EA580C] border-[#FDBA74]/50';
+    } else if (s === 'REVISED') {
+        styles = 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]';
+    } else if (s === 'REJECTED') {
+        styles = 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]';
+    } else if (s === 'ON PROGRESS') {
+        styles = 'bg-blue-50 text-blue-600 border-blue-100';
+    }
+
+    return (
+      <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${styles}`}>
+        {(s === 'PENDING' || s === 'PENDING APPROVAL') ? 'PENDING' : s}
+      </span>
+    );
+  };
+
+  const renderWorkflowActions = (item: BuildingRecord) => {
+      const s = (item.status || '').toUpperCase();
+      const isPending = s === 'PENDING' || s === 'PENDING APPROVAL' || s === 'ON PROGRESS';
+
+      if (isPending && onAction) {
+          return (
+              <div className="flex items-center justify-center gap-2">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onAction(item, 'Approve'); }}
+                    className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95"
+                    title="Approve"
+                  >
+                      <CheckCircle size={16} strokeWidth={3} />
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onAction(item, 'Revise'); }}
+                    className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95"
+                    title="Revise"
+                  >
+                      <RotateCcw size={16} strokeWidth={3} />
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onAction(item, 'Reject'); }}
+                    className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95"
+                    title="Reject"
+                  >
+                      <XCircle size={16} strokeWidth={3} />
+                  </button>
+              </div>
+          );
+      }
+
+      return (
+          <div className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic text-center">
+              WORKFLOW COMPLETED
+          </div>
+      );
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full min-w-[1400px] text-left border-collapse">
           <thead>
             <tr className="bg-white border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-              <th className="p-5 pl-8 w-64 group cursor-pointer hover:bg-gray-50/50 transition-colors">
+              <th className="p-5 pl-8 w-24 group cursor-pointer hover:bg-gray-50/50 transition-colors">
                 <div className="flex items-center justify-between">
-                  PROPERTI / ASSET NO
+                  ID
+                  <ChevronsUpDown size={14} className="text-gray-300" />
+                </div>
+              </th>
+              <th className="p-5 w-56 group cursor-pointer hover:bg-gray-50/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  PROPERTI / ASSET
                   <ChevronsUpDown size={14} className="text-gray-300" />
                 </div>
               </th>
@@ -31,7 +101,7 @@ export const BuildingTable: React.FC<Props> = ({ data, onEdit, onView, onDelete 
               </th>
               <th className="p-5 w-48 group cursor-pointer hover:bg-gray-50/50 transition-colors">
                 <div className="flex items-center justify-between">
-                  PERIODE KONTRAK
+                  PERIODE
                   <ChevronsUpDown size={14} className="text-gray-300" />
                 </div>
               </th>
@@ -41,20 +111,17 @@ export const BuildingTable: React.FC<Props> = ({ data, onEdit, onView, onDelete 
                   <ChevronsUpDown size={14} className="text-gray-300" />
                 </div>
               </th>
-              <th className="p-5 w-48 group cursor-pointer hover:bg-gray-50/50 transition-colors">
-                <div className="flex items-center justify-between">
-                  LOKASI
-                  <ChevronsUpDown size={14} className="text-gray-300" />
-                </div>
-              </th>
               <th className="p-5 group cursor-pointer hover:bg-gray-50/50 transition-colors">
                 <div className="flex items-center justify-between">
-                  ALAMAT LENGKAP
+                  LOKASI / ALAMAT
                   <ChevronsUpDown size={14} className="text-gray-300" />
                 </div>
               </th>
-              <th className="p-5 w-32 group cursor-pointer hover:bg-gray-50/50 transition-colors text-center">
-                STATUS
+              <th className="p-5 w-48 text-center group cursor-pointer hover:bg-gray-50/50 transition-colors">
+                  APPROVAL STATUS
+              </th>
+              <th className="p-5 w-48 text-center group cursor-pointer hover:bg-gray-50/50 transition-colors">
+                  WORKFLOW ACTIONS
               </th>
               <th className="p-5 w-24 pr-8 text-right">AKSI</th>
             </tr>
@@ -62,9 +129,12 @@ export const BuildingTable: React.FC<Props> = ({ data, onEdit, onView, onDelete 
           <tbody className="divide-y divide-gray-50 text-[12px]">
             {data.map((item) => (
               <tr key={item.id} className="hover:bg-gray-50/30 transition-colors group">
-                <td className="p-5 pl-8">
+                <td className="p-5 pl-8 text-[11px] font-mono font-bold text-gray-400">
+                    {item.id}
+                </td>
+                <td className="p-5">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center text-black border border-gray-100">
+                    <div className="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center text-black border border-gray-100 shrink-0">
                         <Building size={16} />
                     </div>
                     <div>
@@ -99,20 +169,21 @@ export const BuildingTable: React.FC<Props> = ({ data, onEdit, onView, onDelete 
                     </span>
                 </td>
                 <td className="p-5">
-                    <div className="flex items-center gap-2 text-gray-600 font-bold uppercase">
-                        <MapPin size={12} className="text-gray-300" />
-                        {item.location}
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2 text-gray-600 font-bold uppercase">
+                            <MapPin size={12} className="text-gray-300" />
+                            {item.location}
+                        </div>
+                        <div className="text-[10px] text-gray-400 font-medium truncate max-w-[200px] pl-5">
+                            {item.address}
+                        </div>
                     </div>
                 </td>
-                <td className="p-5 text-gray-400 font-medium max-w-[250px] truncate">
-                    {item.address}
+                <td className="p-5 text-center">
+                    {renderStatusBadge(item.status)}
                 </td>
                 <td className="p-5 text-center">
-                    <span className={`inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${
-                        item.status === 'Open' ? 'bg-[#E8FDF5] text-[#059669]' : 'bg-gray-100 text-gray-400'
-                    }`}>
-                        {item.status}
-                    </span>
+                    {renderWorkflowActions(item)}
                 </td>
                 <td className="p-5 pr-8 text-right">
                   <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

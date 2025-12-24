@@ -23,7 +23,7 @@ export const BuildingAssetTable: React.FC<Props> = ({ data, onEdit, onView, onAc
       case 'Revised':
         return <span className="bg-blue-50 text-blue-600 border-blue-100 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm">REVISED</span>;
       case 'Pending Approval':
-        return <span className="bg-orange-50 text-orange-600 border-orange-100 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm">PENDING APPROVAL</span>;
+        return <span className="bg-orange-50 text-orange-600 border-orange-100 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm">PENDING</span>;
       default:
         return <span className="bg-gray-50 text-gray-500 border-gray-100 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm">DRAFT</span>;
     }
@@ -44,7 +44,13 @@ export const BuildingAssetTable: React.FC<Props> = ({ data, onEdit, onView, onAc
         <table className="w-full min-w-[1400px] text-left border-collapse">
           <thead>
             <tr className="bg-[#F2F2F2] border-b border-gray-200">
-              <th className="p-6 pl-8 w-64 group cursor-pointer hover:bg-gray-200/50 transition-colors">
+              <th className="p-6 pl-8 w-24 group cursor-pointer hover:bg-gray-200/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">ID</span>
+                  <ChevronsUpDown size={12} className="text-gray-300" />
+                </div>
+              </th>
+              <th className="p-6 w-64 group cursor-pointer hover:bg-gray-200/50 transition-colors">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">ASSET NAME / CODE</span>
                   <ChevronsUpDown size={12} className="text-gray-300" />
@@ -77,7 +83,10 @@ export const BuildingAssetTable: React.FC<Props> = ({ data, onEdit, onView, onAc
           <tbody className="divide-y divide-gray-50">
             {data.map((item) => (
               <tr key={item.id} className="bg-white hover:bg-[#FDFDFD] transition-all group">
-                <td className="p-6 pl-8">
+                <td className="p-6 pl-8 text-[11px] font-mono font-bold text-gray-400">
+                    {item.id}
+                </td>
+                <td className="p-6">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center shadow-lg shadow-black/10">
                         <Activity size={18} />
@@ -155,7 +164,7 @@ export const BuildingAssetTable: React.FC<Props> = ({ data, onEdit, onView, onAc
             ))}
             {data.length === 0 && (
                 <tr>
-                    <td colSpan={7} className="p-24 text-center">
+                    <td colSpan={8} className="p-24 text-center">
                         <div className="flex flex-col items-center opacity-30">
                             <Clock size={48} className="text-gray-400 mb-4" />
                             <p className="text-[11px] font-black uppercase tracking-[0.3em]">Belum ada permintaan aset diajukan</p>

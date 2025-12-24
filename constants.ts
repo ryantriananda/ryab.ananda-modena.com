@@ -1,5 +1,5 @@
 
-import { AssetRecord, MasterItem, VehicleRecord, TaxKirRecord, MasterVendorRecord, DeliveryLocationRecord, LogBookRecord, BuildingRecord, ReminderRecord, VehicleContractRecord, GeneralMasterItem, UserRecord, BuildingAssetRecord } from './types';
+import { AssetRecord, MasterItem, VehicleRecord, TaxKirRecord, MasterVendorRecord, DeliveryLocationRecord, LogBookRecord, BuildingRecord, ReminderRecord, VehicleContractRecord, GeneralMasterItem, UserRecord, BuildingAssetRecord, BuildingMaintenanceRecord } from './types';
 
 export const MOCK_BUILDING_DATA: BuildingRecord[] = [
     {
@@ -13,7 +13,15 @@ export const MOCK_BUILDING_DATA: BuildingRecord[] = [
         status: 'Open',
         startDate: '2024-01-01',
         endDate: '2028-12-31',
-        proposals: []
+        proposals: [],
+        workflow: [
+            { role: 'BM', status: 'Approved', date: '2023-11-01', approver: 'Branch Manager JKT' },
+            { role: 'Regional Branches', status: 'Approved', date: '2023-11-05', approver: 'Regional Head' },
+            { role: 'AVP Dealership', status: 'Approved', date: '2023-11-10', approver: 'AVP Sales' },
+            { role: 'Owner', status: 'Approved', date: '2023-11-15', approver: 'Owner' }
+        ],
+        currentWorkflowStep: 3,
+        isLeaseProposalFilled: true
     }
 ];
 
@@ -74,6 +82,194 @@ export const MOCK_BUILDING_ASSETS: BuildingAssetRecord[] = [
         status: 'Maintenance',
         approvalStatus: 'Rejected',
         ownership: 'Own'
+    }
+];
+
+export const MOCK_BUILDING_MAINTENANCE_DATA: BuildingMaintenanceRecord[] = [
+    {
+        id: 'MNT-2024-001',
+        requestDate: '2024-02-15',
+        assetId: 'ASSET-001',
+        assetName: 'AC SPLIT MEC 1',
+        buildingLocation: 'Head Office Satrio - Lantai 2',
+        maintenanceType: 'Preventive',
+        description: 'Cuci AC Rutin 3 Bulanan',
+        vendor: 'PT. Cool Technic',
+        cost: '150000',
+        status: 'Completed',
+        approvalStatus: 'Approved'
+    },
+    {
+        id: 'MNT-2024-002',
+        requestDate: '2024-02-20',
+        assetId: 'ASSET-004',
+        assetName: 'Backup Generator 500KVA',
+        buildingLocation: 'Head Office Satrio - Basement',
+        maintenanceType: 'Corrective',
+        description: 'Penggantian Filter Oli & Solar',
+        vendor: 'PT. Power Gen',
+        cost: '2500000',
+        status: 'In Progress',
+        approvalStatus: 'Approved'
+    },
+    {
+        id: 'MNT-2024-003',
+        requestDate: '2024-02-25',
+        assetId: 'ASSET-002',
+        assetName: 'Passenger Lift A',
+        buildingLocation: 'Head Office Satrio',
+        maintenanceType: 'Corrective',
+        description: 'Bunyi kasar pada pintu lift, perlu pengecekan bearing',
+        vendor: 'Schindler',
+        cost: '5000000',
+        status: 'Scheduled',
+        approvalStatus: 'Pending Approval'
+    }
+];
+
+export const MOCK_BRANCH_IMPROVEMENT_DATA: BuildingRecord[] = [
+    {
+        id: 'BI-2024-001',
+        name: 'MODENA Home Center Bintaro',
+        assetNo: 'REQ-BI-BTR-01',
+        type: 'MHC',
+        ownership: 'Rent',
+        location: 'Tangerang Selatan',
+        address: 'Jl. Bintaro Utama 3A, Sektor 5',
+        status: 'Pending',
+        channel: 'Direct',
+        department: 'Sales',
+        assetValue: '0',
+        rentCost: '250000000',
+        startDate: '2024-06-01',
+        endDate: '2029-06-01',
+        proposals: [
+            {
+                id: 'PROP-01',
+                optionName: 'Ruko Kebayoran Arcade',
+                address: { jl: 'Jl. Boulevard Bintaro Jaya', kota: 'Tangsel', kabupaten: 'Tangerang', propinsi: 'Banten' },
+                phoneLines: '2',
+                electricity: '16500',
+                water: 'PAM',
+                areas: { land: '120', building: '240', frontYard: 'Parking 2 Cars' },
+                conditions: { fence: 'Yes', gate: 'Rolling Door', parking: 'Shared' },
+                security: ['CCTV Kawasan', 'Security 24 Jam'],
+                floors: { ground: 'Showroom', f1: 'Office', f2: 'Warehouse', f3: '-', f4: '-' },
+                materials: ['Concrete', 'Glass Facade'],
+                legal: { shm: true, hgb: false, imb: true },
+                costs: { rent: '250000000', tax: '25000000', notary: '5000000' },
+                owner: { name: 'Bpk. Hendra', phone: '0812345678', address: 'Jakarta' },
+                survey: { pros: ['Lokasi Strategis', 'Parkir Luas'], cons: ['Harga sewa tinggi'] }
+            }
+        ],
+        workflow: [
+            { role: 'BM', status: 'Pending' },
+            { role: 'Regional Branches', status: 'Pending' },
+            { role: 'AVP Dealership', status: 'Pending' },
+            { role: 'Owner', status: 'Pending' }
+        ],
+        currentWorkflowStep: 0,
+        isLeaseProposalFilled: false
+    },
+    {
+        id: 'BI-2024-002',
+        name: 'MODENA Logistics Hub Surabaya',
+        assetNo: 'REQ-BI-SBY-09',
+        type: 'Warehouse',
+        ownership: 'Rent',
+        location: 'Surabaya',
+        address: 'Kawasan Industri Rungkut',
+        status: 'On Progress',
+        channel: 'Traditional',
+        department: 'Logistics',
+        assetValue: '0',
+        rentCost: '450000000',
+        startDate: '2024-05-01',
+        endDate: '2027-05-01',
+        proposals: [],
+        workflow: [
+            { role: 'BM', status: 'Approved', date: '2024-03-01', approver: 'Branch Manager SBY' },
+            { role: 'Regional Branches', status: 'Pending' },
+            { role: 'AVP Dealership', status: 'Pending' },
+            { role: 'Owner', status: 'Pending' }
+        ],
+        currentWorkflowStep: 1,
+        isLeaseProposalFilled: false
+    },
+    {
+        id: 'BI-2024-003',
+        name: 'MODENA Showroom Medan',
+        assetNo: 'REQ-BI-MDN-03',
+        type: 'Showroom',
+        ownership: 'Rent',
+        location: 'Medan',
+        address: 'Jl. Gatot Subroto No. 45',
+        status: 'Revised', // Changed to Revised for demo
+        channel: 'Direct',
+        department: 'Sales',
+        assetValue: '0',
+        rentCost: '180000000',
+        startDate: '2024-04-15',
+        endDate: '2026-04-15',
+        proposals: [],
+        workflow: [
+            { role: 'BM', status: 'Approved', date: '2024-02-15', approver: 'Branch Manager MDN' },
+            { role: 'Regional Branches', status: 'Rejected', date: '2024-02-18', approver: 'Regional Head Sumatera', comment: 'Lokasi kurang premium, tolong cari opsi lain di area Merdeka Walk.' },
+            { role: 'AVP Dealership', status: 'Pending' },
+            { role: 'Owner', status: 'Pending' }
+        ],
+        currentWorkflowStep: 1,
+        isLeaseProposalFilled: false
+    },
+    {
+        id: 'BI-2024-004',
+        name: 'MODENA Experience Center Bali',
+        assetNo: 'REQ-BI-DPS-01',
+        type: 'Showroom & Office',
+        ownership: 'Rent',
+        location: 'Denpasar',
+        address: 'Sunset Road No. 88',
+        status: 'Approved',
+        channel: 'Direct',
+        department: 'Marketing',
+        assetValue: '0',
+        rentCost: '350000000',
+        startDate: '2024-03-01',
+        endDate: '2029-03-01',
+        proposals: [],
+        workflow: [
+            { role: 'BM', status: 'Approved', date: '2024-01-10', approver: 'Branch Manager Bali' },
+            { role: 'Regional Branches', status: 'Approved', date: '2024-01-12', approver: 'Regional Head East' },
+            { role: 'AVP Dealership', status: 'Approved', date: '2024-01-15', approver: 'AVP Sales' },
+            { role: 'Owner', status: 'Approved', date: '2024-01-20', approver: 'Owner' }
+        ],
+        currentWorkflowStep: 3,
+        isLeaseProposalFilled: false
+    },
+    {
+        id: 'BI-2024-005',
+        name: 'MODENA Warehouse Makassar',
+        assetNo: 'REQ-BI-MKS-02',
+        type: 'Warehouse',
+        ownership: 'Rent',
+        location: 'Makassar',
+        address: 'Jl. Ir. Sutami, Pergudangan Parangloe',
+        status: 'Completed',
+        channel: 'Traditional',
+        department: 'Logistics',
+        assetValue: '0',
+        rentCost: '200000000',
+        startDate: '2023-12-01',
+        endDate: '2026-12-01',
+        proposals: [],
+        workflow: [
+            { role: 'BM', status: 'Approved', date: '2023-12-01', approver: 'Branch Manager MKS' },
+            { role: 'Regional Branches', status: 'Approved', date: '2023-12-05', approver: 'Regional Head East' },
+            { role: 'AVP Dealership', status: 'Approved', date: '2023-12-10', approver: 'AVP Sales' },
+            { role: 'Owner', status: 'Approved', date: '2023-12-15', approver: 'Owner' }
+        ],
+        currentWorkflowStep: 3,
+        isLeaseProposalFilled: true
     }
 ];
 

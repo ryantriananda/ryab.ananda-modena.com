@@ -112,6 +112,7 @@ export const Sidebar: React.FC<Props> = ({
         icon: <Building size={20} />,
         subItems: [
              { label: 'Building Asset Management', icon: <Database size={16} /> },
+             { label: 'Pemeliharaan Asset', icon: <Wrench size={16} /> },
              { label: 'Branch Improvement', icon: <FileText size={16} /> },
              { label: 'List Reminder Dokumen', icon: <Bell size={16} /> },
              { label: 'List Reminder Pemeliharaan', icon: <Clock size={16} /> },
@@ -135,7 +136,6 @@ export const Sidebar: React.FC<Props> = ({
         { label: 'Tipe Vendor', icon: <Settings size={16} /> },
         { label: 'Peran', icon: <Settings size={16} /> },
         { label: 'Master Vendor', icon: <Users size={16} /> },
-        { label: 'Master Gedung', icon: <Building size={16} /> },
       ]
     },
   ];

@@ -14,6 +14,7 @@ import { MasterVendorTable } from './components/MasterVendorTable';
 import { VehicleContractTable } from './components/VehicleContractTable';
 import { BuildingTable } from './components/BuildingTable';
 import { BuildingAssetTable } from './components/BuildingAssetTable';
+import { BuildingMaintenanceTable } from './components/BuildingMaintenanceTable'; // Import New Table
 import { ReminderTable } from './components/ReminderTable';
 import { GeneralMasterTable } from './components/GeneralMasterTable';
 import { StationeryRequestTable } from './components/StationeryRequestTable';
@@ -23,6 +24,8 @@ import { LogBookTable } from './components/LogBookTable';
 import { UserTable } from './components/UserTable';
 import { VehicleModal } from './components/VehicleModal';
 import { BuildingModal } from './components/BuildingModal';
+import { BuildingAssetItemModal } from './components/BuildingAssetItemModal';
+import { BuildingMaintenanceModal } from './components/BuildingMaintenanceModal'; // Import New Modal
 import { GeneralMasterModal } from './components/GeneralMasterModal';
 import { AddStockModal } from './components/AddStockModal';
 import { MasterItemModal } from './components/MasterItemModal';
@@ -39,6 +42,8 @@ import {
   MOCK_VEHICLE_CONTRACT_DATA, 
   MOCK_BUILDING_DATA, 
   MOCK_BUILDING_ASSETS,
+  MOCK_BUILDING_MAINTENANCE_DATA, // Import Maintenance Mock
+  MOCK_BRANCH_IMPROVEMENT_DATA,
   MOCK_REMINDER_DATA, 
   MOCK_MAINTENANCE_REMINDER,
   MOCK_GENERAL_MASTER_DATA,
@@ -61,6 +66,7 @@ import {
   VehicleContractRecord, 
   BuildingRecord, 
   BuildingAssetRecord,
+  BuildingMaintenanceRecord,
   ReminderRecord, 
   GeneralMasterItem,
   AssetRecord,
@@ -87,6 +93,8 @@ const App: React.FC = () => {
   const [vehicleData, setVehicleData] = useState<VehicleRecord[]>(MOCK_VEHICLE_DATA);
   const [buildingData, setBuildingData] = useState<BuildingRecord[]>(MOCK_BUILDING_DATA);
   const [buildingAssetData, setBuildingAssetData] = useState<BuildingAssetRecord[]>(MOCK_BUILDING_ASSETS);
+  const [buildingMaintenanceData, setBuildingMaintenanceData] = useState<BuildingMaintenanceRecord[]>(MOCK_BUILDING_MAINTENANCE_DATA);
+  const [branchImprovementData, setBranchImprovementData] = useState<BuildingRecord[]>(MOCK_BRANCH_IMPROVEMENT_DATA);
   const [serviceData, setServiceData] = useState<ServiceRecord[]>([]);
   const [taxKirData, setTaxKirData] = useState<TaxKirRecord[]>(MOCK_TAX_KIR_DATA);
   const [vehicleContractData, setVehicleContractData] = useState<VehicleContractRecord[]>(MOCK_VEHICLE_CONTRACT_DATA);
@@ -102,6 +110,8 @@ const App: React.FC = () => {
   const [isStockModalOpen, setIsStockModalOpen] = useState(false);
   const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false);
   const [isBuildingModalOpen, setIsBuildingModalOpen] = useState(false);
+  const [isBuildingAssetItemModalOpen, setIsBuildingAssetItemModalOpen] = useState(false);
+  const [isBuildingMaintenanceModalOpen, setIsBuildingMaintenanceModalOpen] = useState(false);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [isTaxKirModalOpen, setIsTaxKirModalOpen] = useState(false);
   const [isVehicleContractModalOpen, setIsVehicleContractModalOpen] = useState(false);
@@ -113,7 +123,9 @@ const App: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<UserRecord | null>(null);
   const [selectedContract, setSelectedContract] = useState<VehicleContractRecord | null>(null);
   const [selectedGeneralItem, setSelectedGeneralItem] = useState<GeneralMasterItem | null>(null);
+  const [selectedBuilding, setSelectedBuilding] = useState<BuildingRecord | null>(null);
   const [selectedBuildingAsset, setSelectedBuildingAsset] = useState<BuildingAssetRecord | null>(null);
+  const [selectedBuildingMaintenance, setSelectedBuildingMaintenance] = useState<BuildingMaintenanceRecord | null>(null);
 
   const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -130,8 +142,14 @@ const App: React.FC = () => {
       setIsStockModalOpen(true);
     } else if (activeModule === 'Daftar Aset') {
       setIsVehicleModalOpen(true);
-    } else if (activeModule === 'Building Asset Management' || activeModule === 'Branch Improvement' || activeModule === 'Master Gedung') {
+    } else if (activeModule === 'Building Asset Management') {
       setSelectedBuildingAsset(null);
+      setIsBuildingAssetItemModalOpen(true);
+    } else if (activeModule === 'Pemeliharaan Asset') {
+      setSelectedBuildingMaintenance(null);
+      setIsBuildingMaintenanceModalOpen(true);
+    } else if (activeModule === 'Branch Improvement' || activeModule === 'Master Gedung') {
+      setSelectedBuilding(null);
       setIsBuildingModalOpen(true);
     } else if (activeModule === 'Servis') {
       setIsServiceModalOpen(true);
@@ -158,7 +176,43 @@ const App: React.FC = () => {
       setBuildingAssetData(prev => prev.map(a => a.id === item.id ? { ...a, approvalStatus: statusMap[action] } : a));
   };
 
-  const handleSaveBuildingAsset = (data: Partial<BuildingAssetRecord>) => {
+  const handleMaintenanceWorkflowAction = (item: BuildingMaintenanceRecord, action: 'Approve' | 'Reject' | 'Revise') => {
+      const statusMap: Record<string, BuildingMaintenanceRecord['approvalStatus']> = {
+          'Approve': 'Approved',
+          'Reject': 'Rejected',
+          'Revise': 'Revised'
+      };
+      setBuildingMaintenanceData(prev => prev.map(m => m.id === item.id ? { ...m, approvalStatus: statusMap[action] } : m));
+  };
+
+  const handleBuildingWorkflowAction = (item: BuildingRecord, action: 'Approve' | 'Reject' | 'Revise') => {
+      const statusMap: Record<string, string> = {
+          'Approve': 'Approved',
+          'Reject': 'Rejected',
+          'Revise': 'Revised'
+      };
+      setBranchImprovementData(prev => prev.map(b => b.id === item.id ? { ...b, status: statusMap[action] } : b));
+  };
+
+  const handleSaveBuilding = (data: Partial<BuildingRecord>) => {
+      const isBranchImprovement = activeModule === 'Branch Improvement';
+      const updateFunction = isBranchImprovement ? setBranchImprovementData : setBuildingData;
+      
+      if (modalMode === 'create') {
+          const newBuilding: BuildingRecord = {
+              id: `BDG-${Date.now()}`,
+              assetNo: `BDG-NEW-${Math.floor(Math.random() * 1000)}`,
+              status: isBranchImprovement ? 'Pending' : 'Open',
+              ...data
+          } as BuildingRecord;
+          updateFunction(prev => [newBuilding, ...prev]);
+      } else if (selectedBuilding) {
+          updateFunction(prev => prev.map(b => b.id === selectedBuilding.id ? { ...b, ...data } as BuildingRecord : b));
+      }
+      setIsBuildingModalOpen(false);
+  };
+
+  const handleSaveBuildingAssetItem = (data: Partial<BuildingAssetRecord>) => {
       if (modalMode === 'create') {
           const newAsset: BuildingAssetRecord = {
               id: `ASSET-${Date.now()}`,
@@ -168,9 +222,22 @@ const App: React.FC = () => {
           } as BuildingAssetRecord;
           setBuildingAssetData(prev => [newAsset, ...prev]);
       } else if (selectedBuildingAsset) {
-          setBuildingAssetData(prev => prev.map(a => a.id === selectedBuildingAsset.id ? { ...a, ...data } : a));
+          setBuildingAssetData(prev => prev.map(a => a.id === selectedBuildingAsset.id ? { ...a, ...data } as BuildingAssetRecord : a));
       }
-      setIsBuildingModalOpen(false);
+      setIsBuildingAssetItemModalOpen(false);
+  };
+
+  const handleSaveBuildingMaintenance = (data: Partial<BuildingMaintenanceRecord>) => {
+      if (modalMode === 'create') {
+          const newMaintenance: BuildingMaintenanceRecord = {
+              id: `MNT-${Date.now()}`,
+              ...data
+          } as BuildingMaintenanceRecord;
+          setBuildingMaintenanceData(prev => [newMaintenance, ...prev]);
+      } else if (selectedBuildingMaintenance) {
+          setBuildingMaintenanceData(prev => prev.map(m => m.id === selectedBuildingMaintenance.id ? { ...m, ...data } as BuildingMaintenanceRecord : m));
+      }
+      setIsBuildingMaintenanceModalOpen(false);
   };
 
   const handleSaveGeneralMaster = (name: string) => {
@@ -261,6 +328,27 @@ const App: React.FC = () => {
         return buildingAssetData.filter(a => (a.approvalStatus || 'Draft').toLowerCase().includes(target));
      }, [buildingAssetData, activeTab]);
 
+     // Filter logic for building maintenance
+     const filteredMaintenance = useMemo(() => {
+        if (activeTab === 'SEMUA') return buildingMaintenanceData;
+        return buildingMaintenanceData.filter(m => {
+            const status = (m.approvalStatus || 'Draft').toUpperCase();
+            if (activeTab === 'PENDING') return status.includes('PENDING');
+            return status === activeTab;
+        });
+     }, [buildingMaintenanceData, activeTab]);
+
+     // Filter logic for Branch Improvement
+     const filteredBranchImprovement = useMemo(() => {
+        if (activeTab === 'SEMUA') return branchImprovementData;
+        // Map 'PENDING' tab to 'Pending' status which might be 'Pending Approval' or just 'Pending'
+        return branchImprovementData.filter(b => {
+            const status = (b.status || '').toUpperCase();
+            if (activeTab === 'PENDING') return status.includes('PENDING');
+            return status === activeTab;
+        });
+     }, [branchImprovementData, activeTab]);
+
      // Filter logic for reminders
      const filterReminders = (records: ReminderRecord[]) => {
         if (activeTab === 'SEMUA') return records;
@@ -282,18 +370,35 @@ const App: React.FC = () => {
                 onDelete={(id) => setVehicleData(prev => prev.filter(v => v.id !== id))}
             />;
          case 'Building Asset Management':
-         case 'Branch Improvement':
+            // Asset Gedung (AC, APAR, etc.) uses BuildingAssetTable
             return <BuildingAssetTable 
                 data={filteredBuildingAssets} 
-                onEdit={(item) => { setSelectedBuildingAsset(item); setModalMode('edit'); setIsBuildingModalOpen(true); }} 
-                onView={(item) => { setSelectedBuildingAsset(item); setModalMode('view'); setIsBuildingModalOpen(true); }} 
+                onEdit={(item) => { setSelectedBuildingAsset(item); setModalMode('edit'); setIsBuildingAssetItemModalOpen(true); }} 
+                onView={(item) => { setSelectedBuildingAsset(item); setModalMode('view'); setIsBuildingAssetItemModalOpen(true); }} 
                 onAction={handleWorkflowAction}
+            />;
+         case 'Pemeliharaan Asset':
+            return <BuildingMaintenanceTable
+                data={filteredMaintenance}
+                onEdit={(item) => { setSelectedBuildingMaintenance(item); setModalMode('edit'); setIsBuildingMaintenanceModalOpen(true); }}
+                onView={(item) => { setSelectedBuildingMaintenance(item); setModalMode('view'); setIsBuildingMaintenanceModalOpen(true); }}
+                onDelete={(id) => setBuildingMaintenanceData(prev => prev.filter(m => m.id !== id))}
+                onAction={handleMaintenanceWorkflowAction}
+            />;
+         case 'Branch Improvement':
+            // Kontak Gedung / Contracts / New Branches uses BuildingTable
+            return <BuildingTable 
+                data={filteredBranchImprovement} 
+                onEdit={(item) => { setSelectedBuilding(item); setModalMode('edit'); setIsBuildingModalOpen(true); }} 
+                onView={(item) => { setSelectedBuilding(item); setModalMode('view'); setIsBuildingModalOpen(true); }} 
+                onDelete={(id) => setBranchImprovementData(prev => prev.filter(b => b.id !== id))}
+                onAction={handleBuildingWorkflowAction}
             />;
          case 'Master Gedung':
             return <BuildingTable 
                 data={buildingData} 
-                onEdit={()=>{}} 
-                onView={()=>{}} 
+                onEdit={(item) => { setSelectedBuilding(item); setModalMode('edit'); setIsBuildingModalOpen(true); }} 
+                onView={(item) => { setSelectedBuilding(item); setModalMode('view'); setIsBuildingModalOpen(true); }} 
                 onDelete={(id) => setBuildingData(prev => prev.filter(b => b.id !== id))}
             />;
          case 'List Reminder Dokumen':
@@ -351,11 +456,14 @@ const App: React.FC = () => {
   };
 
   const isReminderModule = activeModule.includes('Reminder');
-  const isBuildingWorkflow = activeModule === 'Building Asset Management' || activeModule === 'Branch Improvement';
+  const isBuildingAssetModule = activeModule === 'Building Asset Management';
+  const isMaintenanceModule = activeModule === 'Pemeliharaan Asset';
 
   const getModuleTabs = () => {
     if (isReminderModule) return ['SEMUA', 'URGENT', 'WARNING', 'SAFE'];
-    if (isBuildingWorkflow) return ['SEMUA', 'PENDING', 'REVISED', 'APPROVED', 'REJECTED'];
+    if (isBuildingAssetModule) return ['SEMUA', 'PENDING', 'REVISED', 'APPROVED', 'REJECTED'];
+    if (isMaintenanceModule) return ['SEMUA', 'PENDING', 'APPROVED', 'REJECTED', 'REVISED'];
+    if (activeModule === 'Branch Improvement') return ['SEMUA', 'PENDING', 'REVISED', 'APPROVED', 'REJECTED'];
     if (activeModule.includes('Master') || activeModule === 'Jenis Kendaraan' || activeModule === 'Master Gedung') return ['SEMUA'];
     return ['SEMUA', 'PENDING', 'APPROVED', 'REJECTED'];
   };
@@ -416,8 +524,25 @@ const App: React.FC = () => {
       <BuildingModal 
         isOpen={isBuildingModalOpen} 
         onClose={() => setIsBuildingModalOpen(false)} 
-        onSave={handleSaveBuildingAsset}
-        initialData={selectedBuildingAsset as any}
+        onSave={handleSaveBuilding}
+        initialData={selectedBuilding || undefined}
+        mode={modalMode}
+      />
+
+      <BuildingAssetItemModal 
+        isOpen={isBuildingAssetItemModalOpen} 
+        onClose={() => setIsBuildingAssetItemModalOpen(false)} 
+        onSave={handleSaveBuildingAssetItem}
+        initialData={selectedBuildingAsset}
+        mode={modalMode}
+      />
+
+      <BuildingMaintenanceModal
+        isOpen={isBuildingMaintenanceModalOpen}
+        onClose={() => setIsBuildingMaintenanceModalOpen(false)}
+        onSave={handleSaveBuildingMaintenance}
+        initialData={selectedBuildingMaintenance}
+        assetList={buildingAssetData}
         mode={modalMode}
       />
 
