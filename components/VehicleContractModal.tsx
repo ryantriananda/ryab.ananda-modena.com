@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Save, Car, FileText, UploadCloud, Trash2, CheckCircle2, Clock, GitBranch } from 'lucide-react';
+import { X, Save, Car, FileText, UploadCloud, Trash2, CheckCircle2, Clock, Image as ImageIcon } from 'lucide-react';
 import { VehicleContractRecord, VehicleRecord } from '../types';
 
 interface Props {
@@ -12,6 +12,8 @@ interface Props {
   vehicleList?: VehicleRecord[];
 }
 
+type DocKeys = 'contract' | 'stnk' | 'kir' | 'front' | 'rear' | 'right' | 'left';
+
 export const VehicleContractModal: React.FC<Props> = ({ 
   isOpen, 
   onClose, 
@@ -21,7 +23,18 @@ export const VehicleContractModal: React.FC<Props> = ({
   vehicleList = [] 
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [activeUploadKey, setActiveUploadKey] = useState<DocKeys | null>(null);
+  
+  const [docPreviews, setDocPreviews] = useState<{ [key in DocKeys]: string | null }>({
+      contract: null,
+      stnk: null,
+      kir: null,
+      front: null,
+      rear: null,
+      right: null,
+      left: null
+  });
+
   const [activeTab, setActiveTab] = useState('DETAILS');
   const [form, setForm] = useState<Partial<VehicleContractRecord>>({
     status: 'Aktif',
@@ -36,7 +49,15 @@ export const VehicleContractModal: React.FC<Props> = ({
     if (isOpen) {
       if (initialData) {
         setForm(initialData);
-        setImagePreview(initialData.attachmentUrl || null);
+        setDocPreviews({
+            contract: initialData.attachmentUrl || null,
+            stnk: initialData.stnkUrl || null,
+            kir: initialData.kirUrl || null,
+            front: initialData.photoFront || null,
+            rear: initialData.photoRear || null,
+            right: initialData.photoRight || null,
+            left: initialData.photoLeft || null
+        });
       } else {
         setForm({ 
             status: 'Aktif', 
@@ -47,11 +68,13 @@ export const VehicleContractModal: React.FC<Props> = ({
             tglMulai: new Date().toISOString().split('T')[0],
             approvalStatus: 'Pending'
         });
-        setImagePreview(null);
+        setDocPreviews({ contract: null, stnk: null, kir: null, front: null, rear: null, right: null, left: null });
       }
       setActiveTab('DETAILS');
     }
   }, [isOpen, initialData]);
+
+  const isView = mode === 'view';
 
   const handleVehicleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const selectedNoPol = e.target.value;
@@ -76,9 +99,85 @@ export const VehicleContractModal: React.FC<Props> = ({
       }
   };
 
-  if (!isOpen) return null;
+  const handleUploadClick = (key: DocKeys) => {
+      if (!isView) {
+          setActiveUploadKey(key);
+          setTimeout(() => fileInputRef.current?.click(), 0);
+      }
+  }
 
-  const isView = mode === 'view';
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file && activeUploadKey) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+              setDocPreviews(prev => ({ ...prev, [activeUploadKey]: ev.target?.result as string }));
+          };
+          reader.readAsDataURL(file);
+      }
+      // Reset to allow same file selection
+      e.target.value = '';
+  }
+
+  const handleRemoveImage = (e: React.MouseEvent, key: DocKeys) => {
+      e.stopPropagation();
+      setDocPreviews(prev => ({ ...prev, [key]: null }));
+  }
+
+  const handleSave = () => {
+      const updatedData: Partial<VehicleContractRecord> = {
+          ...form,
+          attachmentUrl: docPreviews.contract || undefined,
+          stnkUrl: docPreviews.stnk || undefined,
+          kirUrl: docPreviews.kir || undefined,
+          photoFront: docPreviews.front || undefined,
+          photoRear: docPreviews.rear || undefined,
+          photoRight: docPreviews.right || undefined,
+          photoLeft: docPreviews.left || undefined,
+      };
+      onSave(updatedData);
+  }
+
+  const UploadBox = ({ label, uploadKey, icon: Icon = UploadCloud }: { label: string, uploadKey: DocKeys, icon?: any }) => {
+      const preview = docPreviews[uploadKey];
+      return (
+        <div className="flex flex-col h-full">
+            <Label>{label}</Label>
+            <div 
+                onClick={() => handleUploadClick(uploadKey)}
+                className={`relative flex-1 border-2 border-dashed rounded-[1.5rem] flex flex-col items-center justify-center transition-all overflow-hidden bg-white min-h-[160px]
+                  ${preview ? 'border-gray-200' : 'border-gray-100 hover:border-black hover:bg-gray-50/50'}
+                  ${!isView ? 'cursor-pointer' : 'cursor-default'}
+                `}
+            >
+                {preview ? (
+                  <div className="relative w-full h-full group flex items-center justify-center">
+                      <img src={preview} alt={label} className="w-full h-full object-contain p-2" />
+                      {!isView && (
+                          <button 
+                              onClick={(e) => handleRemoveImage(e, uploadKey)}
+                              className="absolute top-3 right-3 bg-black text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                          >
+                              <Trash2 size={14} />
+                          </button>
+                      )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center p-4 text-center">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-gray-100 transition-all mb-3 bg-white`}>
+                          <Icon size={18} className="text-gray-300" />
+                      </div>
+                      <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest leading-relaxed">
+                          {isView ? 'No Image' : 'Upload'}
+                      </p>
+                  </div>
+                )}
+            </div>
+        </div>
+      );
+  };
+
+  if (!isOpen) return null;
 
   const SectionHeader = ({ title, sub }: { title: string, sub?: string }) => (
     <div className="flex items-center gap-4 mb-8">
@@ -110,7 +209,7 @@ export const VehicleContractModal: React.FC<Props> = ({
     </div>
   );
 
-  const tabs = ['DETAILS', 'WORKFLOW'];
+  const tabs = ['DETAILS', 'DOKUMEN', 'WORKFLOW'];
 
   return (
     <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center backdrop-blur-sm p-4 overflow-hidden">
@@ -147,6 +246,7 @@ export const VehicleContractModal: React.FC<Props> = ({
         </div>
 
         <div className="flex-1 overflow-y-auto p-12 custom-scrollbar bg-[#FBFBFB]">
+          
           {activeTab === 'DETAILS' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div className="space-y-12">
@@ -215,50 +315,35 @@ export const VehicleContractModal: React.FC<Props> = ({
                     </div>
                     </div>
                 </div>
-
-                <div className="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm">
-                    <SectionHeader title="CONTRACT ATTACHMENT" sub="Digital Copy" />
-                    <div 
-                        onClick={() => !isView && fileInputRef.current?.click()}
-                        className={`relative border-2 border-dashed rounded-[1.5rem] h-40 flex flex-col items-center justify-center transition-all overflow-hidden bg-white
-                        ${imagePreview ? 'border-gray-200' : 'border-gray-100 hover:border-black hover:bg-gray-50/50'}
-                        ${!isView ? 'cursor-pointer' : 'cursor-default'}
-                        `}
-                    >
-                        {imagePreview ? (
-                        <div className="relative w-full h-full group">
-                            <img src={imagePreview} alt="Preview" className="w-full h-full object-contain p-4" />
-                            {!isView && (
-                                <button 
-                                    onClick={(e) => { e.stopPropagation(); setImagePreview(null); }}
-                                    className="absolute top-4 right-4 bg-black text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
-                            )}
-                        </div>
-                        ) : (
-                        <div className="flex flex-col items-center">
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-sm border border-gray-100 transition-all mb-3 bg-white`}>
-                                <UploadCloud size={20} className="text-gray-300" />
-                            </div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center px-6 leading-relaxed">
-                                Upload Dokumen Kontrak (PDF/IMG)
-                            </p>
-                        </div>
-                        )}
-                        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                                const reader = new FileReader();
-                                reader.onload = (ev) => setImagePreview(ev.target?.result as string);
-                                reader.readAsDataURL(file);
-                            }
-                        }} />
-                    </div>
-                </div>
                 </div>
             </div>
+          )}
+
+          {activeTab === 'DOKUMEN' && (
+              <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*,application/pdf" onChange={handleFileChange} />
+                  
+                  {/* Section 1: Legal Documents */}
+                  <div className="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm">
+                      <SectionHeader title="LEGAL DOCUMENTS" sub="STNK & KIR Attachments" />
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                          <UploadBox label="Contract Document" uploadKey="contract" icon={FileText} />
+                          <UploadBox label="STNK Document" uploadKey="stnk" icon={FileText} />
+                          <UploadBox label="KIR Document" uploadKey="kir" icon={FileText} />
+                      </div>
+                  </div>
+
+                  {/* Section 2: Vehicle Physical Check */}
+                  <div className="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm">
+                      <SectionHeader title="VEHICLE PHYSICAL CHECK" sub="4-Side Body Photos" />
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                          <UploadBox label="Tampak Depan" uploadKey="front" icon={ImageIcon} />
+                          <UploadBox label="Tampak Belakang" uploadKey="rear" icon={ImageIcon} />
+                          <UploadBox label="Samping Kanan" uploadKey="right" icon={ImageIcon} />
+                          <UploadBox label="Samping Kiri" uploadKey="left" icon={ImageIcon} />
+                      </div>
+                  </div>
+              </div>
           )}
 
           {activeTab === 'WORKFLOW' && (
@@ -300,7 +385,7 @@ export const VehicleContractModal: React.FC<Props> = ({
         <div className="px-10 py-8 bg-white border-t border-gray-100 flex justify-between items-center shrink-0">
           <button onClick={onClose} className="px-12 py-4 text-[11px] font-black uppercase tracking-[0.25em] text-gray-400 hover:text-black transition-all bg-gray-50 rounded-2xl active:scale-95">Batal</button>
           {!isView && (
-            <button onClick={() => onSave({...form, attachmentUrl: imagePreview || undefined})} className="bg-black text-white px-20 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.25em] hover:bg-gray-800 transition-all active:scale-95 shadow-2xl shadow-black/20 flex items-center gap-4">
+            <button onClick={handleSave} className="bg-black text-white px-20 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.25em] hover:bg-gray-800 transition-all active:scale-95 shadow-2xl shadow-black/20 flex items-center gap-4">
               <Save size={18} strokeWidth={2.5} /> Simpan Kontrak
             </button>
           )}

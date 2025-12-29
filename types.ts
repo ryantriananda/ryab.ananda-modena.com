@@ -10,11 +10,14 @@ export interface Employee {
 
 export interface UserRecord {
   id: string;
+  employeeId?: string; // NIK
   name: string;
   email: string;
   role: string;
   department: string;
+  location?: string; // Branch Location
   phone: string;
+  joinDate?: string;
   status: 'Active' | 'Inactive';
   lastActive: string;
   avatar: string;
@@ -132,7 +135,15 @@ export interface VehicleContractRecord {
   tglBeli?: string;
   noPolisAsuransi?: string;
   jangkaPertanggungan?: string;
-  attachmentUrl?: string;
+  
+  // Documents
+  attachmentUrl?: string; // Main Contract Doc
+  stnkUrl?: string;
+  kirUrl?: string;
+  photoFront?: string;
+  photoRear?: string;
+  photoRight?: string;
+  photoLeft?: string;
 }
 
 export interface MaintenanceSchedule {
@@ -378,6 +389,8 @@ export interface TaxKirRecord {
   estimasiBiaya?: string;
   jenisPembayaran?: string;
   targetSelesai?: string;
+  attachmentUrl?: string;
+  jatuhTempo?: string; // New Field for Editable Due Date
 }
 
 export interface MutationRecord {
