@@ -11,6 +11,7 @@ import { VehicleTable } from './components/VehicleTable';
 import { ServiceLogTable } from './components/ServiceLogTable'; 
 import { TaxKirTable } from './components/TaxKirTable';
 import { MasterVendorTable } from './components/MasterVendorTable';
+import { VendorTable } from './components/VendorTable';
 import { VehicleContractTable } from './components/VehicleContractTable';
 import { BuildingTable } from './components/BuildingTable';
 import { BuildingAssetTable } from './components/BuildingAssetTable';
@@ -43,6 +44,7 @@ import { UserModal } from './components/UserModal';
 import { UtilityModal } from './components/UtilityModal';
 import { MutationModal } from './components/MutationModal'; 
 import { SalesModal } from './components/SalesModal'; 
+import { VendorModal } from './components/VendorModal';
 
 import { Zap, Droplets, TrendingUp } from 'lucide-react';
 import { 
@@ -70,8 +72,20 @@ import {
   MOCK_USER_DATA,
   MOCK_VEHICLE_TYPE_DATA,
   MOCK_ASSET_CATEGORY_DATA,
+  MOCK_LOCATION_DATA,
+  MOCK_DEPARTMENT_DATA,
+  MOCK_UOM_MASTER_DATA,
+  MOCK_BRAND_DATA,
+  MOCK_COST_CENTER_DATA,
   MOCK_GENERAL_ASSET_DATA,
-  MOCK_IT_ASSET_DATA
+  MOCK_IT_ASSET_DATA,
+  MOCK_COLOR_DATA,
+  MOCK_BUILDING_TYPE_DATA,
+  MOCK_GENERAL_ASSET_TYPE_DATA,
+  MOCK_PPN_DATA,
+  MOCK_BRAND_TYPE_DATA,
+  MOCK_OPERATOR_DATA,
+  MOCK_VENDOR_DATA
 } from './constants';
 import { 
   VehicleRecord, 
@@ -92,7 +106,10 @@ import {
   UserRecord,
   MutationRecord,
   SalesRecord,
-  GeneralAssetRecord
+  GeneralAssetRecord,
+  MasterVendorRecord,
+  WorkflowLog,
+  VendorRecord
 } from './types';
 import { useLanguage } from './contexts/LanguageContext';
 
@@ -109,12 +126,12 @@ const getInitialData = <T,>(key: string, fallback: T): T => {
 
 const App: React.FC = () => {
   const { t } = useLanguage();
-  const [activeModule, setActiveModule] = useState('Asset HC'); // Default changed to Asset HC
+  const [activeModule, setActiveModule] = useState('Asset HC'); 
   const [activeTab, setActiveTab] = useState('SEMUA');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // DATA STATES (INITIALIZED WITH LOCAL STORAGE OR MOCK DATA)
+  // DATA STATES
   const [atkData, setAtkData] = useState<AssetRecord[]>(() => getInitialData('atkData', MOCK_ATK_DATA));
   const [arkData, setArkData] = useState<AssetRecord[]>(() => getInitialData('arkData', MOCK_ARK_DATA));
   const [vehicleData, setVehicleData] = useState<VehicleRecord[]>(() => getInitialData('vehicleData', MOCK_VEHICLE_DATA));
@@ -128,14 +145,43 @@ const App: React.FC = () => {
   const [vehicleContractData, setVehicleContractData] = useState<VehicleContractRecord[]>(() => getInitialData('vehicleContractData', MOCK_VEHICLE_CONTRACT_DATA));
   const [logBookData, setLogBookData] = useState<LogBookRecord[]>(() => getInitialData('logBookData', MOCK_LOGBOOK_DATA));
   const [userData, setUserData] = useState<UserRecord[]>(() => getInitialData('userData', MOCK_USER_DATA));
+  
+  // Master Data States
   const [vehicleTypeData, setVehicleTypeData] = useState<GeneralMasterItem[]>(() => getInitialData('vehicleTypeData', MOCK_VEHICLE_TYPE_DATA));
   const [assetCategoryData, setAssetCategoryData] = useState<GeneralMasterItem[]>(() => getInitialData('assetCategoryData', MOCK_ASSET_CATEGORY_DATA));
+  const [locationData, setLocationData] = useState<GeneralMasterItem[]>(() => getInitialData('locationData', MOCK_LOCATION_DATA));
+  const [departmentData, setDepartmentData] = useState<GeneralMasterItem[]>(() => getInitialData('departmentData', MOCK_DEPARTMENT_DATA));
+  const [uomMasterData, setUomMasterData] = useState<GeneralMasterItem[]>(() => getInitialData('uomMasterData', MOCK_UOM_MASTER_DATA));
+  const [brandData, setBrandData] = useState<GeneralMasterItem[]>(() => getInitialData('brandData', MOCK_BRAND_DATA));
+  const [costCenterData, setCostCenterData] = useState<GeneralMasterItem[]>(() => getInitialData('costCenterData', MOCK_COST_CENTER_DATA));
+  const [colorData, setColorData] = useState<GeneralMasterItem[]>(() => getInitialData('colorData', MOCK_COLOR_DATA));
+  const [buildingTypeData, setBuildingTypeData] = useState<GeneralMasterItem[]>(() => getInitialData('buildingTypeData', MOCK_BUILDING_TYPE_DATA));
+  const [genAssetTypeData, setGenAssetTypeData] = useState<GeneralMasterItem[]>(() => getInitialData('genAssetTypeData', MOCK_GENERAL_ASSET_TYPE_DATA));
+  const [ppnData, setPpnData] = useState<GeneralMasterItem[]>(() => getInitialData('ppnData', MOCK_PPN_DATA));
+  const [brandTypeData, setBrandTypeData] = useState<GeneralMasterItem[]>(() => getInitialData('brandTypeData', MOCK_BRAND_TYPE_DATA));
+  const [operatorData, setOperatorData] = useState<GeneralMasterItem[]>(() => getInitialData('operatorData', MOCK_OPERATOR_DATA));
+  const [masterVendorData, setMasterVendorData] = useState<MasterVendorRecord[]>(() => getInitialData('masterVendorData', MOCK_MASTER_VENDOR_DATA));
+
+  // Expanded Master Data States (From Request)
+  const [taxTypeData, setTaxTypeData] = useState<GeneralMasterItem[]>(() => getInitialData('taxTypeData', MOCK_GENERAL_MASTER_DATA.jenisPajak));
+  const [paymentTypeData, setPaymentTypeData] = useState<GeneralMasterItem[]>(() => getInitialData('paymentTypeData', MOCK_GENERAL_MASTER_DATA.jenisPembayaran));
+  const [serviceTypeData, setServiceTypeData] = useState<GeneralMasterItem[]>(() => getInitialData('serviceTypeData', MOCK_GENERAL_MASTER_DATA.jenisServis));
+  const [mutationStatusData, setMutationStatusData] = useState<GeneralMasterItem[]>(() => getInitialData('mutationStatusData', MOCK_GENERAL_MASTER_DATA.statusMutasi));
+  const [salesStatusData, setSalesStatusData] = useState<GeneralMasterItem[]>(() => getInitialData('salesStatusData', MOCK_GENERAL_MASTER_DATA.statusPenjualan));
+  const [requestStatusData, setRequestStatusData] = useState<GeneralMasterItem[]>(() => getInitialData('requestStatusData', MOCK_GENERAL_MASTER_DATA.statusRequest));
+  const [mutationTypeData, setMutationTypeData] = useState<GeneralMasterItem[]>(() => getInitialData('mutationTypeData', MOCK_GENERAL_MASTER_DATA.tipeMutasi));
+  const [vendorTypeData, setVendorTypeData] = useState<GeneralMasterItem[]>(() => getInitialData('vendorTypeData', MOCK_GENERAL_MASTER_DATA.tipeVendor));
+  const [roleData, setRoleData] = useState<GeneralMasterItem[]>(() => getInitialData('roleData', MOCK_GENERAL_MASTER_DATA.peran));
+  const [syncBranchData, setSyncBranchData] = useState<GeneralMasterItem[]>(() => getInitialData('syncBranchData', []));
+  const [syncChannelData, setSyncChannelData] = useState<GeneralMasterItem[]>(() => getInitialData('syncChannelData', []));
+
   const [mutationData, setMutationData] = useState<MutationRecord[]>(() => getInitialData('mutationData', []));
   const [salesData, setSalesData] = useState<SalesRecord[]>(() => getInitialData('salesData', []));
   const [reminderData, setReminderData] = useState<ReminderRecord[]>(() => getInitialData('reminderData', MOCK_REMINDER_DATA));
   const [maintenanceReminderData, setMaintenanceReminderData] = useState<ReminderRecord[]>(() => getInitialData('maintenanceReminderData', MOCK_MAINTENANCE_REMINDER));
   const [generalAssetData, setGeneralAssetData] = useState<GeneralAssetRecord[]>(() => getInitialData('generalAssetData', MOCK_GENERAL_ASSET_DATA));
   const [itAssetData, setItAssetData] = useState<GeneralAssetRecord[]>(() => getInitialData('itAssetData', MOCK_IT_ASSET_DATA));
+  const [vendorData, setVendorData] = useState<VendorRecord[]>(() => getInitialData('vendorData', MOCK_VENDOR_DATA));
 
   // PERSISTENCE EFFECTS
   useEffect(() => localStorage.setItem('atkData', JSON.stringify(atkData)), [atkData]);
@@ -151,14 +197,43 @@ const App: React.FC = () => {
   useEffect(() => localStorage.setItem('vehicleContractData', JSON.stringify(vehicleContractData)), [vehicleContractData]);
   useEffect(() => localStorage.setItem('logBookData', JSON.stringify(logBookData)), [logBookData]);
   useEffect(() => localStorage.setItem('userData', JSON.stringify(userData)), [userData]);
+  
+  // Master Persistence
   useEffect(() => localStorage.setItem('vehicleTypeData', JSON.stringify(vehicleTypeData)), [vehicleTypeData]);
   useEffect(() => localStorage.setItem('assetCategoryData', JSON.stringify(assetCategoryData)), [assetCategoryData]);
+  useEffect(() => localStorage.setItem('locationData', JSON.stringify(locationData)), [locationData]);
+  useEffect(() => localStorage.setItem('departmentData', JSON.stringify(departmentData)), [departmentData]);
+  useEffect(() => localStorage.setItem('uomMasterData', JSON.stringify(uomMasterData)), [uomMasterData]);
+  useEffect(() => localStorage.setItem('brandData', JSON.stringify(brandData)), [brandData]);
+  useEffect(() => localStorage.setItem('costCenterData', JSON.stringify(costCenterData)), [costCenterData]);
+  useEffect(() => localStorage.setItem('colorData', JSON.stringify(colorData)), [colorData]);
+  useEffect(() => localStorage.setItem('buildingTypeData', JSON.stringify(buildingTypeData)), [buildingTypeData]);
+  useEffect(() => localStorage.setItem('genAssetTypeData', JSON.stringify(genAssetTypeData)), [genAssetTypeData]);
+  useEffect(() => localStorage.setItem('ppnData', JSON.stringify(ppnData)), [ppnData]);
+  useEffect(() => localStorage.setItem('brandTypeData', JSON.stringify(brandTypeData)), [brandTypeData]);
+  useEffect(() => localStorage.setItem('operatorData', JSON.stringify(operatorData)), [operatorData]);
+  useEffect(() => localStorage.setItem('masterVendorData', JSON.stringify(masterVendorData)), [masterVendorData]);
+  
+  // Extended Master Persistence
+  useEffect(() => localStorage.setItem('taxTypeData', JSON.stringify(taxTypeData)), [taxTypeData]);
+  useEffect(() => localStorage.setItem('paymentTypeData', JSON.stringify(paymentTypeData)), [paymentTypeData]);
+  useEffect(() => localStorage.setItem('serviceTypeData', JSON.stringify(serviceTypeData)), [serviceTypeData]);
+  useEffect(() => localStorage.setItem('mutationStatusData', JSON.stringify(mutationStatusData)), [mutationStatusData]);
+  useEffect(() => localStorage.setItem('salesStatusData', JSON.stringify(salesStatusData)), [salesStatusData]);
+  useEffect(() => localStorage.setItem('requestStatusData', JSON.stringify(requestStatusData)), [requestStatusData]);
+  useEffect(() => localStorage.setItem('mutationTypeData', JSON.stringify(mutationTypeData)), [mutationTypeData]);
+  useEffect(() => localStorage.setItem('vendorTypeData', JSON.stringify(vendorTypeData)), [vendorTypeData]);
+  useEffect(() => localStorage.setItem('roleData', JSON.stringify(roleData)), [roleData]);
+  useEffect(() => localStorage.setItem('syncBranchData', JSON.stringify(syncBranchData)), [syncBranchData]);
+  useEffect(() => localStorage.setItem('syncChannelData', JSON.stringify(syncChannelData)), [syncChannelData]);
+
   useEffect(() => localStorage.setItem('mutationData', JSON.stringify(mutationData)), [mutationData]);
   useEffect(() => localStorage.setItem('salesData', JSON.stringify(salesData)), [salesData]);
   useEffect(() => localStorage.setItem('reminderData', JSON.stringify(reminderData)), [reminderData]);
   useEffect(() => localStorage.setItem('maintenanceReminderData', JSON.stringify(maintenanceReminderData)), [maintenanceReminderData]);
   useEffect(() => localStorage.setItem('generalAssetData', JSON.stringify(generalAssetData)), [generalAssetData]);
   useEffect(() => localStorage.setItem('itAssetData', JSON.stringify(itAssetData)), [itAssetData]);
+  useEffect(() => localStorage.setItem('vendorData', JSON.stringify(vendorData)), [vendorData]);
 
   // MODAL STATES
   const [isStockModalOpen, setIsStockModalOpen] = useState(false);
@@ -175,6 +250,7 @@ const App: React.FC = () => {
   const [isMutationModalOpen, setIsMutationModalOpen] = useState(false); 
   const [isSalesModalOpen, setIsSalesModalOpen] = useState(false); 
   const [isGeneralAssetModalOpen, setIsGeneralAssetModalOpen] = useState(false);
+  const [isVendorModalOpen, setIsVendorModalOpen] = useState(false);
   
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedAsset, setSelectedAsset] = useState<AssetRecord | null>(null);
@@ -188,6 +264,7 @@ const App: React.FC = () => {
   const [selectedMutation, setSelectedMutation] = useState<MutationRecord | null>(null); 
   const [selectedSales, setSelectedSales] = useState<SalesRecord | null>(null); 
   const [selectedGeneralAsset, setSelectedGeneralAsset] = useState<GeneralAssetRecord | null>(null);
+  const [selectedVendor, setSelectedVendor] = useState<VendorRecord | null>(null);
 
   const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -210,7 +287,7 @@ const App: React.FC = () => {
       setIsStockModalOpen(true);
     } else if (activeModule === 'Daftar Aset') {
       setIsVehicleModalOpen(true);
-    } else if (activeModule === 'Asset HC') { // Changed from Master Asset
+    } else if (activeModule === 'Asset HC') { 
       setSelectedBuildingAsset(null);
       setIsBuildingAssetItemModalOpen(true);
     } else if (activeModule === 'Asset IT') { 
@@ -232,7 +309,34 @@ const App: React.FC = () => {
     } else if (activeModule === 'Manajemen User') {
       setSelectedUser(null);
       setIsUserModalOpen(true);
-    } else if (activeModule === 'Jenis Kendaraan' || activeModule === 'Asset Category') {
+    } else if ([
+        'Jenis Kendaraan', 
+        'Asset Category',
+        'Master Lokasi',
+        'Master Departemen',
+        'Master Department',
+        'Master Satuan',
+        'Master Brand',
+        'Master Cost Center',
+        'Master Warna',
+        'Master Tipe Gedung',
+        'Master Tipe Aset',
+        'Master Asset Type',
+        'Master PPN',
+        'Master Brand Type',
+        'Master Operator',
+        'Jenis Pajak',
+        'Jenis Pembayaran',
+        'Jenis Servis',
+        'Status Mutasi',
+        'Status Penjualan',
+        'Status Request',
+        'Tipe Mutasi',
+        'Tipe Vendor',
+        'Role',
+        'Sync Branchs',
+        'Sync Channels'
+    ].includes(activeModule)) {
       setSelectedGeneralItem(null);
       setIsGeneralMasterModalOpen(true);
     } else if (activeModule === 'Utility Monitoring') {
@@ -244,10 +348,97 @@ const App: React.FC = () => {
     } else if (activeModule === 'Penjualan') {
       setSelectedSales(null);
       setIsSalesModalOpen(true);
+    } else if (activeModule === 'General Asset List') {
+      setSelectedGeneralAsset(null);
+      setIsGeneralAssetModalOpen(true);
+    } else if (activeModule === 'Vendor') {
+      setSelectedVendor(null);
+      setIsVendorModalOpen(true);
     }
   };
 
-  // --- WORKFLOW HANDLERS (PERSISTED) ---
+  const handleExport = () => {
+      // Simulate Export Logic
+      const exportTime = new Date().toLocaleString('id-ID');
+      alert(`Exporting data for ${activeModule}...\nTime: ${exportTime}\nFormat: CSV (Simulated)`);
+      // In a real app, this would convert the corresponding state data to CSV and trigger a download.
+  };
+
+  // Determine if Export button should be shown
+  const shouldShowExport = [
+      // Vehicle Submenus
+      'Daftar Aset', 'Kontrak Kendaraan', 'Servis', 'Pajak & KIR', 'Mutasi', 'Penjualan',
+      // General Asset Submenus
+      'Asset HC', 'Asset IT', 'General Asset List',
+      // Building Submenus
+      'Master Gedung', 'Pemeliharaan Asset', 'Utility Monitoring', 'Branch Improvement', 'Compliance & Legal',
+      // Master Data (Any active module that includes "Master", "Jenis", "Status", "Tipe", "Role", "Sync", "Asset Category")
+      'Vendor'
+  ].includes(activeModule) || 
+  activeModule.includes('Master') || 
+  activeModule.includes('Jenis') || 
+  activeModule.includes('Status') || 
+  activeModule.includes('Tipe') || 
+  activeModule === 'Role' || 
+  activeModule.includes('Sync') ||
+  activeModule === 'Asset Category';
+
+  // --- WORKFLOW HANDLERS (VEHICLE MODULES) ---
+  const handleVehicleWorkflowAction = (item: VehicleRecord, action: 'Approve' | 'Reject' | 'Revise') => {
+      const statusMap: Record<string, 'Approved' | 'Rejected' | 'Revised'> = {
+          'Approve': 'Approved',
+          'Reject': 'Rejected',
+          'Revise': 'Revised'
+      };
+      setVehicleData(prev => prev.map(v => v.id === item.id ? { ...v, approvalStatus: statusMap[action] } : v));
+  };
+
+  const handleContractWorkflowAction = (item: VehicleContractRecord, action: 'Approve' | 'Reject' | 'Revise') => {
+      const statusMap: Record<string, 'Approved' | 'Rejected' | 'Revised'> = {
+          'Approve': 'Approved',
+          'Reject': 'Rejected',
+          'Revise': 'Revised'
+      };
+      setVehicleContractData(prev => prev.map(c => c.id === item.id ? { ...c, approvalStatus: statusMap[action] } : c));
+  };
+
+  const handleServiceWorkflowAction = (item: ServiceRecord, action: 'Approve' | 'Reject' | 'Revise') => {
+      const statusMap: Record<string, string> = {
+          'Approve': 'Approved',
+          'Reject': 'Rejected',
+          'Revise': 'Revised'
+      };
+      setServiceData(prev => prev.map(s => s.id === item.id ? { ...s, statusApproval: statusMap[action] } : s));
+  };
+
+  const handleTaxKirWorkflowAction = (item: TaxKirRecord, action: 'Approve' | 'Reject' | 'Revise') => {
+      const statusMap: Record<string, string> = {
+          'Approve': 'Approved',
+          'Reject': 'Rejected',
+          'Revise': 'Revised'
+      };
+      setTaxKirData(prev => prev.map(t => t.id === item.id ? { ...t, statusApproval: statusMap[action] } : t));
+  };
+
+  const handleMutationWorkflowAction = (item: MutationRecord, action: 'Approve' | 'Reject' | 'Revise') => {
+      const statusMap: Record<string, string> = {
+          'Approve': 'Approved',
+          'Reject': 'Rejected',
+          'Revise': 'Revised'
+      };
+      setMutationData(prev => prev.map(m => m.id === item.id ? { ...m, statusApproval: statusMap[action] } : m));
+  };
+
+  const handleSalesWorkflowAction = (item: SalesRecord, action: 'Approve' | 'Reject' | 'Revise') => {
+      const statusMap: Record<string, string> = {
+          'Approve': 'Approved',
+          'Reject': 'Rejected',
+          'Revise': 'Revised'
+      };
+      setSalesData(prev => prev.map(s => s.id === item.id ? { ...s, statusApproval: statusMap[action] } : s));
+  };
+
+  // --- WORKFLOW HANDLERS (BUILDING) ---
   const handleWorkflowAction = (item: BuildingAssetRecord, action: 'Approve' | 'Reject' | 'Revise') => {
       const statusMap: Record<string, BuildingAssetRecord['approvalStatus']> = {
           'Approve': 'Approved',
@@ -275,7 +466,8 @@ const App: React.FC = () => {
       setBranchImprovementData(prev => prev.map(b => b.id === item.id ? { ...b, status: statusMap[action] } : b));
   };
 
-  // --- SAVE HANDLERS (PERSISTED) ---
+  // --- SAVE HANDLERS ---
+  // ... (Existing save handlers remain unchanged) ...
   const handleSaveBuilding = (data: Partial<BuildingRecord>) => {
       const isBranchImprovement = activeModule === 'Branch Improvement';
       const updateFunction = isBranchImprovement ? setBranchImprovementData : setBuildingData;
@@ -284,10 +476,11 @@ const App: React.FC = () => {
           const newBuilding: BuildingRecord = {
               id: `BDG-${Date.now()}`,
               assetNo: `BDG-NEW-${Math.floor(Math.random() * 1000)}`,
-              status: isBranchImprovement ? 'Pending' : 'Open',
+              status: 'Pending', 
               ...data
           } as BuildingRecord;
           updateFunction(prev => [newBuilding, ...prev]);
+          alert("Request Gedung/Bangunan Berhasil Diajukan!");
       } else if (selectedBuilding) {
           updateFunction(prev => prev.map(b => b.id === selectedBuilding.id ? { ...b, ...data } as BuildingRecord : b));
       }
@@ -362,19 +555,54 @@ const App: React.FC = () => {
   };
 
   const handleSaveGeneralMaster = (name: string) => {
+      const updateMasterData = (setter: React.Dispatch<React.SetStateAction<GeneralMasterItem[]>>, currentList: GeneralMasterItem[]) => {
+          if (modalMode === 'create') {
+              setter(prev => [...prev, { id: Date.now(), name: name.toUpperCase() }]);
+          } else if (selectedGeneralItem) {
+              setter(prev => prev.map(item => item.id === selectedGeneralItem.id ? { ...item, name: name.toUpperCase() } : item));
+          }
+      };
+
       if (activeModule === 'Jenis Kendaraan') {
-          if (modalMode === 'create') {
-              setVehicleTypeData(prev => [...prev, { id: Date.now(), name: name.toUpperCase() }]);
-          } else if (selectedGeneralItem) {
-              setVehicleTypeData(prev => prev.map(item => item.id === selectedGeneralItem.id ? { ...item, name: name.toUpperCase() } : item));
-          }
+          updateMasterData(setVehicleTypeData, vehicleTypeData);
       } else if (activeModule === 'Asset Category') {
-          if (modalMode === 'create') {
-              setAssetCategoryData(prev => [...prev, { id: Date.now(), name: name.toUpperCase() }]);
-          } else if (selectedGeneralItem) {
-              setAssetCategoryData(prev => prev.map(item => item.id === selectedGeneralItem.id ? { ...item, name: name.toUpperCase() } : item));
-          }
+          updateMasterData(setAssetCategoryData, assetCategoryData);
+      } else if (activeModule === 'Master Lokasi') {
+          updateMasterData(setLocationData, locationData);
+      } else if (activeModule === 'Master Departemen' || activeModule === 'Master Department') {
+          updateMasterData(setDepartmentData, departmentData);
+      } else if (activeModule === 'Master Satuan') {
+          updateMasterData(setUomMasterData, uomMasterData);
+      } else if (activeModule === 'Master Brand') {
+          updateMasterData(setBrandData, brandData);
+      } else if (activeModule === 'Master Cost Center') {
+          updateMasterData(setCostCenterData, costCenterData);
+      } else if (activeModule === 'Master Warna') {
+          updateMasterData(setColorData, colorData);
+      } else if (activeModule === 'Master Tipe Gedung') {
+          updateMasterData(setBuildingTypeData, buildingTypeData);
+      } else if (activeModule === 'Master Tipe Aset' || activeModule === 'Master Asset Type') {
+          updateMasterData(setGenAssetTypeData, genAssetTypeData);
+      } else if (activeModule === 'Master PPN') {
+          updateMasterData(setPpnData, ppnData);
+      } else if (activeModule === 'Master Brand Type') {
+          updateMasterData(setBrandTypeData, brandTypeData);
+      } else if (activeModule === 'Master Operator') {
+          updateMasterData(setOperatorData, operatorData);
       }
+      // New Master Data Saves
+      else if (activeModule === 'Jenis Pajak') updateMasterData(setTaxTypeData, taxTypeData);
+      else if (activeModule === 'Jenis Pembayaran') updateMasterData(setPaymentTypeData, paymentTypeData);
+      else if (activeModule === 'Jenis Servis') updateMasterData(setServiceTypeData, serviceTypeData);
+      else if (activeModule === 'Status Mutasi') updateMasterData(setMutationStatusData, mutationStatusData);
+      else if (activeModule === 'Status Penjualan') updateMasterData(setSalesStatusData, salesStatusData);
+      else if (activeModule === 'Status Request') updateMasterData(setRequestStatusData, requestStatusData);
+      else if (activeModule === 'Tipe Mutasi') updateMasterData(setMutationTypeData, mutationTypeData);
+      else if (activeModule === 'Tipe Vendor') updateMasterData(setVendorTypeData, vendorTypeData);
+      else if (activeModule === 'Role') updateMasterData(setRoleData, roleData);
+      else if (activeModule === 'Sync Branchs') updateMasterData(setSyncBranchData, syncBranchData);
+      else if (activeModule === 'Sync Channels') updateMasterData(setSyncChannelData, syncChannelData);
+
       setIsGeneralMasterModalOpen(false);
   };
 
@@ -442,15 +670,54 @@ const App: React.FC = () => {
           const newRecord: GeneralAssetRecord = {
               id: `${idPrefix}-${Date.now()}`,
               assetNumber: `${assetPrefix}-${Math.floor(1000 + Math.random() * 9000)}`,
+              approvalStatus: 'Pending', 
               ...data
           } as GeneralAssetRecord;
           updateFunction(prev => [newRecord, ...prev]);
+          alert("Request General Asset Berhasil Diajukan!");
       } else if (selectedGeneralAsset) {
           updateFunction(prev => prev.map(item => 
               item.id === selectedGeneralAsset.id ? { ...item, ...data } as GeneralAssetRecord : item
           ));
       }
       setIsGeneralAssetModalOpen(false);
+  };
+
+  const handleSaveVendor = (data: Partial<VendorRecord>) => {
+      if (modalMode === 'create') {
+          const newVendor: VendorRecord = {
+              id: Date.now(),
+              vendorCode: `VND-${Math.floor(Math.random() * 1000)}`,
+              ...data
+          } as VendorRecord;
+          setVendorData(prev => [newVendor, ...prev]);
+      } else if (selectedVendor) {
+          setVendorData(prev => prev.map(v => v.id === selectedVendor.id ? { ...v, ...data } as VendorRecord : v));
+      }
+      setIsVendorModalOpen(false);
+  };
+
+  // Determine Custom Button Label
+  const getCustomAddLabel = () => {
+      if (activeModule.includes('Master') || activeModule === 'Jenis Kendaraan' || activeModule === 'Asset Category') {
+          // Remove "Master " prefix if exists, or just use full name if not
+          const label = activeModule.replace('Master ', '');
+          return `Add ${label}`;
+      }
+      if (['Jenis Pajak', 'Jenis Pembayaran', 'Jenis Servis', 'Status Mutasi', 'Status Penjualan', 'Status Request', 'Tipe Mutasi', 'Tipe Vendor', 'Role', 'Sync Branchs', 'Sync Channels'].includes(activeModule)) {
+          return `Add ${activeModule}`;
+      }
+      if (activeModule === 'Daftar Aset') return 'Request Vehicle';
+      if (activeModule === 'Asset HC') return 'Request Asset HC';
+      if (activeModule === 'Asset IT') return 'Request Asset IT';
+      if (activeModule === 'Branch Improvement') return 'New Branch Req';
+      if (activeModule === 'Kontrak Kendaraan') return 'New Contract';
+      if (activeModule === 'Pajak & KIR') return 'Request Tax/KIR';
+      if (activeModule === 'Manajemen User') return 'Add User';
+      if (activeModule === 'Utility Monitoring') return 'Input Utility';
+      if (activeModule === 'Vendor') return 'Add Vendor';
+      
+      return undefined;
   };
 
   const renderContent = () => {
@@ -478,6 +745,39 @@ const App: React.FC = () => {
         });
      }, [branchImprovementData, activeTab]);
 
+     // Building Master Filter
+     const filteredBuildingMaster = useMemo(() => {
+        if (activeTab === 'SEMUA') return buildingData;
+        return buildingData.filter(b => {
+            const status = (b.status || '').toUpperCase();
+            if (activeTab === 'PENDING') return status.includes('PENDING');
+            return status === activeTab;
+        });
+     }, [buildingData, activeTab]);
+
+     // Vehicle Filter
+     const filteredVehicleData = useMemo(() => {
+        if (activeTab === 'SEMUA') return vehicleData;
+        return vehicleData.filter(v => {
+            const status = (v.approvalStatus || 'Approved').toUpperCase();
+            if (activeTab === 'PENDING') return status === 'PENDING';
+            if (activeTab === 'APPROVED') return status === 'APPROVED' || !v.approvalStatus;
+            return status === activeTab;
+        });
+     }, [vehicleData, activeTab]);
+
+     // General Asset Filter
+     const filteredGeneralAssetData = useMemo(() => {
+        const sourceData = activeModule === 'Asset IT' ? itAssetData : generalAssetData;
+        if (activeTab === 'SEMUA') return sourceData;
+        return sourceData.filter(g => {
+            const status = (g.approvalStatus || 'Approved').toUpperCase();
+            if (activeTab === 'PENDING') return status === 'PENDING';
+            if (activeTab === 'APPROVED') return status === 'APPROVED' || !g.approvalStatus;
+            return status === activeTab;
+        });
+     }, [activeModule, generalAssetData, itAssetData, activeTab]);
+
      const filteredUtility = useMemo(() => {
          if (activeTab === 'OVERVIEW' || activeTab === 'SEMUA') return utilityData;
          const target = activeTab.toLowerCase();
@@ -486,6 +786,16 @@ const App: React.FC = () => {
          if (target === 'internet') return utilityData.filter(u => u.type.toLowerCase().includes('internet'));
          return utilityData;
      }, [utilityData, activeTab]);
+
+     const filteredVendorData = useMemo(() => {
+        if (activeTab === 'SEMUA') return vendorData;
+        return vendorData.filter(v => v.status.toUpperCase() === activeTab);
+     }, [vendorData, activeTab]);
+
+     const filteredUserData = useMemo(() => {
+        if (activeTab === 'SEMUA') return userData;
+        return userData.filter(u => u.status.toUpperCase() === activeTab);
+     }, [userData, activeTab]);
 
      switch(activeModule) {
          case 'Request ATK':
@@ -496,28 +806,29 @@ const App: React.FC = () => {
             return <StationeryRequestTable data={arkData} onView={(item) => { setSelectedAsset(item); setModalMode('view'); setIsStockModalOpen(true); }} />;
          case 'Daftar Aset':
             return <VehicleTable 
-                data={vehicleData} 
-                onEdit={(item) => { setSelectedAsset(item as any); /* Quick cast fix */ setModalMode('edit'); setIsVehicleModalOpen(true); }}
+                data={filteredVehicleData} 
+                onEdit={(item) => { setSelectedAsset(item as any); setModalMode('edit'); setIsVehicleModalOpen(true); }}
                 onView={(item) => { setSelectedAsset(item as any); setModalMode('view'); setIsVehicleModalOpen(true); }}
                 onDelete={(id) => setVehicleData(prev => prev.filter(v => v.id !== id))}
+                onAction={handleVehicleWorkflowAction}
             />;
-         case 'Asset HC': // Changed case name
+         case 'Asset HC': 
             return <BuildingAssetTable 
                 data={filteredBuildingAssets} 
                 onEdit={(item) => { setSelectedBuildingAsset(item); setModalMode('edit'); setIsBuildingAssetItemModalOpen(true); }} 
                 onView={(item) => { setSelectedBuildingAsset(item); setModalMode('view'); setIsBuildingAssetItemModalOpen(true); }} 
                 onAction={handleWorkflowAction}
             />;
-         case 'Asset IT': // New Case for Asset IT
+         case 'Asset IT': 
             return <GeneralAssetTable 
-                data={itAssetData} 
+                data={filteredGeneralAssetData} 
                 onEdit={(item) => { setSelectedGeneralAsset(item); setModalMode('edit'); setIsGeneralAssetModalOpen(true); }}
                 onView={(item) => { setSelectedGeneralAsset(item); setModalMode('view'); setIsGeneralAssetModalOpen(true); }}
                 onDelete={(id) => setItAssetData(prev => prev.filter(g => g.id !== id))}
             />;
-         case 'General Asset List': // Changed to match new sub-menu logic
+         case 'General Asset List': 
             return <GeneralAssetTable 
-                data={generalAssetData} 
+                data={filteredGeneralAssetData} 
                 onEdit={(item) => { setSelectedGeneralAsset(item); setModalMode('edit'); setIsGeneralAssetModalOpen(true); }}
                 onView={(item) => { setSelectedGeneralAsset(item); setModalMode('view'); setIsGeneralAssetModalOpen(true); }}
                 onDelete={(id) => setGeneralAssetData(prev => prev.filter(g => g.id !== id))}
@@ -591,7 +902,7 @@ const App: React.FC = () => {
             />;
          case 'Master Gedung':
             return <BuildingTable 
-                data={buildingData} 
+                data={filteredBuildingMaster} 
                 onEdit={(item) => { setSelectedBuilding(item); setModalMode('edit'); setIsBuildingModalOpen(true); }} 
                 onView={(item) => { setSelectedBuilding(item); setModalMode('view'); setIsBuildingModalOpen(true); }} 
                 onDelete={(id) => setBuildingData(prev => prev.filter(b => b.id !== id))}
@@ -612,15 +923,17 @@ const App: React.FC = () => {
             return <ServiceLogTable 
                 data={serviceData} 
                 onEdit={()=>{}} 
-                onView={()=>{}} 
+                onView={(item) => { setSelectedAsset(item as any); setModalMode('view'); setIsServiceModalOpen(true); }} // Fix Service view
                 onDelete={(id) => setServiceData(prev => prev.filter(s => s.id !== id))}
+                onAction={handleServiceWorkflowAction}
             />;
          case 'Pajak & KIR':
             return <TaxKirTable 
                 data={taxKirData} 
-                onEdit={()=>{}} 
-                onView={()=>{}} 
+                onEdit={(item) => { /* Add Edit Logic */ }} 
+                onView={(item) => { /* Add View Logic */ }} 
                 onDelete={(id) => setTaxKirData(prev => prev.filter(t => t.id !== id))}
+                onAction={handleTaxKirWorkflowAction}
             />;
          case 'Kontrak Kendaraan':
             return <VehicleContractTable 
@@ -628,36 +941,60 @@ const App: React.FC = () => {
                 onEdit={(item) => { setSelectedContract(item); setModalMode('edit'); setIsVehicleContractModalOpen(true); }} 
                 onView={(item) => { setSelectedContract(item); setModalMode('view'); setIsVehicleContractModalOpen(true); }} 
                 onDelete={(id) => setVehicleContractData(prev => prev.filter(i => i.id !== id))}
+                onAction={handleContractWorkflowAction}
             />;
          case 'Log Book':
             return <LogBookTable data={logBookData} onEdit={()=>{}} onView={()=>{}} />;
          case 'Manajemen User':
             return <UserTable 
-                data={userData} 
+                data={filteredUserData} 
                 onEdit={(user) => { setSelectedUser(user); setModalMode('edit'); setIsUserModalOpen(true); }}
                 onView={(user) => { setSelectedUser(user); setModalMode('view'); setIsUserModalOpen(true); }}
                 onDelete={(id) => setUserData(prev => prev.filter(u => u.id !== id))}
             />;
-         case 'Jenis Kendaraan':
-            return <GeneralMasterTable 
-                data={vehicleTypeData} 
-                title={activeModule}
-                onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} 
-                onDelete={(id) => setVehicleTypeData(prev => prev.filter(i => i.id !== id))} 
+         case 'Vendor':
+            return <VendorTable 
+                data={filteredVendorData} 
+                onEdit={(item) => { setSelectedVendor(item); setModalMode('edit'); setIsVendorModalOpen(true); }}
+                onView={(item) => { setSelectedVendor(item); setModalMode('view'); setIsVendorModalOpen(true); }}
+                onDelete={(id) => setVendorData(prev => prev.filter(v => v.id !== id))}
             />;
-         case 'Asset Category':
-            return <GeneralMasterTable 
-                data={assetCategoryData} 
-                title={activeModule}
-                onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} 
-                onDelete={(id) => setAssetCategoryData(prev => prev.filter(i => i.id !== id))} 
-            />;
+         
+         // --- Master Data Renders ---
+         // ... (No Changes to Master Data Renders) ...
+         case 'Master Vendor': return <MasterVendorTable data={masterVendorData} onEdit={()=>{}} onView={()=>{}} />;
+         case 'Jenis Kendaraan': return <GeneralMasterTable data={vehicleTypeData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setVehicleTypeData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Asset Category': return <GeneralMasterTable data={assetCategoryData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setAssetCategoryData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Master Lokasi': return <GeneralMasterTable data={locationData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setLocationData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Master Department': case 'Master Departemen': return <GeneralMasterTable data={departmentData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setDepartmentData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Master Satuan': return <GeneralMasterTable data={uomMasterData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setUomMasterData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Master Brand': return <GeneralMasterTable data={brandData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setBrandData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Master Cost Center': return <GeneralMasterTable data={costCenterData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setCostCenterData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Master Warna': return <GeneralMasterTable data={colorData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setColorData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Master Tipe Gedung': return <GeneralMasterTable data={buildingTypeData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setBuildingTypeData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Master Asset Type': case 'Master Tipe Aset': return <GeneralMasterTable data={genAssetTypeData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setGenAssetTypeData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Master PPN': return <GeneralMasterTable data={ppnData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setPpnData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Master Brand Type': return <GeneralMasterTable data={brandTypeData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setBrandTypeData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Master Operator': return <GeneralMasterTable data={operatorData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setOperatorData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Jenis Pajak': return <GeneralMasterTable data={taxTypeData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setTaxTypeData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Jenis Pembayaran': return <GeneralMasterTable data={paymentTypeData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setPaymentTypeData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Jenis Servis': return <GeneralMasterTable data={serviceTypeData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setServiceTypeData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Status Mutasi': return <GeneralMasterTable data={mutationStatusData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setMutationStatusData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Status Penjualan': return <GeneralMasterTable data={salesStatusData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setSalesStatusData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Status Request': return <GeneralMasterTable data={requestStatusData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setRequestStatusData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Tipe Mutasi': return <GeneralMasterTable data={mutationTypeData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setMutationTypeData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Tipe Vendor': return <GeneralMasterTable data={vendorTypeData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setVendorTypeData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Role': return <GeneralMasterTable data={roleData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setRoleData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Sync Branchs': return <GeneralMasterTable data={syncBranchData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setSyncBranchData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Sync Channels': return <GeneralMasterTable data={syncChannelData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setSyncChannelData(prev => prev.filter(i => i.id !== id))} />;
+
          case 'Mutasi':
             return <MutationTable 
                 data={mutationData} 
                 onEdit={(item) => { setSelectedMutation(item); setModalMode('edit'); setIsMutationModalOpen(true); }}
                 onView={(item) => { setSelectedMutation(item); setModalMode('view'); setIsMutationModalOpen(true); }}
                 onDelete={(id) => setMutationData(prev => prev.filter(m => m.id !== id))}
+                onAction={handleMutationWorkflowAction}
             />;
          case 'Penjualan':
             return <SalesTable 
@@ -665,6 +1002,7 @@ const App: React.FC = () => {
                 onEdit={(item) => { setSelectedSales(item); setModalMode('edit'); setIsSalesModalOpen(true); }}
                 onView={(item) => { setSelectedSales(item); setModalMode('view'); setIsSalesModalOpen(true); }}
                 onDelete={(id) => setSalesData(prev => prev.filter(s => s.id !== id))}
+                onAction={handleSalesWorkflowAction}
             />;
          default:
             return <div className="p-8 text-center text-gray-500">Modul {activeModule} sedang dalam pengembangan.</div>;
@@ -672,8 +1010,9 @@ const App: React.FC = () => {
   };
 
   const isReminderModule = activeModule.includes('Reminder') || activeModule === 'Compliance & Legal';
-  const isBuildingAssetModule = activeModule === 'Asset HC'; // Updated
+  const isBuildingAssetModule = activeModule === 'Asset HC'; 
   const isMaintenanceModule = activeModule === 'Pemeliharaan Asset';
+  const isRequestModule = ['Daftar Aset', 'Asset IT', 'General Asset List', 'Master Gedung'].includes(activeModule);
 
   const getModuleTabs = () => {
     if (activeModule === 'Compliance & Legal') return ['DOKUMEN', 'PEMELIHARAAN'];
@@ -682,7 +1021,17 @@ const App: React.FC = () => {
     if (isBuildingAssetModule) return ['SEMUA', 'PENDING', 'REVISED', 'APPROVED', 'REJECTED'];
     if (isMaintenanceModule) return ['SEMUA', 'PENDING', 'APPROVED', 'REJECTED', 'REVISED'];
     if (activeModule === 'Branch Improvement') return ['SEMUA', 'PENDING', 'REVISED', 'APPROVED', 'REJECTED'];
-    if (activeModule.includes('Master') || activeModule === 'Jenis Kendaraan' || activeModule === 'Master Gedung' || activeModule === 'Asset Category') return ['SEMUA'];
+    if (isRequestModule) return ['SEMUA', 'PENDING', 'APPROVED', 'REJECTED'];
+    
+    // Add vehicle submenus to tabs
+    if (['Daftar Aset', 'Kontrak Kendaraan', 'Servis', 'Pajak & KIR', 'Mutasi', 'Penjualan'].includes(activeModule)) {
+        return ['SEMUA', 'PENDING', 'APPROVED', 'REJECTED'];
+    }
+
+    if (activeModule === 'Vendor') return ['SEMUA', 'ACTIVE', 'INACTIVE', 'BLACKLIST'];
+    if (activeModule === 'Manajemen User') return ['SEMUA', 'ACTIVE', 'INACTIVE'];
+
+    if (activeModule.includes('Master') || activeModule === 'Jenis Kendaraan' || activeModule === 'Asset Category' || activeModule.includes('Jenis') || activeModule.includes('Status') || activeModule.includes('Tipe') || activeModule === 'Role' || activeModule.includes('Sync')) return ['SEMUA'];
     return ['SEMUA', 'PENDING', 'APPROVED', 'REJECTED'];
   };
 
@@ -723,9 +1072,12 @@ const App: React.FC = () => {
                 activeTab={activeTab} 
                 onTabChange={setActiveTab} 
                 onAddClick={handleAddClick}
+                onExportClick={handleExport}
                 moduleName={activeModule}
                 hideAdd={isReminderModule}
                 hideImport={isReminderModule || activeModule === 'Utility Monitoring'}
+                hideExport={!shouldShowExport}
+                customAddLabel={getCustomAddLabel()} // Pass dynamic label
             />
             
             {renderContent()}
@@ -748,15 +1100,17 @@ const App: React.FC = () => {
         onClose={() => setIsVehicleModalOpen(false)} 
         onSave={(data) => { 
             if (modalMode === 'create') {
-                setVehicleData(prev => [{id: Date.now(), ...data} as VehicleRecord, ...prev]); 
+                setVehicleData(prev => [{id: Date.now(), approvalStatus: 'Pending', ...data} as VehicleRecord, ...prev]); 
+                alert("Request Aset Kendaraan Berhasil Diajukan!");
             } else if (selectedAsset) {
-                // Fix for edit mode in Vehicle
                 setVehicleData(prev => prev.map(v => v.id === (selectedAsset as any).id ? { ...v, ...data } as VehicleRecord : v));
             }
             setIsVehicleModalOpen(false); 
         }}
         initialData={selectedAsset as any} 
         mode={modalMode}
+        brandList={brandData}
+        colorList={colorData}
       />
 
       <BuildingModal 
@@ -765,6 +1119,7 @@ const App: React.FC = () => {
         onSave={handleSaveBuilding}
         initialData={selectedBuilding || undefined}
         mode={modalMode}
+        buildingTypeList={buildingTypeData}
       />
 
       <BuildingAssetItemModal 
@@ -856,6 +1211,18 @@ const App: React.FC = () => {
         onClose={() => setIsGeneralAssetModalOpen(false)}
         onSave={handleSaveGeneralAsset}
         initialData={selectedGeneralAsset || undefined}
+        mode={modalMode}
+        assetTypeList={genAssetTypeData}
+        categoryList={assetCategoryData}
+        locationList={locationData}
+        departmentList={departmentData}
+      />
+
+      <VendorModal 
+        isOpen={isVendorModalOpen}
+        onClose={() => setIsVendorModalOpen(false)}
+        onSave={handleSaveVendor}
+        initialData={selectedVendor || undefined}
         mode={modalMode}
       />
     </div>

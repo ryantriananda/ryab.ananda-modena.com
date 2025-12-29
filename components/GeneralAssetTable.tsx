@@ -11,6 +11,13 @@ interface Props {
 }
 
 export const GeneralAssetTable: React.FC<Props> = ({ data, onEdit, onView, onDelete }) => {
+  const getApprovalBadge = (status: string) => {
+      const s = (status || 'Approved').toLowerCase();
+      if(s === 'pending') return <span className="inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.1em] bg-orange-50 text-orange-600 border border-orange-200">Pending</span>;
+      if(s === 'rejected') return <span className="inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.1em] bg-red-50 text-red-600 border border-red-200">Rejected</span>;
+      return <span className="inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.1em] bg-[#E8FDF5] text-[#059669] border border-[#10B981]/20">Approved</span>;
+  }
+
   return (
     <div className="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden transition-all duration-500">
       <div className="overflow-x-auto custom-scrollbar">
@@ -47,11 +54,8 @@ export const GeneralAssetTable: React.FC<Props> = ({ data, onEdit, onView, onDel
                   <ChevronsUpDown size={12} className="text-gray-300" />
                 </div>
               </th>
-              <th className="p-6 group cursor-pointer hover:bg-gray-200/50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">ADDRESS</span>
-                  <ChevronsUpDown size={12} className="text-gray-300" />
-                </div>
+              <th className="p-6 w-32 text-center">
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">STATUS</span>
               </th>
               <th className="p-6 w-32 text-center pr-8">
                   <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">ACTION</span>
@@ -104,11 +108,11 @@ export const GeneralAssetTable: React.FC<Props> = ({ data, onEdit, onView, onDel
                         </div>
                     </div>
                 </td>
-                <td className="p-6">
-                    <p className="text-[11px] font-medium text-gray-500 line-clamp-2 leading-relaxed max-w-[250px]">{item.address}</p>
+                <td className="p-6 text-center">
+                    {getApprovalBadge(item.approvalStatus || 'Approved')}
                 </td>
                 <td className="p-6 text-center pr-8">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-1">
                          <button onClick={(e) => { e.stopPropagation(); onView?.(item); }} className="p-2 text-gray-300 hover:text-black transition-all rounded-lg hover:bg-gray-50">
                             <Eye size={18} />
                          </button>

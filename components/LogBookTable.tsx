@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LogBookRecord } from '../types';
 import { ChevronsUpDown, Eye, Pencil, User, Users, Baby, MapPin, Clock, Calendar, MessageSquare, MoreHorizontal, ChevronLeft, ChevronRight, Activity } from 'lucide-react';
@@ -123,7 +124,7 @@ export const LogBookTable: React.FC<Props> = ({ data, onEdit, onView }) => {
                         </div>
                     </td>
                     <td className="p-5 text-center">
-                        <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-center gap-1">
                             <button 
                                 onClick={(e) => { e.stopPropagation(); onView?.(item); }}
                                 className="text-gray-400 hover:text-black transition-all p-2 rounded-xl hover:bg-gray-100 active:scale-90"

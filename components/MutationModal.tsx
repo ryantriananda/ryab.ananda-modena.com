@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, Send, MapPin, Calendar, Building, Info, AlertTriangle } from 'lucide-react';
+import { X, Save, Send, MapPin, Calendar, Building, Info, AlertTriangle, FileText, CheckCircle2, Clock } from 'lucide-react';
 import { MutationRecord, VehicleRecord } from '../types';
 
 interface Props {
@@ -20,6 +20,7 @@ export const MutationModal: React.FC<Props> = ({
     mode = 'create',
     vehicleList = []
 }) => {
+  const [activeTab, setActiveTab] = useState('DETAILS');
   const [form, setForm] = useState<Partial<MutationRecord>>({
     status: 'Draft',
     statusApproval: 'Pending',
@@ -42,6 +43,7 @@ export const MutationModal: React.FC<Props> = ({
             lokasiTujuan: ''
         });
       }
+      setActiveTab('DETAILS');
     }
   }, [isOpen, initialData]);
 
@@ -93,10 +95,15 @@ export const MutationModal: React.FC<Props> = ({
           </button>
         </div>
 
+        <div className="bg-white border-b border-gray-100 flex px-10 shrink-0 gap-8">
+            <button onClick={() => setActiveTab('DETAILS')} className={`py-3 text-[10px] font-black uppercase tracking-widest border-b-2 ${activeTab === 'DETAILS' ? 'border-black text-black' : 'border-transparent text-gray-400'}`}>Details</button>
+            <button onClick={() => setActiveTab('WORKFLOW')} className={`py-3 text-[10px] font-black uppercase tracking-widest border-b-2 ${activeTab === 'WORKFLOW' ? 'border-black text-black' : 'border-transparent text-gray-400'}`}>Workflow</button>
+        </div>
+
         {/* Content */}
         <div className="p-10 overflow-y-auto custom-scrollbar">
+            {activeTab === 'DETAILS' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
                 {/* Vehicle Selection */}
                 <div className="md:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
                     <div className="flex items-center gap-3 mb-6">
@@ -195,6 +202,40 @@ export const MutationModal: React.FC<Props> = ({
                     </div>
                 </div>
             </div>
+            ) : (
+                <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="bg-white p-12 rounded-[2.5rem] border border-gray-100 shadow-sm relative overflow-hidden">
+                        <div className="absolute left-[51px] top-12 bottom-12 w-[2px] bg-gray-100"></div>
+                        <div className="space-y-10 relative z-10">
+                            <div className="flex gap-8">
+                                <div className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center shadow-lg shadow-black/20 shrink-0">
+                                    <FileText size={20} strokeWidth={3} />
+                                </div>
+                                <div className="pt-2">
+                                    <h4 className="text-[13px] font-black text-black uppercase tracking-tight">Mutation Request Created</h4>
+                                    <p className="text-[11px] text-gray-400 mt-1">Submitted on {form.tglPermintaan}</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-8">
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 border-4 border-white shadow-lg ${
+                                    form.statusApproval === 'Approved' ? 'bg-green-500 text-white shadow-green-200' :
+                                    form.statusApproval === 'Rejected' ? 'bg-red-500 text-white shadow-red-200' :
+                                    'bg-orange-500 text-white shadow-orange-200'
+                                }`}>
+                                    {form.statusApproval === 'Approved' ? <CheckCircle2 size={20} /> : 
+                                     form.statusApproval === 'Rejected' ? <X size={20} /> : <Clock size={20} />}
+                                </div>
+                                <div className="pt-2">
+                                    <h4 className="text-[13px] font-black text-black uppercase tracking-tight">Status: {form.statusApproval}</h4>
+                                    <p className="text-[11px] text-gray-400 mt-1">
+                                        {form.statusApproval === 'Approved' ? 'Transfer Approved' : 'Waiting for approval'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                  </div>
+              </div>
+            )}
         </div>
 
         {/* Footer */}

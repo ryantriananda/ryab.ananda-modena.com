@@ -164,7 +164,7 @@ export const ReminderTable: React.FC<Props> = ({ data, onView, onDelete, title }
                                 </div>
                             </td>
                             <td className="p-5 text-center pr-8">
-                                <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex items-center justify-center gap-1">
                                     <button onClick={(e) => { e.stopPropagation(); onView?.(item); }} className="p-2 text-gray-300 hover:text-black transition-all rounded-lg hover:bg-gray-50">
                                         <Eye size={16} />
                                     </button>

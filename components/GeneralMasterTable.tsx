@@ -51,7 +51,7 @@ export const GeneralMasterTable: React.FC<Props> = ({ data, onEdit, onDelete, ti
                             </div>
                         </td>
                         <td className="p-6 text-center">
-                            <div className="flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
+                            <div className="flex items-center justify-center gap-3">
                                 <button 
                                     onClick={() => onEdit(item)}
                                     className="p-3 text-gray-400 hover:text-black bg-white hover:bg-gray-100 rounded-xl transition-all border border-transparent hover:border-gray-200 shadow-sm hover:shadow-md"

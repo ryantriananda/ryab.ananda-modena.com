@@ -175,7 +175,7 @@ export const BuildingMaintenanceTable: React.FC<Props> = ({ data, onEdit, onView
                     {renderWorkflowActions(item)}
                 </td>
                 <td className="p-6 text-center pr-8">
-                    <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-center gap-2">
                          <button 
                             onClick={(e) => { e.stopPropagation(); onView?.(item); }}
                             className="p-2 text-gray-300 hover:text-black transition-all bg-gray-50 rounded-lg hover:bg-gray-100"

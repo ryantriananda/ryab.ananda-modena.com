@@ -51,6 +51,14 @@ export interface AssetRecord {
   status: 'Approved' | 'Pending' | 'Rejected' | 'Closed' | 'Draft' | 'On Progress';
 }
 
+export interface WorkflowLog {
+  step: string;
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Revised';
+  actor: string;
+  date: string;
+  comment?: string;
+}
+
 export interface VehicleRecord {
   id: number;
   noRegistrasi: string;
@@ -59,6 +67,8 @@ export interface VehicleRecord {
   channel: string;
   cabang: string;
   status: 'Aktif' | 'Tidak Aktif';
+  approvalStatus?: 'Pending' | 'Approved' | 'Rejected' | 'Revised'; 
+  workflow?: WorkflowLog[];
   ownership?: 'Milik Modena' | 'Sewa';
   merek?: string;
   tipeKendaraan?: string;
@@ -79,6 +89,14 @@ export interface VehicleRecord {
   hargaBeli?: string;
   noPolisAsuransi?: string;
   jangkaPertanggungan?: string;
+  
+  // Documents & Photos
+  stnkUrl?: string;
+  kirUrl?: string;
+  photoFront?: string;
+  photoRear?: string;
+  photoRight?: string;
+  photoLeft?: string;
 }
 
 export interface VehicleContractRecord {
@@ -91,6 +109,8 @@ export interface VehicleContractRecord {
   tglBerakhir: string;
   biayaSewa: string;
   status: 'Aktif' | 'Selesai';
+  approvalStatus?: 'Pending' | 'Approved' | 'Rejected' | 'Revised';
+  workflow?: WorkflowLog[];
   keterangan?: string;
   ownership?: 'Milik Modena' | 'Sewa';
   
@@ -326,6 +346,7 @@ export interface ServiceRecord {
   cabang: string;
   status: string;
   statusApproval: string;
+  workflow?: WorkflowLog[];
   aset?: string;
   tglStnk?: string;
   jenisServis?: string;
@@ -350,6 +371,7 @@ export interface TaxKirRecord {
   cabang: string;
   status: string;
   statusApproval: string;
+  workflow?: WorkflowLog[];
   aset?: string;
   tahunPembuatan?: string;
   vendor?: string;
@@ -368,6 +390,7 @@ export interface MutationRecord {
   lokasiTujuan: string;
   status: string;
   statusApproval: string;
+  workflow?: WorkflowLog[];
 }
 
 export interface SalesRecord {
@@ -379,6 +402,7 @@ export interface SalesRecord {
   hargaTertinggi: string;
   status: string;
   statusApproval: string;
+  workflow?: WorkflowLog[];
   
 }
 
@@ -470,7 +494,13 @@ export interface VendorRecord {
   id: string | number;
   vendorName: string;
   vendorCode: string;
-  status: string;
+  status: 'Active' | 'Inactive' | 'Blacklist';
+  type: string;
+  category: string;
+  email: string;
+  phone: string;
+  address: string;
+  picName?: string;
 }
 
 export interface GeneralMasterItem {
@@ -506,4 +536,5 @@ export interface GeneralAssetRecord {
   department: string;
   subLocation: string;
   address: string;
+  approvalStatus?: 'Pending' | 'Approved' | 'Rejected'; // Added approval status
 }

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { X, Save, Wrench, Plus, Upload, Trash2, Calendar, Clock, ChevronRight, Info, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { ServiceRecord, VehicleRecord, SparePart } from '../types';
 
@@ -20,6 +20,7 @@ export const ServiceModal: React.FC<Props> = ({
     mode = 'create',
     vehicleList
 }) => {
+  const [activeTab, setActiveTab] = useState('DETAILS');
   const [form, setForm] = useState<Partial<ServiceRecord>>({
     noPolisi: '',
     aset: '',
@@ -28,6 +29,7 @@ export const ServiceModal: React.FC<Props> = ({
     kmKendaraan: '',
     masalah: '',
     jenisServis: 'Servis Rutin',
+    statusApproval: 'Pending',
     spareParts: []
   });
 
@@ -47,10 +49,12 @@ export const ServiceModal: React.FC<Props> = ({
           kmKendaraan: '',
           masalah: '',
           jenisServis: 'Servis Rutin',
+          statusApproval: 'Pending',
           spareParts: []
         });
         setParts([]);
       }
+      setActiveTab('DETAILS');
     }
   }, [isOpen, initialData]);
 
@@ -85,7 +89,6 @@ export const ServiceModal: React.FC<Props> = ({
 
   if (!isOpen) return null;
 
-  // Fix: make children optional to resolve TS error where children are passed via JSX but reported as missing
   const Label = ({ children }: { children?: React.ReactNode }) => (
     <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">
       {children}
@@ -96,7 +99,6 @@ export const ServiceModal: React.FC<Props> = ({
     <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center backdrop-blur-sm p-4">
       <div className="bg-white w-full max-w-[1100px] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-200">
         
-        {/* Header */}
         <div className="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gray-50 rounded-lg">
@@ -109,13 +111,16 @@ export const ServiceModal: React.FC<Props> = ({
           </button>
         </div>
 
-        {/* Content Area */}
+        <div className="bg-white border-b border-gray-100 flex px-8 shrink-0 gap-6">
+            <button onClick={() => setActiveTab('DETAILS')} className={`py-3 text-[10px] font-black uppercase tracking-widest border-b-2 ${activeTab === 'DETAILS' ? 'border-black text-black' : 'border-transparent text-gray-400'}`}>Details</button>
+            <button onClick={() => setActiveTab('WORKFLOW')} className={`py-3 text-[10px] font-black uppercase tracking-widest border-b-2 ${activeTab === 'WORKFLOW' ? 'border-black text-black' : 'border-transparent text-gray-400'}`}>Workflow</button>
+        </div>
+
         <div className="flex-1 overflow-hidden flex flex-col lg:flex-row bg-[#FBFBFB]">
           
-          {/* Main Form (Left) */}
+          {activeTab === 'DETAILS' && (
+          <>
           <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-8">
-            
-            {/* Vehicle Unit Data */}
             <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-1 h-6 bg-black rounded-full"></div>
@@ -138,19 +143,14 @@ export const ServiceModal: React.FC<Props> = ({
                       <option value="">(Pilih Unit)</option>
                       {vehicleList.map(v => <option key={v.id} value={v.noPolisi}>{v.noPolisi} - {v.nama}</option>)}
                     </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                    </div>
                   </div>
                 </div>
 
-                {/* Jenis Servis Flagging */}
                 <div>
                     <Label>Kategori Pemeliharaan</Label>
                     <div className="flex gap-4">
                         {['Servis Rutin', 'Non-Rutin'].map(type => {
                             const isSelected = form.jenisServis === type;
-                            const isRutin = type === 'Servis Rutin';
                             return (
                                 <button
                                     key={type}
@@ -162,11 +162,7 @@ export const ServiceModal: React.FC<Props> = ({
                                         : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                     }`}
                                 >
-                                    <div className="flex items-center justify-center gap-2 relative z-10">
-                                        {isRutin ? <CheckCircle2 size={16} className={isSelected ? 'text-green-400' : 'text-gray-300'} /> : <AlertTriangle size={16} className={isSelected ? 'text-orange-400' : 'text-gray-300'} />}
-                                        <span className="text-[11px] font-black uppercase tracking-widest">{type}</span>
-                                    </div>
-                                    {isSelected && <div className="absolute inset-0 bg-white/10" />}
+                                    <span className="text-[11px] font-black uppercase tracking-widest">{type}</span>
                                 </button>
                             );
                         })}
@@ -179,7 +175,6 @@ export const ServiceModal: React.FC<Props> = ({
                     <input 
                       type="text"
                       className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-bold placeholder:text-gray-300 focus:border-black outline-none shadow-sm"
-                      placeholder="Contoh: 45000"
                       value={form.kmKendaraan}
                       onChange={(e) => setForm({...form, kmKendaraan: e.target.value})}
                       disabled={isView}
@@ -190,7 +185,6 @@ export const ServiceModal: React.FC<Props> = ({
                     <input 
                       type="text"
                       className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-bold placeholder:text-gray-300 focus:border-black outline-none shadow-sm"
-                      placeholder="Nama Bengkel"
                       value={form.vendor}
                       onChange={(e) => setForm({...form, vendor: e.target.value})}
                       disabled={isView}
@@ -199,18 +193,9 @@ export const ServiceModal: React.FC<Props> = ({
                 </div>
 
                 <div>
-                  <Label>Bukti Kwitansi / Foto (IMG)</Label>
-                  <div className="border-2 border-dashed border-gray-100 rounded-2xl py-12 flex flex-col items-center justify-center bg-gray-50/20 hover:bg-gray-50/50 transition-colors cursor-pointer group">
-                    <Upload size={32} className="text-gray-300 group-hover:text-black mb-3 transition-colors" />
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover:text-black transition-colors">Klik untuk unggah lampiran</p>
-                  </div>
-                </div>
-
-                <div>
                   <Label>Deskripsi Masalah</Label>
                   <textarea 
                     className="w-full border border-gray-200 rounded-2xl px-4 py-4 text-sm font-medium min-h-[120px] focus:border-black outline-none transition-all placeholder:text-gray-300 shadow-sm"
-                    placeholder="Jelaskan keluhan unit..."
                     value={form.masalah}
                     onChange={(e) => setForm({...form, masalah: e.target.value})}
                     disabled={isView}
@@ -219,7 +204,6 @@ export const ServiceModal: React.FC<Props> = ({
               </div>
             </div>
 
-            {/* Spare Parts Section */}
             <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
@@ -240,7 +224,7 @@ export const ServiceModal: React.FC<Props> = ({
                 <table className="w-full text-left">
                   <thead>
                     <tr className="text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50">
-                      <th className="pb-4 px-2">NAMA BARANG / DESKRIPSI</th>
+                      <th className="pb-4 px-2">NAMA BARANG</th>
                       <th className="pb-4 px-2 text-center w-24">QTY</th>
                       <th className="pb-4 px-2 text-right w-40">HARGA (RP)</th>
                       <th className="pb-4 px-2 text-right w-40">SUBTOTAL</th>
@@ -258,7 +242,6 @@ export const ServiceModal: React.FC<Props> = ({
                             <input 
                               type="text"
                               className="w-full border-none p-0 text-[12px] font-bold text-black focus:ring-0 placeholder:text-gray-300 bg-transparent"
-                              placeholder="Input Nama Barang..."
                               value={part.name}
                               onChange={(e) => updatePart(idx, 'name', e.target.value)}
                               disabled={isView}
@@ -295,13 +278,6 @@ export const ServiceModal: React.FC<Props> = ({
                         </tr>
                       );
                     })}
-                    {parts.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="py-12 text-center">
-                          <p className="text-[11px] font-medium text-gray-300 italic">Belum ada rincian penggantian suku cadang.</p>
-                        </td>
-                      </tr>
-                    )}
                   </tbody>
                   <tfoot>
                     <tr>
@@ -318,66 +294,49 @@ export const ServiceModal: React.FC<Props> = ({
               </div>
             </div>
           </div>
+          </>
+          )}
 
-          {/* Sidebar (Right) */}
-          <div className="w-full lg:w-[320px] bg-white border-l border-gray-100 p-8 overflow-y-auto shrink-0 custom-scrollbar">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <Clock size={16} className="text-black" />
-                <h3 className="text-[11px] font-black text-black uppercase tracking-widest">Riwayat Sebelumnya</h3>
-              </div>
-              <span className="bg-blue-600 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase">1 LOG</span>
-            </div>
-
-            <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 mb-8 flex gap-3">
-              <Info size={16} className="text-blue-600 shrink-0 mt-0.5" />
-              <p className="text-[10px] font-bold text-blue-600 leading-relaxed">
-                Klik log di bawah untuk melihat rincian riwayat servis sebelumnya.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              {/* History Card 1 */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:border-black transition-all cursor-pointer group">
-                <div className="flex justify-between items-start mb-3">
-                  <span className="text-[9px] font-mono font-black text-black bg-gray-50 px-2 py-0.5 rounded">SRV/2024/001</span>
-                  <div className="flex items-center gap-1.5 text-[8px] font-bold text-gray-300">
-                    <Calendar size={10} />
-                    10 FEB 2024
+          {activeTab === 'WORKFLOW' && (
+              <div className="flex-1 p-12 overflow-y-auto">
+                  <div className="max-w-2xl mx-auto bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
+                        <div className="absolute left-[51px] top-12 bottom-12 w-[2px] bg-gray-100"></div>
+                        <div className="space-y-10 relative z-10">
+                            <div className="flex gap-8">
+                                <div className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center shadow-lg shadow-black/20 shrink-0">
+                                    <Wrench size={20} strokeWidth={3} />
+                                </div>
+                                <div className="pt-2">
+                                    <h4 className="text-[13px] font-black text-black uppercase tracking-tight">Service Request Created</h4>
+                                    <p className="text-[11px] text-gray-400 mt-1">On {form.tglRequest}</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-8">
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 border-4 border-white shadow-lg ${
+                                    form.statusApproval === 'Approved' ? 'bg-green-500 text-white shadow-green-200' :
+                                    form.statusApproval === 'Rejected' ? 'bg-red-500 text-white shadow-red-200' :
+                                    'bg-orange-500 text-white shadow-orange-200'
+                                }`}>
+                                    {form.statusApproval === 'Approved' ? <CheckCircle2 size={20} /> : 
+                                     form.statusApproval === 'Rejected' ? <X size={20} /> : <Clock size={20} />}
+                                </div>
+                                <div className="pt-2">
+                                    <h4 className="text-[13px] font-black text-black uppercase tracking-tight">Status: {form.statusApproval}</h4>
+                                    <p className="text-[11px] text-gray-400 mt-1">
+                                        {form.statusApproval === 'Approved' ? 'Service Approved' : 'Waiting for approval'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                   </div>
-                </div>
-                <h4 className="text-[11px] font-black text-black uppercase mb-1">Servis Rutin</h4>
-                <p className="text-[10px] text-gray-400 italic line-clamp-2 mb-4 leading-relaxed">
-                  "Suara mesin kasar dan tarikan berat pada tanjakan"
-                </p>
-                <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                  <div className="text-[10px] font-black text-orange-600">45.000 KM</div>
-                  <div className="text-[10px] font-black text-black">Rp 1.250.000</div>
-                </div>
               </div>
-              
-              <div className="h-24 border-2 border-dashed border-gray-50 rounded-2xl flex items-center justify-center opacity-30">
-                <ChevronRight size={24} className="text-gray-100" />
-              </div>
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Footer */}
         <div className="px-8 py-5 border-t border-gray-100 flex justify-between bg-white shrink-0">
-          <button 
-            onClick={onClose}
-            className="px-10 py-3 text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-all bg-gray-50 rounded-xl"
-          >
-            Batal
-          </button>
+          <button onClick={onClose} className="px-10 py-3 text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-all bg-gray-50 rounded-xl">Batal</button>
           {!isView && (
-            <button 
-              onClick={handleSave}
-              className="bg-black text-white px-16 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all active:scale-95 shadow-xl shadow-black/20"
-            >
-              Simpan Laporan Servis
-            </button>
+            <button onClick={handleSave} className="bg-black text-white px-16 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all active:scale-95 shadow-xl shadow-black/20">Simpan Laporan Servis</button>
           )}
         </div>
       </div>

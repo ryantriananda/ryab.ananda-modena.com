@@ -1,20 +1,50 @@
 
 import React from 'react';
 import { VehicleContractRecord } from '../types';
-import { ChevronsUpDown, Eye, Pencil, Trash2 } from 'lucide-react';
+import { ChevronsUpDown, Eye, Pencil, Trash2, CheckCircle, XCircle, RotateCcw } from 'lucide-react';
 
 interface Props {
   data: VehicleContractRecord[];
   onEdit?: (item: VehicleContractRecord) => void;
   onView?: (item: VehicleContractRecord) => void;
   onDelete?: (id: string) => void;
+  onAction?: (item: VehicleContractRecord, action: 'Approve' | 'Reject' | 'Revise') => void;
 }
 
-export const VehicleContractTable: React.FC<Props> = ({ data, onEdit, onView, onDelete }) => {
+export const VehicleContractTable: React.FC<Props> = ({ data, onEdit, onView, onDelete, onAction }) => {
+  
+  const getStatusBadge = (status: string) => {
+      const s = (status || '').toLowerCase();
+      if(s.includes('pending')) return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-orange-50 text-orange-600 border border-orange-200">Pending</span>;
+      if(s.includes('rejected')) return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-red-50 text-red-600 border border-red-200">Rejected</span>;
+      if(s.includes('revised')) return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-blue-50 text-blue-600 border border-blue-200">Revised</span>;
+      return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-green-100 text-green-700 border border-green-200">Active</span>;
+  };
+
+  const renderWorkflowActions = (item: VehicleContractRecord) => {
+      const s = (item.approvalStatus || 'Approved').toLowerCase();
+      if (s.includes('pending') && onAction) {
+          return (
+              <div className="flex items-center justify-center gap-2">
+                  <button onClick={(e) => { e.stopPropagation(); onAction(item, 'Approve'); }} className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-xl shadow-md transition-all active:scale-95" title="Approve"><CheckCircle size={16} strokeWidth={2.5} /></button>
+                  <button onClick={(e) => { e.stopPropagation(); onAction(item, 'Revise'); }} className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-md transition-all active:scale-95" title="Revise"><RotateCcw size={16} strokeWidth={2.5} /></button>
+                  <button onClick={(e) => { e.stopPropagation(); onAction(item, 'Reject'); }} className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-md transition-all active:scale-95" title="Reject"><XCircle size={16} strokeWidth={2.5} /></button>
+              </div>
+          );
+      }
+      return (
+          <div className="text-center">
+              <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest italic">
+                  WORKFLOW COMPLETED
+              </span>
+          </div>
+      );
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1200px] text-left border-collapse">
+        <table className="w-full min-w-[1300px] text-left border-collapse">
           <thead>
             <tr className="bg-gray-100 border-b border-gray-200 text-xs font-semibold text-gray-700 uppercase tracking-wider">
               <th className="p-4 group cursor-pointer hover:bg-gray-200 transition-colors">
@@ -53,7 +83,8 @@ export const VehicleContractTable: React.FC<Props> = ({ data, onEdit, onView, on
                   <ChevronsUpDown size={14} className="text-gray-500 group-hover:text-gray-700"/>
                 </div>
               </th>
-              <th className="p-4 w-24 text-center">Aksi</th>
+              <th className="p-4 w-56 text-center">Workflow Actions</th>
+              <th className="p-4 w-32 text-center">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 text-sm text-gray-700">
@@ -74,30 +105,23 @@ export const VehicleContractTable: React.FC<Props> = ({ data, onEdit, onView, on
                             Rp {parseInt(item.biayaSewa || '0').toLocaleString('id-ID')}
                         </td>
                         <td className="p-4">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
-                                item.status === 'Aktif' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200'
-                            }`}>
-                                {item.status}
-                            </span>
+                            {getStatusBadge(item.approvalStatus || 'Approved')}
                         </td>
                         <td className="p-4">
+                            {renderWorkflowActions(item)}
+                        </td>
+                        <td className="p-4 text-center">
                             <div className="flex items-center justify-center gap-2">
-                                <button onClick={(e) => { e.stopPropagation(); onView?.(item); }} className="text-gray-400 hover:text-black transition-colors">
-                                    <Eye size={18} />
-                                </button>
-                                <button onClick={(e) => { e.stopPropagation(); onEdit?.(item); }} className="text-gray-400 hover:text-blue-600 transition-colors">
-                                    <Pencil size={18} />
-                                </button>
-                                <button onClick={(e) => { e.stopPropagation(); onDelete?.(item.id); }} className="text-gray-400 hover:text-red-500 transition-colors">
-                                    <Trash2 size={18} />
-                                </button>
+                                <button onClick={(e) => { e.stopPropagation(); onView?.(item); }} className="text-gray-400 hover:text-black transition-colors"><Eye size={18} /></button>
+                                <button onClick={(e) => { e.stopPropagation(); onEdit?.(item); }} className="text-gray-400 hover:text-blue-600 transition-colors"><Pencil size={18} /></button>
+                                <button onClick={(e) => { e.stopPropagation(); onDelete?.(item.id); }} className="text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
                             </div>
                         </td>
                     </tr>
                 ))
             ) : (
                 <tr>
-                    <td colSpan={7} className="p-12 text-center text-gray-400 italic">Belum ada kontrak terdaftar</td>
+                    <td colSpan={8} className="p-12 text-center text-gray-400 italic">Belum ada kontrak terdaftar</td>
                 </tr>
             )}
           </tbody>

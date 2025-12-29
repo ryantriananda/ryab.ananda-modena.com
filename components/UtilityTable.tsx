@@ -75,7 +75,7 @@ export const UtilityTable: React.FC<Props> = ({ data, onEdit, onView, onDelete }
                     {getStatusBadge(item.status)}
                 </td>
                 <td className="p-6 text-center pr-8">
-                    <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-center gap-2">
                          <button onClick={() => onView?.(item)} className="p-2 text-gray-300 hover:text-black transition-all">
                             <Eye size={16} />
                          </button>

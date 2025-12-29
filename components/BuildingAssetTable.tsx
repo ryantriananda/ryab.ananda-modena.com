@@ -151,7 +151,7 @@ export const BuildingAssetTable: React.FC<Props> = ({ data, onEdit, onView, onAc
                     )}
                 </td>
                 <td className="p-6 text-right pr-8">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-1">
                          <button onClick={() => onView?.(item)} className="p-2 text-gray-300 hover:text-black transition-all">
                             <Eye size={18} />
                          </button>

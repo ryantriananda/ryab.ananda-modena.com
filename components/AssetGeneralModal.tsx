@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Save, ChevronsUpDown, Building2 } from 'lucide-react';
-import { GeneralAssetRecord } from '../types';
+import { GeneralAssetRecord, GeneralMasterItem } from '../types';
 
 interface Props {
   isOpen: boolean;
@@ -9,6 +9,10 @@ interface Props {
   onSave: (data: Partial<GeneralAssetRecord>) => void;
   initialData?: Partial<GeneralAssetRecord>;
   mode?: 'create' | 'edit' | 'view';
+  assetTypeList?: GeneralMasterItem[];
+  categoryList?: GeneralMasterItem[];
+  locationList?: GeneralMasterItem[];
+  departmentList?: GeneralMasterItem[];
 }
 
 export const AssetGeneralModal: React.FC<Props> = ({ 
@@ -16,11 +20,15 @@ export const AssetGeneralModal: React.FC<Props> = ({
     onClose, 
     onSave, 
     initialData, 
-    mode = 'create' 
+    mode = 'create',
+    assetTypeList = [],
+    categoryList = [],
+    locationList = [],
+    departmentList = []
 }) => {
   const [form, setForm] = useState<Partial<GeneralAssetRecord>>({
     assetNumber: '[Auto Generate]',
-    assetCategory: 'Building',
+    assetCategory: '',
     ownership: 'Rent',
     type: '',
     assetLocation: '',
@@ -37,7 +45,7 @@ export const AssetGeneralModal: React.FC<Props> = ({
       } else {
         setForm({
           assetNumber: '[Auto Generate]',
-          assetCategory: 'Building',
+          assetCategory: '',
           ownership: 'Rent',
           type: '',
           assetLocation: '',
@@ -74,7 +82,7 @@ export const AssetGeneralModal: React.FC<Props> = ({
       <select 
         {...props}
         disabled={isView || props.disabled}
-        className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-[12px] font-black text-black focus:border-black outline-none transition-all appearance-none disabled:bg-gray-50/50 disabled:text-gray-400 shadow-sm cursor-pointer"
+        className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-[12px] font-black text-black focus:border-black outline-none transition-all appearance-none disabled:bg-gray-50/50 disabled:text-gray-400 shadow-sm cursor-pointer uppercase"
       >
         {props.children}
       </select>
@@ -122,11 +130,13 @@ export const AssetGeneralModal: React.FC<Props> = ({
               
               <div>
                 <Label required>Type</Label>
-                <Input 
+                <Select 
                   value={form.type} 
                   onChange={(e) => setForm({...form, type: e.target.value})} 
-                  placeholder="Input Building Type..."
-                />
+                >
+                  <option value="">(PILIH TIPE)</option>
+                  {assetTypeList.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+                </Select>
               </div>
 
               <div>
@@ -135,10 +145,8 @@ export const AssetGeneralModal: React.FC<Props> = ({
                   value={form.assetLocation} 
                   onChange={(e) => setForm({...form, assetLocation: e.target.value})}
                 >
-                  <option value="">Select Location...</option>
-                  <option value="Jakarta">Jakarta</option>
-                  <option value="Surabaya">Surabaya</option>
-                  <option value="Bandung">Bandung</option>
+                  <option value="">(PILIH LOKASI)</option>
+                  {locationList.map(l => <option key={l.id} value={l.name}>{l.name}</option>)}
                 </Select>
               </div>
 
@@ -148,11 +156,8 @@ export const AssetGeneralModal: React.FC<Props> = ({
                   value={form.department} 
                   onChange={(e) => setForm({...form, department: e.target.value})}
                 >
-                  <option value="">Select Department...</option>
-                  <option value="Finance">Finance</option>
-                  <option value="Operation">Operation</option>
-                  <option value="IT">IT</option>
-                  <option value="HRGA">HRGA</option>
+                  <option value="">(PILIH DEPARTEMEN)</option>
+                  {departmentList.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
                 </Select>
               </div>
             </div>
@@ -161,10 +166,13 @@ export const AssetGeneralModal: React.FC<Props> = ({
             <div className="space-y-10">
               <div>
                 <Label>Asset Category</Label>
-                <Input 
+                <Select 
                   value={form.assetCategory} 
                   onChange={(e) => setForm({...form, assetCategory: e.target.value})} 
-                />
+                >
+                  <option value="">(PILIH KATEGORI)</option>
+                  {categoryList.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                </Select>
               </div>
 
               <div>
@@ -231,7 +239,7 @@ export const AssetGeneralModal: React.FC<Props> = ({
               onClick={handleSave} 
               className="px-20 py-5 text-[11px] font-black uppercase tracking-[0.25em] text-white bg-black rounded-2xl shadow-2xl shadow-black/20 hover:bg-gray-800 transition-all active:scale-95 flex items-center gap-4"
             >
-              <Save size={18} strokeWidth={3} /> Save Information
+              <Save size={18} strokeWidth={3} /> {mode === 'create' ? 'Submit Asset Request' : 'Save Information'}
             </button>
           )}
         </div>

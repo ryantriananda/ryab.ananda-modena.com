@@ -8,10 +8,13 @@ interface Props {
   activeTab: string;
   onTabChange: (tab: string) => void;
   onAddClick: () => void;
+  onExportClick?: () => void; // New Prop
   searchPlaceholder?: string;
   moduleName?: string;
   hideAdd?: boolean;
   hideImport?: boolean;
+  hideExport?: boolean; // New Prop
+  customAddLabel?: string;
 }
 
 export const FilterBar: React.FC<Props> = ({ 
@@ -19,13 +22,24 @@ export const FilterBar: React.FC<Props> = ({
   activeTab, 
   onTabChange, 
   onAddClick, 
+  onExportClick,
   searchPlaceholder, 
   moduleName,
   hideAdd = false,
-  hideImport = false
+  hideImport = false,
+  hideExport = false,
+  customAddLabel
 }) => {
   const { t } = useLanguage();
   const isService = moduleName === 'Servis';
+
+  // Determine button label
+  let addButtonLabel = t('Add Data');
+  if (customAddLabel) {
+      addButtonLabel = customAddLabel;
+  } else if (isService) {
+      addButtonLabel = 'New Request';
+  }
 
   return (
     <div className="mb-8 space-y-6">
@@ -81,6 +95,14 @@ export const FilterBar: React.FC<Props> = ({
                 <Upload size={14} /> <span className="hidden sm:inline">Import</span>
                 </button>
             )}
+            {!hideExport && (
+                <button 
+                  onClick={onExportClick}
+                  className="flex items-center gap-2 px-4 h-full border-r border-gray-100 text-gray-500 hover:text-black hover:bg-gray-50 transition-all text-[10px] font-black uppercase tracking-widest"
+                >
+                <Download size={14} /> <span className="hidden sm:inline">Export</span>
+                </button>
+            )}
             <button className="flex items-center gap-2 px-4 h-full text-gray-500 hover:text-black hover:bg-gray-50 transition-all text-[10px] font-black uppercase tracking-widest">
               <Filter size={14} /> <span className="hidden sm:inline">Filter</span>
             </button>
@@ -91,7 +113,7 @@ export const FilterBar: React.FC<Props> = ({
               onClick={onAddClick}
               className="bg-black text-white px-6 h-[42px] rounded-xl font-black text-[10px] uppercase tracking-[0.15em] flex items-center gap-2 hover:bg-gray-900 transition-all shadow-xl shadow-black/20 hover:scale-105 active:scale-95"
             >
-              <Plus size={16} strokeWidth={3} /> {isService ? 'New Request' : t('Add Data')}
+              <Plus size={16} strokeWidth={3} /> {addButtonLabel}
             </button>
           )}
         </div>

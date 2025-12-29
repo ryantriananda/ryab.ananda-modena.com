@@ -186,7 +186,7 @@ export const BuildingTable: React.FC<Props> = ({ data, onEdit, onView, onDelete,
                     {renderWorkflowActions(item)}
                 </td>
                 <td className="p-5 pr-8 text-right">
-                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center justify-end gap-1">
                     <button 
                       onClick={(e) => { e.stopPropagation(); onView?.(item); }}
                       className="p-1.5 text-gray-300 hover:text-black transition-all"

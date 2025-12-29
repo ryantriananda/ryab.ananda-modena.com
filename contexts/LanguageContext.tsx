@@ -36,7 +36,7 @@ const translations: Record<string, Record<Language, string>> = {
   'Building Asset Management': { id: 'Manajemen Aset Gedung', en: 'Building Asset Management' },
   'Master Asset': { id: 'Master Aset', en: 'Master Asset' },
   'Asset HC': { id: 'Aset HC', en: 'Asset HC' }, 
-  'Asset IT': { id: 'Aset IT', en: 'Asset IT' }, // New Translation
+  'Asset IT': { id: 'Aset IT', en: 'Asset IT' }, 
   'General Asset': { id: 'Aset Umum', en: 'General Asset' },
   'General Asset List': { id: 'Daftar Aset Umum', en: 'General Asset List' }, 
   'Branch Improvement': { id: 'Branch Improvement', en: 'Branch Improvement' },
@@ -55,6 +55,21 @@ const translations: Record<string, Record<Language, string>> = {
   
   // Master Sub-items
   'Asset Category': { id: 'Kategori Aset', en: 'Asset Category' },
+  'Master Lokasi': { id: 'Master Lokasi', en: 'Master Location' },
+  'Master Department': { id: 'Master Departemen', en: 'Master Department' }, 
+  'Master Satuan': { id: 'Master Satuan', en: 'Master UOM' },
+  'Master Brand': { id: 'Master Brand', en: 'Master Brand' },
+  'Master Cost Center': { id: 'Master Cost Center', en: 'Master Cost Center' },
+  'Master Warna': { id: 'Master Warna', en: 'Master Color' },
+  'Master Tipe Gedung': { id: 'Master Tipe Gedung', en: 'Master Building Type' },
+  'Master Tipe Aset': { id: 'Master Tipe Aset', en: 'Master Asset Type' },
+  'Master Asset Type': { id: 'Master Tipe Aset', en: 'Master Asset Type' }, 
+  'Master PPN': { id: 'Master PPN', en: 'Master VAT' },
+  'Master Brand Type': { id: 'Master Tipe Brand', en: 'Master Brand Type' }, 
+  'Master Operator': { id: 'Master Operator', en: 'Master Operator' },
+  'Master Vendor': { id: 'Master Vendor', en: 'Master Vendor' },
+  
+  // New Master Items
   'Jenis Pajak': { id: 'Jenis Pajak', en: 'Tax Type' },
   'Jenis Pembayaran': { id: 'Jenis Pembayaran', en: 'Payment Type' },
   'Jenis Servis': { id: 'Jenis Servis', en: 'Service Type' },
@@ -65,7 +80,8 @@ const translations: Record<string, Record<Language, string>> = {
   'Tipe Mutasi': { id: 'Tipe Mutasi', en: 'Mutation Type' },
   'Tipe Vendor': { id: 'Tipe Vendor', en: 'Vendor Type' },
   'Role': { id: 'Peran', en: 'Role' },
-  'Master Vendor': { id: 'Master Vendor', en: 'Master Vendor' },
+  'Sync Branchs': { id: 'Sync Cabang', en: 'Sync Branchs' },
+  'Sync Channels': { id: 'Sync Channel', en: 'Sync Channels' },
   
   // Tabs for Master ATK
   'Items': { id: 'Barang', en: 'Items' },

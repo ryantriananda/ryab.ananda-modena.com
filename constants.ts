@@ -1,5 +1,5 @@
 
-import { AssetRecord, MasterItem, VehicleRecord, TaxKirRecord, MasterVendorRecord, DeliveryLocationRecord, LogBookRecord, BuildingRecord, ReminderRecord, VehicleContractRecord, GeneralMasterItem, UserRecord, BuildingAssetRecord, BuildingMaintenanceRecord, UtilityRecord, GeneralAssetRecord } from './types';
+import { AssetRecord, MasterItem, VehicleRecord, TaxKirRecord, MasterVendorRecord, DeliveryLocationRecord, LogBookRecord, BuildingRecord, ReminderRecord, VehicleContractRecord, GeneralMasterItem, UserRecord, BuildingAssetRecord, BuildingMaintenanceRecord, UtilityRecord, GeneralAssetRecord, VendorRecord } from './types';
 
 export const MOCK_BUILDING_DATA: BuildingRecord[] = [
     {
@@ -533,19 +533,140 @@ export const MOCK_ASSET_CATEGORY_DATA: GeneralMasterItem[] = [
     { id: 6, name: 'BUILDING' }
 ];
 
+export const MOCK_LOCATION_DATA: GeneralMasterItem[] = [
+    { id: 1, name: 'JAKARTA HEAD OFFICE' },
+    { id: 2, name: 'SURABAYA BRANCH' },
+    { id: 3, name: 'MEDAN BRANCH' },
+    { id: 4, name: 'BANDUNG BRANCH' },
+    { id: 5, name: 'MAKASSAR BRANCH' },
+    { id: 6, name: 'WAREHOUSE CAKUNG' }
+];
+
+export const MOCK_DEPARTMENT_DATA: GeneralMasterItem[] = [
+    { id: 1, name: 'HRGA' },
+    { id: 2, name: 'IT' },
+    { id: 3, name: 'FINANCE' },
+    { id: 4, name: 'OPERATION' },
+    { id: 5, name: 'SALES' },
+    { id: 6, name: 'MARKETING' }
+];
+
+export const MOCK_UOM_MASTER_DATA: GeneralMasterItem[] = [
+    { id: 1, name: 'PCS' },
+    { id: 2, name: 'UNIT' },
+    { id: 3, name: 'SET' },
+    { id: 4, name: 'BOX' },
+    { id: 5, name: 'PACK' },
+    { id: 6, name: 'RIM' }
+];
+
+export const MOCK_BRAND_DATA: GeneralMasterItem[] = [
+    { id: 1, name: 'TOYOTA' },
+    { id: 2, name: 'HONDA' },
+    { id: 3, name: 'DAIHATSU' },
+    { id: 4, name: 'SAMSUNG' },
+    { id: 5, name: 'DELL' },
+    { id: 6, name: 'DAIKIN' },
+    { id: 7, name: 'PANASONIC' }
+];
+
+export const MOCK_COST_CENTER_DATA: GeneralMasterItem[] = [
+    { id: 1, name: 'CC-001 (HEAD OFFICE)' },
+    { id: 2, name: 'CC-002 (SALES DEPT)' },
+    { id: 3, name: 'CC-003 (MARKETING)' },
+    { id: 4, name: 'CC-004 (LOGISTICS)' },
+    { id: 5, name: 'CC-005 (IT)' }
+];
+
+// New Mocks for requested integration
+export const MOCK_COLOR_DATA: GeneralMasterItem[] = [
+    { id: 1, name: 'HITAM' },
+    { id: 2, name: 'PUTIH' },
+    { id: 3, name: 'SILVER' },
+    { id: 4, name: 'ABU-ABU' },
+    { id: 5, name: 'MERAH' },
+    { id: 6, name: 'BIRU' }
+];
+
+export const MOCK_BUILDING_TYPE_DATA: GeneralMasterItem[] = [
+    { id: 1, name: 'OFFICE' },
+    { id: 2, name: 'WAREHOUSE' },
+    { id: 3, name: 'SHOWROOM' },
+    { id: 4, name: 'MHC (MODENA HOME CENTER)' },
+    { id: 5, name: 'MEC (MODENA EXPERIENCE CENTER)' }
+];
+
+export const MOCK_GENERAL_ASSET_TYPE_DATA: GeneralMasterItem[] = [
+    { id: 1, name: 'LAPTOP' },
+    { id: 2, name: 'MONITOR' },
+    { id: 3, name: 'PRINTER' },
+    { id: 4, name: 'MEJA KERJA' },
+    { id: 5, name: 'KURSI KERJA' },
+    { id: 6, name: 'LEMARI ARSIP' },
+    { id: 7, name: 'AC SPLIT' }
+];
+
+// New Mock Data from Image Request
+export const MOCK_PPN_DATA: GeneralMasterItem[] = [
+    { id: 1, name: '11%' },
+    { id: 2, name: '12%' },
+    { id: 3, name: '0%' }
+];
+
+export const MOCK_BRAND_TYPE_DATA: GeneralMasterItem[] = [
+    { id: 1, name: 'LOCAL' },
+    { id: 2, name: 'IMPORT' },
+    { id: 3, name: 'OEM' }
+];
+
+export const MOCK_OPERATOR_DATA: GeneralMasterItem[] = [
+    { id: 1, name: 'TELKOMSEL' },
+    { id: 2, name: 'XL' },
+    { id: 3, name: 'INDOSAT' }
+];
+
+// Master Generic Mock Data (New Items)
 export const MOCK_GENERAL_MASTER_DATA = { 
     jenisPajak: [{id: 1, name: 'STNK 1 TAHUN'}, {id: 2, name: 'STNK 5 TAHUN'}], 
     jenisPembayaran: [{id: 1, name: 'KASBON'}, {id: 2, name: 'REIMBURSE'}], 
     jenisServis: [{id: 1, name: 'SERVIS RUTIN'}, {id: 2, name: 'GANTI BAN'}], 
-    statusMutasi: [], 
-    statusPenjualan: [], 
-    statusRequest: [], 
-    tipeMutasi: [], 
-    tipeVendor: [], 
-    peran: [] 
+    statusMutasi: [{id: 1, name: 'PENDING'}, {id: 2, name: 'APPROVED'}, {id: 3, name: 'REJECTED'}], 
+    statusPenjualan: [{id: 1, name: 'OPEN BIDDING'}, {id: 2, name: 'SOLD'}], 
+    statusRequest: [{id: 1, name: 'DRAFT'}, {id: 2, name: 'SUBMITTED'}], 
+    tipeMutasi: [{id: 1, name: 'PERMANENT'}, {id: 2, name: 'TEMPORARY'}], 
+    tipeVendor: [{id: 1, name: 'SUPPLIER'}, {id: 2, name: 'SERVICE PROVIDER'}], 
+    peran: [{id: 1, name: 'ADMIN'}, {id: 2, name: 'USER'}, {id: 3, name: 'MANAGER'}] 
 };
 
-export const MOCK_VEHICLE_DATA: VehicleRecord[] = [{ id: 1, noRegistrasi: 'REG-2024001', nama: 'TOYOTA AVANZA 1.3 G', noPolisi: 'B 1234 ABC', channel: 'HCO', cabang: 'Jakarta', status: 'Aktif' }];
+export const MOCK_VEHICLE_DATA: VehicleRecord[] = [
+    { 
+        id: 1, 
+        noRegistrasi: 'AST-HO-001', 
+        nama: 'TOYOTA AVANZA 1.3 G', 
+        noPolisi: 'B 1234 ABC', 
+        channel: 'HCO', 
+        cabang: 'Jakarta', 
+        status: 'Aktif',
+        ownership: 'Milik Modena',
+        merek: 'TOYOTA',
+        tahunPembuatan: '2022',
+        approvalStatus: 'Approved'
+    },
+    { 
+        id: 2, 
+        noRegistrasi: 'RNT-SBY-001', 
+        nama: 'HONDA HRV E CVT', 
+        noPolisi: 'B 5678 DEF', 
+        channel: 'Management', 
+        cabang: 'Surabaya', 
+        status: 'Aktif',
+        ownership: 'Sewa',
+        merek: 'HONDA',
+        tahunPembuatan: '2023',
+        approvalStatus: 'Pending'
+    }
+];
+
 export const MOCK_VEHICLE_CONTRACT_DATA: VehicleContractRecord[] = [
   {
     id: 'CTR-001',
@@ -557,10 +678,35 @@ export const MOCK_VEHICLE_CONTRACT_DATA: VehicleContractRecord[] = [
     tglBerakhir: '2025-01-01',
     biayaSewa: '5500000',
     status: 'Aktif',
-    keterangan: 'Rental tahunan unit operasional'
+    keterangan: 'Rental tahunan unit operasional',
+    approvalStatus: 'Approved'
+  },
+  {
+    id: 'CTR-002',
+    noKontrak: 'KTR/MDC/2024/002',
+    noPolisi: 'B 5678 DEF',
+    aset: 'HONDA HRV',
+    vendor: 'MPMRent',
+    tglMulai: '2024-02-01',
+    tglBerakhir: '2025-02-01',
+    biayaSewa: '8500000',
+    status: 'Aktif',
+    approvalStatus: 'Pending'
   }
 ];
-export const MOCK_TAX_KIR_DATA: TaxKirRecord[] = [];
+export const MOCK_TAX_KIR_DATA: TaxKirRecord[] = [
+    {
+        id: 'TAX-001',
+        noPolisi: 'B 1234 ABC',
+        tglRequest: '2024-03-01',
+        jenis: 'Pajak STNK',
+        channel: 'HCO',
+        cabang: 'Jakarta',
+        status: 'Proses',
+        statusApproval: 'Pending',
+        estimasiBiaya: '3500000'
+    }
+];
 export const MOCK_LOGBOOK_DATA: LogBookRecord[] = [];
 export const MOCK_MASTER_VENDOR_DATA: MasterVendorRecord[] = [];
 
@@ -576,7 +722,8 @@ export const MOCK_GENERAL_ASSET_DATA: GeneralAssetRecord[] = [
         channel: 'Direct',
         department: 'HRGA',
         subLocation: 'Lantai 2 - HR Room',
-        address: 'Jl. Prof. DR. Satrio No. C4'
+        address: 'Jl. Prof. DR. Satrio No. C4',
+        approvalStatus: 'Approved'
     },
     {
         id: 'GA-002',
@@ -588,7 +735,8 @@ export const MOCK_GENERAL_ASSET_DATA: GeneralAssetRecord[] = [
         channel: 'Indirect',
         department: 'Operation',
         subLocation: 'Pantry',
-        address: 'Jl. Mayjen Sungkono No. 10'
+        address: 'Jl. Mayjen Sungkono No. 10',
+        approvalStatus: 'Pending'
     }
 ];
 
@@ -603,7 +751,8 @@ export const MOCK_IT_ASSET_DATA: GeneralAssetRecord[] = [
         channel: 'Direct',
         department: 'IT',
         subLocation: 'IT Room',
-        address: 'Jl. Prof. DR. Satrio No. C4'
+        address: 'Jl. Prof. DR. Satrio No. C4',
+        approvalStatus: 'Approved'
     },
     {
         id: 'IT-002',
@@ -615,6 +764,46 @@ export const MOCK_IT_ASSET_DATA: GeneralAssetRecord[] = [
         channel: 'Direct',
         department: 'IT',
         subLocation: 'Server Room',
-        address: 'Jl. Prof. DR. Satrio No. C4'
+        address: 'Jl. Prof. DR. Satrio No. C4',
+        approvalStatus: 'Pending'
+    }
+];
+
+export const MOCK_VENDOR_DATA: VendorRecord[] = [
+    {
+        id: 1,
+        vendorName: 'PT. ATK Jaya Abadi',
+        vendorCode: 'VND-001',
+        type: 'Goods',
+        category: 'Office Supplies',
+        email: 'sales@atkjaya.com',
+        phone: '021-5551234',
+        address: 'Jl. Fatmawati No. 10, Jakarta Selatan',
+        status: 'Active',
+        picName: 'Budi Santoso'
+    },
+    {
+        id: 2,
+        vendorName: 'CV. Service Komputer Handal',
+        vendorCode: 'VND-002',
+        type: 'Service',
+        category: 'IT Maintenance',
+        email: 'support@servicehandal.com',
+        phone: '0812-9988-7766',
+        address: 'Ruko Mangga Dua Square Blok A',
+        status: 'Active',
+        picName: 'Andi Wijaya'
+    },
+    {
+        id: 3,
+        vendorName: 'PT. Cleaning Service Prima',
+        vendorCode: 'VND-003',
+        type: 'Service',
+        category: 'Facility Management',
+        email: 'info@cleaningprima.com',
+        phone: '021-7778889',
+        address: 'Jl. Sudirman Kav 50, Jakarta Pusat',
+        status: 'Inactive',
+        picName: 'Siti Aminah'
     }
 ];
