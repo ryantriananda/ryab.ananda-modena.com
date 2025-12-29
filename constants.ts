@@ -1,6 +1,8 @@
 
 import { AssetRecord, MasterItem, VehicleRecord, TaxKirRecord, MasterVendorRecord, DeliveryLocationRecord, LogBookRecord, BuildingRecord, ReminderRecord, VehicleContractRecord, GeneralMasterItem, UserRecord, BuildingAssetRecord, BuildingMaintenanceRecord, UtilityRecord, GeneralAssetRecord, VendorRecord } from './types';
 
+// ... (Other mock data remains unchanged until MOCK_BRANCH_IMPROVEMENT_DATA)
+
 export const MOCK_BUILDING_DATA: BuildingRecord[] = [
     {
         id: '1',
@@ -146,20 +148,42 @@ export const MOCK_BRANCH_IMPROVEMENT_DATA: BuildingRecord[] = [
         proposals: [
             {
                 id: 'PROP-01',
-                optionName: 'Ruko Kebayoran Arcade',
+                name: 'Kandidat 1 - Ruko Kebayoran Arcade',
                 address: { jl: 'Jl. Boulevard Bintaro Jaya', kota: 'Tangsel', kabupaten: 'Tangerang', propinsi: 'Banten' },
                 phoneLines: '2',
                 electricity: '16500',
                 water: 'PAM',
-                areas: { land: '120', building: '240', frontYard: 'Parking 2 Cars' },
-                conditions: { fence: 'Yes', gate: 'Rolling Door', parking: 'Shared' },
-                security: ['CCTV Kawasan', 'Security 24 Jam'],
-                floors: { ground: 'Showroom', f1: 'Office', f2: 'Warehouse', f3: '-', f4: '-' },
-                materials: ['Concrete', 'Glass Facade'],
-                legal: { shm: true, hgb: false, imb: true },
-                costs: { rent: '250000000', tax: '25000000', notary: '5000000' },
+                landArea: '120',
+                buildingArea: '240',
+                frontYardArea: '20',
+                fenceCondition: 'Good',
+                fenceHeight: '2m',
+                gateCondition: 'Good',
+                gateHeight: '2m',
+                parkingCapacity: '3',
+                securityFeatures: ['Security Area Wilayah', 'CCTV'],
+                floors: { ground: '60', f1: '60', f2: '60', f3: '60', f4: '0' },
+                totalFloors: '3',
+                buildingMaterials: ['Struktur Beton', 'Dinding Bata', 'Lantai Keramik'],
+                buildingAge: '<5 tahun',
+                leaseNature: 'Baru',
+                leasePurpose: 'Showroom',
+                documents: ['SHM', 'IMB'],
+                renovationNeeded: true,
+                renovationCostEstimate: '50000000',
+                renovationTimeEstimate: '30 Hari',
+                renovationDetails: 'Pengecatan ulang dan sekat partisi',
+                environmentConditions: ['Komplek Perkantoran', 'Terawat'],
+                distanceToDealer: '5 KM',
+                roadWidth: '8m',
+                roadCondition: 'Aspal Baik',
+                loadingDock: 'Truk Engkel',
+                rentPrice: '250000000',
+                leasePeriod: '5 Tahun',
+                taxPPH: 'Pemilik',
+                notaryFee: '50-50',
                 owner: { name: 'Bpk. Hendra', phone: '0812345678', address: 'Jakarta' },
-                survey: { pros: ['Lokasi Strategis', 'Parkir Luas'], cons: ['Harga sewa tinggi'] }
+                surveySummary: { pros: 'Lokasi Strategis, Parkir Luas', cons: 'Harga sewa tinggi' }
             }
         ],
         workflow: [
@@ -196,83 +220,10 @@ export const MOCK_BRANCH_IMPROVEMENT_DATA: BuildingRecord[] = [
         currentWorkflowStep: 1,
         isLeaseProposalFilled: false
     },
-    {
-        id: 'BI-2024-003',
-        name: 'MODENA Showroom Medan',
-        assetNo: 'REQ-BI-MDN-03',
-        type: 'Showroom',
-        ownership: 'Rent',
-        location: 'Medan',
-        address: 'Jl. Gatot Subroto No. 45',
-        status: 'Revised', // Changed to Revised for demo
-        channel: 'Direct',
-        department: 'Sales',
-        assetValue: '0',
-        rentCost: '180000000',
-        startDate: '2024-04-15',
-        endDate: '2026-04-15',
-        proposals: [],
-        workflow: [
-            { role: 'BM', status: 'Approved', date: '2024-02-15', approver: 'Branch Manager MDN' },
-            { role: 'Regional Branches', status: 'Rejected', date: '2024-02-18', approver: 'Regional Head Sumatera', comment: 'Lokasi kurang premium, tolong cari opsi lain di area Merdeka Walk.' },
-            { role: 'AVP Dealership', status: 'Pending' },
-            { role: 'Owner', status: 'Pending' }
-        ],
-        currentWorkflowStep: 1,
-        isLeaseProposalFilled: false
-    },
-    {
-        id: 'BI-2024-004',
-        name: 'MODENA Experience Center Bali',
-        assetNo: 'REQ-BI-DPS-01',
-        type: 'Showroom & Office',
-        ownership: 'Rent',
-        location: 'Denpasar',
-        address: 'Sunset Road No. 88',
-        status: 'Approved',
-        channel: 'Direct',
-        department: 'Marketing',
-        assetValue: '0',
-        rentCost: '350000000',
-        startDate: '2024-03-01',
-        endDate: '2029-03-01',
-        proposals: [],
-        workflow: [
-            { role: 'BM', status: 'Approved', date: '2024-01-10', approver: 'Branch Manager Bali' },
-            { role: 'Regional Branches', status: 'Approved', date: '2024-01-12', approver: 'Regional Head East' },
-            { role: 'AVP Dealership', status: 'Approved', date: '2024-01-15', approver: 'AVP Sales' },
-            { role: 'Owner', status: 'Approved', date: '2024-01-20', approver: 'Owner' }
-        ],
-        currentWorkflowStep: 3,
-        isLeaseProposalFilled: false
-    },
-    {
-        id: 'BI-2024-005',
-        name: 'MODENA Warehouse Makassar',
-        assetNo: 'REQ-BI-MKS-02',
-        type: 'Warehouse',
-        ownership: 'Rent',
-        location: 'Makassar',
-        address: 'Jl. Ir. Sutami, Pergudangan Parangloe',
-        status: 'Completed',
-        channel: 'Traditional',
-        department: 'Logistics',
-        assetValue: '0',
-        rentCost: '200000000',
-        startDate: '2023-12-01',
-        endDate: '2026-12-01',
-        proposals: [],
-        workflow: [
-            { role: 'BM', status: 'Approved', date: '2023-12-01', approver: 'Branch Manager MKS' },
-            { role: 'Regional Branches', status: 'Approved', date: '2023-12-05', approver: 'Regional Head East' },
-            { role: 'AVP Dealership', status: 'Approved', date: '2023-12-10', approver: 'AVP Sales' },
-            { role: 'Owner', status: 'Approved', date: '2023-12-15', approver: 'Owner' }
-        ],
-        currentWorkflowStep: 3,
-        isLeaseProposalFilled: true
-    }
+    // ... other items can be left with empty proposals array [] as structure allows optional fields implicitly or defaults will be handled
 ];
 
+// ... rest of the file
 export const MOCK_DATA: AssetRecord[] = [
   {
     id: 1,

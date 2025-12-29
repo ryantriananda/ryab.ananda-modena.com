@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { X, Save, Wrench, Plus, Upload, Trash2, Calendar, Clock, ChevronRight, Info, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { X, Save, Wrench, Plus, Trash2, Calendar, Clock, User, CheckCircle2, AlertCircle, FileText, PlayCircle } from 'lucide-react';
 import { ServiceRecord, VehicleRecord, SparePart } from '../types';
 
 interface Props {
@@ -20,7 +20,6 @@ export const ServiceModal: React.FC<Props> = ({
     mode = 'create',
     vehicleList
 }) => {
-  const [activeTab, setActiveTab] = useState('DETAILS');
   const [form, setForm] = useState<Partial<ServiceRecord>>({
     noPolisi: '',
     aset: '',
@@ -30,6 +29,7 @@ export const ServiceModal: React.FC<Props> = ({
     masalah: '',
     jenisServis: 'Servis Rutin',
     statusApproval: 'Pending',
+    status: 'Scheduled',
     spareParts: []
   });
 
@@ -50,11 +50,11 @@ export const ServiceModal: React.FC<Props> = ({
           masalah: '',
           jenisServis: 'Servis Rutin',
           statusApproval: 'Pending',
+          status: 'Scheduled',
           spareParts: []
         });
         setParts([]);
       }
-      setActiveTab('DETAILS');
     }
   }, [isOpen, initialData]);
 
@@ -87,6 +87,37 @@ export const ServiceModal: React.FC<Props> = ({
     onClose();
   };
 
+  const getLogs = () => {
+      const logs = [
+          { id: 1, date: form.tglRequest, user: 'System', role: 'System', action: 'Request Created', status: 'Draft', icon: FileText, color: 'text-gray-400', bg: 'bg-gray-100' },
+      ];
+
+      // Mocking logs based on current status for display purposes
+      if (form.statusApproval === 'Pending' || form.statusApproval === 'Pending Approval') {
+           logs.push({ id: 2, date: form.tglRequest, user: 'Ibnu Faisal', role: 'Facility Staff', action: 'Submitted for Approval', status: 'Pending', icon: Clock, color: 'text-orange-500', bg: 'bg-orange-100' });
+      }
+
+      if (form.statusApproval === 'Approved') {
+          logs.push({ id: 2, date: form.tglRequest, user: 'Ibnu Faisal', role: 'Facility Staff', action: 'Submitted', status: 'Pending', icon: Clock, color: 'text-gray-400', bg: 'bg-gray-50' });
+          logs.push({ id: 3, date: 'Next Day', user: 'Budi Santoso', role: 'Manager', action: 'Approved Request', status: 'Approved', icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-100' });
+      } else if (form.statusApproval === 'Rejected') {
+          logs.push({ id: 3, date: 'Next Day', user: 'Budi Santoso', role: 'Manager', action: 'Rejected Request', status: 'Rejected', icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-100' });
+      }
+
+      if (form.status === 'In Progress' || form.status === 'On Progress') {
+           logs.push({ id: 4, date: 'Processing', user: form.vendor || 'Vendor', role: 'Mechanic', action: 'Service Started', status: 'In Progress', icon: PlayCircle, color: 'text-blue-600', bg: 'bg-blue-50' });
+      }
+      
+      if (form.status === 'Completed' || form.status === 'Selesai') {
+           if (!logs.find(l => l.status === 'In Progress')) {
+                logs.push({ id: 4, date: 'Processing', user: form.vendor || 'Vendor', role: 'Mechanic', action: 'Service Started', status: 'In Progress', icon: PlayCircle, color: 'text-gray-400', bg: 'bg-gray-50' });
+           }
+           logs.push({ id: 5, date: 'Finished', user: form.vendor || 'Vendor', role: 'Mechanic', action: 'Service Completed', status: 'Completed', icon: CheckCircle2, color: 'text-green-700', bg: 'bg-green-100' });
+      }
+
+      return logs.reverse();
+  };
+
   if (!isOpen) return null;
 
   const Label = ({ children }: { children?: React.ReactNode }) => (
@@ -97,97 +128,101 @@ export const ServiceModal: React.FC<Props> = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center backdrop-blur-sm p-4">
-      <div className="bg-white w-full max-w-[1100px] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-200">
+      <div className="bg-white w-full max-w-[1200px] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-200">
         
-        <div className="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gray-50 rounded-lg">
-                <Wrench size={18} className="text-black" />
+        {/* Header */}
+        <div className="px-10 py-8 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
+          <div className="flex items-center gap-5">
+            <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center text-white shadow-xl shadow-black/20">
+                <Wrench size={20} strokeWidth={2.5} />
             </div>
-            <h2 className="text-[14px] font-black text-black uppercase tracking-widest">Input Catatan Pemeliharaan</h2>
+            <div>
+                <h2 className="text-[18px] font-black text-black uppercase tracking-tight leading-none">
+                    {mode === 'create' ? 'Input Catatan Pemeliharaan' : 'Detail Pemeliharaan'}
+                </h2>
+                <p className="text-[9px] font-bold text-gray-400 mt-2 uppercase tracking-[0.3em]">Vehicle Maintenance Log</p>
+            </div>
           </div>
-          <button onClick={onClose} className="text-gray-300 hover:text-black transition-colors">
-            <X size={24} />
+          <button onClick={onClose} className="text-gray-300 hover:text-black transition-colors p-2 rounded-full hover:bg-gray-50">
+            <X size={28} strokeWidth={2.5} />
           </button>
         </div>
 
-        <div className="bg-white border-b border-gray-100 flex px-8 shrink-0 gap-6">
-            <button onClick={() => setActiveTab('DETAILS')} className={`py-3 text-[10px] font-black uppercase tracking-widest border-b-2 ${activeTab === 'DETAILS' ? 'border-black text-black' : 'border-transparent text-gray-400'}`}>Details</button>
-            <button onClick={() => setActiveTab('WORKFLOW')} className={`py-3 text-[10px] font-black uppercase tracking-widest border-b-2 ${activeTab === 'WORKFLOW' ? 'border-black text-black' : 'border-transparent text-gray-400'}`}>Workflow</button>
-        </div>
-
+        {/* Content Body - Split View */}
         <div className="flex-1 overflow-hidden flex flex-col lg:flex-row bg-[#FBFBFB]">
           
-          {activeTab === 'DETAILS' && (
-          <>
-          <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-8">
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-1 h-6 bg-black rounded-full"></div>
-                <h3 className="text-[11px] font-black text-black uppercase tracking-widest">Data Unit Kendaraan</h3>
+          {/* Left Column: Form Details */}
+          <div className="flex-1 overflow-y-auto p-10 custom-scrollbar space-y-8">
+            <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm space-y-8">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-1.5 h-6 bg-black rounded-full"></div>
+                <h3 className="text-[12px] font-black text-black uppercase tracking-[0.2em]">Data Unit Kendaraan</h3>
               </div>
               
-              <div className="grid grid-cols-1 gap-6">
-                <div>
-                  <Label>Pilih Unit</Label>
-                  <div className="relative">
-                    <select 
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-bold bg-white focus:border-black outline-none appearance-none shadow-sm"
-                      value={form.noPolisi}
-                      onChange={(e) => {
-                        const v = vehicleList.find(x => x.noPolisi === e.target.value);
-                        setForm({...form, noPolisi: e.target.value, aset: v?.nama});
-                      }}
-                      disabled={isView}
-                    >
-                      <option value="">(Pilih Unit)</option>
-                      {vehicleList.map(v => <option key={v.id} value={v.noPolisi}>{v.noPolisi} - {v.nama}</option>)}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                    <Label>Kategori Pemeliharaan</Label>
-                    <div className="flex gap-4">
-                        {['Servis Rutin', 'Non-Rutin'].map(type => {
-                            const isSelected = form.jenisServis === type;
-                            return (
-                                <button
-                                    key={type}
-                                    onClick={() => !isView && setForm({...form, jenisServis: type})}
-                                    disabled={isView}
-                                    className={`flex-1 py-4 rounded-xl border transition-all relative overflow-hidden group ${
-                                        isSelected 
-                                        ? 'bg-black text-white border-black shadow-lg' 
-                                        : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                                    }`}
-                                >
-                                    <span className="text-[11px] font-black uppercase tracking-widest">{type}</span>
-                                </button>
-                            );
-                        })}
+              <div className="grid grid-cols-1 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <Label>Pilih Unit</Label>
+                        <div className="relative">
+                            <select 
+                            className="w-full border border-gray-200 rounded-2xl px-5 py-4 text-[13px] font-black bg-white focus:border-black outline-none appearance-none shadow-sm cursor-pointer"
+                            value={form.noPolisi}
+                            onChange={(e) => {
+                                const v = vehicleList.find(x => x.noPolisi === e.target.value);
+                                setForm({...form, noPolisi: e.target.value, aset: v?.nama});
+                            }}
+                            disabled={isView}
+                            >
+                            <option value="">(Pilih Unit)</option>
+                            {vehicleList.map(v => <option key={v.id} value={v.noPolisi}>{v.noPolisi} - {v.nama}</option>)}
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <Label>Kategori Pemeliharaan</Label>
+                        <div className="flex gap-3">
+                            {['Servis Rutin', 'Non-Rutin'].map(type => {
+                                const isSelected = form.jenisServis === type;
+                                return (
+                                    <button
+                                        key={type}
+                                        onClick={() => !isView && setForm({...form, jenisServis: type})}
+                                        disabled={isView}
+                                        className={`flex-1 py-4 rounded-xl border transition-all relative overflow-hidden group ${
+                                            isSelected 
+                                            ? 'bg-black text-white border-black shadow-lg' 
+                                            : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        <span className="text-[10px] font-black uppercase tracking-widest">{type}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
                     <Label>Odometer (KM)</Label>
                     <input 
                       type="text"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-bold placeholder:text-gray-300 focus:border-black outline-none shadow-sm"
+                      className="w-full border border-gray-200 rounded-2xl px-5 py-4 text-[13px] font-black placeholder:text-gray-300 focus:border-black outline-none shadow-sm"
                       value={form.kmKendaraan}
                       onChange={(e) => setForm({...form, kmKendaraan: e.target.value})}
                       disabled={isView}
+                      placeholder="0"
                     />
                   </div>
                   <div>
                     <Label>Bengkel / Rekanan</Label>
                     <input 
                       type="text"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm font-bold placeholder:text-gray-300 focus:border-black outline-none shadow-sm"
+                      className="w-full border border-gray-200 rounded-2xl px-5 py-4 text-[13px] font-black placeholder:text-gray-300 focus:border-black outline-none shadow-sm"
                       value={form.vendor}
                       onChange={(e) => setForm({...form, vendor: e.target.value})}
                       disabled={isView}
+                      placeholder="Nama Bengkel"
                     />
                   </div>
                 </div>
@@ -195,25 +230,26 @@ export const ServiceModal: React.FC<Props> = ({
                 <div>
                   <Label>Deskripsi Masalah</Label>
                   <textarea 
-                    className="w-full border border-gray-200 rounded-2xl px-4 py-4 text-sm font-medium min-h-[120px] focus:border-black outline-none transition-all placeholder:text-gray-300 shadow-sm"
+                    className="w-full border border-gray-200 rounded-3xl px-6 py-5 text-[13px] font-medium min-h-[120px] focus:border-black outline-none transition-all placeholder:text-gray-300 shadow-sm resize-none bg-gray-50/50"
                     value={form.masalah}
                     onChange={(e) => setForm({...form, masalah: e.target.value})}
                     disabled={isView}
+                    placeholder="Deskripsikan keluhan atau detail servis..."
                   />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+            <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                  <div className="w-1 h-6 bg-black rounded-full"></div>
-                  <h3 className="text-[11px] font-black text-black uppercase tracking-widest">Rincian Suku Cadang</h3>
+                  <div className="w-1.5 h-6 bg-black rounded-full"></div>
+                  <h3 className="text-[12px] font-black text-black uppercase tracking-[0.2em]">Rincian Suku Cadang</h3>
                 </div>
                 {!isView && (
                   <button 
                     onClick={addPart}
-                    className="bg-black text-white px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/10"
+                    className="bg-black text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/10"
                   >
                     <Plus size={14} strokeWidth={3} /> Tambah Item
                   </button>
@@ -223,10 +259,10 @@ export const ServiceModal: React.FC<Props> = ({
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50">
-                      <th className="pb-4 px-2">NAMA BARANG</th>
+                    <tr className="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">
+                      <th className="pb-4 px-2">ITEM DESCRIPTION</th>
                       <th className="pb-4 px-2 text-center w-24">QTY</th>
-                      <th className="pb-4 px-2 text-right w-40">HARGA (RP)</th>
+                      <th className="pb-4 px-2 text-right w-40">PRICE (IDR)</th>
                       <th className="pb-4 px-2 text-right w-40">SUBTOTAL</th>
                       {!isView && <th className="pb-4 w-12"></th>}
                     </tr>
@@ -241,16 +277,17 @@ export const ServiceModal: React.FC<Props> = ({
                           <td className="py-4 px-2">
                             <input 
                               type="text"
-                              className="w-full border-none p-0 text-[12px] font-bold text-black focus:ring-0 placeholder:text-gray-300 bg-transparent"
+                              className="w-full border-none p-0 text-[13px] font-bold text-black focus:ring-0 placeholder:text-gray-300 bg-transparent"
                               value={part.name}
                               onChange={(e) => updatePart(idx, 'name', e.target.value)}
                               disabled={isView}
+                              placeholder="Part Name"
                             />
                           </td>
                           <td className="py-4 px-2">
                             <input 
                               type="number"
-                              className="w-full border-none p-0 text-[12px] font-black text-center focus:ring-0 bg-transparent"
+                              className="w-full border-none p-0 text-[13px] font-black text-center focus:ring-0 bg-transparent"
                               value={part.qty}
                               onChange={(e) => updatePart(idx, 'qty', parseInt(e.target.value) || 0)}
                               disabled={isView}
@@ -259,18 +296,19 @@ export const ServiceModal: React.FC<Props> = ({
                           <td className="py-4 px-2 text-right">
                             <input 
                               type="text"
-                              className="w-full border-none p-0 text-[12px] font-black text-right focus:ring-0 bg-transparent"
+                              className="w-full border-none p-0 text-[13px] font-black text-right focus:ring-0 bg-transparent"
                               value={part.price}
                               onChange={(e) => updatePart(idx, 'price', e.target.value)}
                               disabled={isView}
+                              placeholder="0"
                             />
                           </td>
-                          <td className="py-4 px-2 text-right font-black text-[12px] text-gray-400">
-                            Rp {subtotal.toLocaleString('id-ID')}
+                          <td className="py-4 px-2 text-right font-black text-[13px] text-black">
+                            {subtotal.toLocaleString('id-ID')}
                           </td>
                           {!isView && (
                             <td className="py-4 px-2 text-right">
-                              <button onClick={() => removePart(idx)} className="text-gray-200 hover:text-red-500 transition-colors">
+                              <button onClick={() => removePart(idx)} className="text-gray-200 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50">
                                 <Trash2 size={16} />
                               </button>
                             </td>
@@ -281,62 +319,65 @@ export const ServiceModal: React.FC<Props> = ({
                   </tbody>
                   <tfoot>
                     <tr>
-                      <td colSpan={3} className="pt-10 pb-4 text-right">
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">TOTAL BIAYA PERBAIKAN</span>
+                      <td colSpan={3} className="pt-8 pb-2 text-right">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">ESTIMATED TOTAL COST</span>
                       </td>
-                      <td className="pt-10 pb-4 text-right">
-                        <span className="text-[18px] font-black text-blue-600">Rp {totalBiaya.toLocaleString('id-ID')}</span>
+                      <td className="pt-8 pb-2 text-right">
+                        <span className="text-[18px] font-black text-black">Rp {totalBiaya.toLocaleString('id-ID')}</span>
                       </td>
-                      {!isView && <td className="pt-10"></td>}
+                      {!isView && <td className="pt-8"></td>}
                     </tr>
                   </tfoot>
                 </table>
               </div>
             </div>
           </div>
-          </>
-          )}
 
-          {activeTab === 'WORKFLOW' && (
-              <div className="flex-1 p-12 overflow-y-auto">
-                  <div className="max-w-2xl mx-auto bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
-                        <div className="absolute left-[51px] top-12 bottom-12 w-[2px] bg-gray-100"></div>
-                        <div className="space-y-10 relative z-10">
-                            <div className="flex gap-8">
-                                <div className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center shadow-lg shadow-black/20 shrink-0">
-                                    <Wrench size={20} strokeWidth={3} />
-                                </div>
-                                <div className="pt-2">
-                                    <h4 className="text-[13px] font-black text-black uppercase tracking-tight">Service Request Created</h4>
-                                    <p className="text-[11px] text-gray-400 mt-1">On {form.tglRequest}</p>
-                                </div>
+          {/* Right Column: History Log / Sidebar */}
+          <div className="w-full lg:w-[350px] bg-white border-l border-gray-100 p-10 overflow-y-auto custom-scrollbar shrink-0">
+             <div className="flex items-center gap-3 mb-10">
+                <Clock size={18} className="text-black"/>
+                <h3 className="text-[12px] font-black text-black uppercase tracking-[0.2em]">Activity Log</h3>
+             </div>
+
+             <div className="space-y-10 relative">
+                <div className="absolute left-[19px] top-4 bottom-4 w-[2px] bg-gray-100"></div>
+                
+                {getLogs().map((log, index) => (
+                    <div key={index} className="relative pl-12 group">
+                        <div className={`absolute left-0 top-0 w-10 h-10 rounded-full flex items-center justify-center border-4 border-white shadow-sm z-10 ${log.bg} group-hover:scale-110 transition-transform`}>
+                            <log.icon size={16} className={log.color} />
+                        </div>
+                        <div>
+                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1">{log.date}</span>
+                            <h4 className="text-[12px] font-black text-black leading-tight mb-0.5">{log.action}</h4>
+                            <div className="text-[10px] text-gray-500 font-medium flex items-center gap-1.5 mt-1">
+                                <User size={10} /> 
+                                <span className="font-bold">{log.user}</span> 
+                                <span className="text-gray-300">•</span>
+                                <span>{log.role}</span>
                             </div>
-                            <div className="flex gap-8">
-                                <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 border-4 border-white shadow-lg ${
-                                    form.statusApproval === 'Approved' ? 'bg-green-500 text-white shadow-green-200' :
-                                    form.statusApproval === 'Rejected' ? 'bg-red-500 text-white shadow-red-200' :
-                                    'bg-orange-500 text-white shadow-orange-200'
-                                }`}>
-                                    {form.statusApproval === 'Approved' ? <CheckCircle2 size={20} /> : 
-                                     form.statusApproval === 'Rejected' ? <X size={20} /> : <Clock size={20} />}
-                                </div>
-                                <div className="pt-2">
-                                    <h4 className="text-[13px] font-black text-black uppercase tracking-tight">Status: {form.statusApproval}</h4>
-                                    <p className="text-[11px] text-gray-400 mt-1">
-                                        {form.statusApproval === 'Approved' ? 'Service Approved' : 'Waiting for approval'}
-                                    </p>
-                                </div>
+                            <div className={`inline-block mt-3 px-3 py-1 rounded text-[9px] font-black uppercase tracking-wider ${log.bg} ${log.color}`}>
+                                {log.status}
                             </div>
                         </div>
-                  </div>
-              </div>
-          )}
+                    </div>
+                ))}
+             </div>
+          </div>
+
         </div>
 
-        <div className="px-8 py-5 border-t border-gray-100 flex justify-between bg-white shrink-0">
-          <button onClick={onClose} className="px-10 py-3 text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-all bg-gray-50 rounded-xl">Batal</button>
+        {/* Footer */}
+        <div className="px-10 py-8 border-t border-gray-100 flex justify-end gap-4 bg-white shrink-0">
+          <button onClick={onClose} className="px-12 py-4 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-all bg-gray-50 hover:bg-gray-100 rounded-2xl active:scale-95">Cancel</button>
           {!isView && (
-            <button onClick={handleSave} className="bg-black text-white px-16 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all active:scale-95 shadow-xl shadow-black/20">Simpan Laporan Servis</button>
+            <button 
+                onClick={handleSave} 
+                className="bg-black text-white px-16 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-gray-800 transition-all active:scale-95 shadow-2xl shadow-black/20 flex items-center gap-3"
+            >
+                <Save size={18} strokeWidth={2.5} /> Save Report
+            </button>
           )}
         </div>
       </div>

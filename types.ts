@@ -281,29 +281,38 @@ export interface BuildingRecord {
   utilityCost?: string; // Electricity, Water
 }
 
+// Updated based on PDF F.50/MI-HCO/R00/2021
 export interface BuildingProposal {
   id: string;
-  optionName: string;
+  name: string; // Used for "Kandidat X"
+  
+  // 1. Alamat Lokasi
   address: {
     jl: string;
     kota: string;
     kabupaten: string;
     propinsi: string;
   };
-  phoneLines: string;
-  electricity: string;
-  water: string;
-  areas: {
-    land: string;
-    building: string;
-    frontYard: string;
-  };
-  conditions: {
-    fence: string;
-    gate: string;
-    parking: string;
-  };
-  security: string[];
+
+  // 2-4. Utilities
+  phoneLines: string; // Jumlah & No Line Tlp
+  electricity: string; // Daya Listrik (Ampere/Watt)
+  water: string; // PAM/Pompa/Sumur
+
+  // 5. Dimensions & Conditions
+  landArea: string; // Luas Tanah (m2)
+  buildingArea: string; // Luas Bangunan (m2)
+  frontYardArea: string; // Luas Halaman Depan (m2)
+  fenceCondition: string; // Tembok/Duri/Besi etc.
+  fenceHeight: string;
+  gateCondition: string; // Pintu Pagar
+  gateHeight: string;
+  parkingCapacity: string; // Parkir Malam (Unit)
+
+  // Security Checkbox
+  securityFeatures: string[]; // Security Area Gedung, CCTV, Alarm, dll.
+
+  // 6. Structure / Floors (Simple representation)
   floors: {
     ground: string;
     f1: string;
@@ -311,25 +320,51 @@ export interface BuildingProposal {
     f3: string;
     f4: string;
   };
-  materials: string[];
-  legal: {
-    shm: boolean;
-    hgb: boolean;
-    imb: boolean;
-  };
-  costs: {
-    rent: string;
-    tax: string;
-    notary: string;
-  };
+  totalFloors: string;
+
+  // 7. Material Checklist
+  buildingMaterials: string[]; // Struktur Baja, Kayu, Genteng, dll.
+  buildingAge: string; // <5, 5-10, etc.
+
+  // 8. Lease Nature
+  leaseNature: string; // Baru / Perpanjang
+  leasePurpose: string; // Showroom, Kantor, Gudang, etc.
+
+  // 9. Documents
+  documents: string[]; // SHM, HGB, IMB
+
+  // 10. Renovation
+  renovationNeeded: boolean;
+  renovationCostEstimate: string;
+  renovationTimeEstimate: string;
+  renovationDetails: string; // Free text for details
+
+  // 12. Environment
+  environmentConditions: string[]; // Cluster, Padat Penduduk, Pergudangan, etc.
+
+  // 13-15. Logistics
+  distanceToDealer: string;
+  roadWidth: string;
+  roadCondition: string;
+  loadingDock: string; // Jenis Truk (Tronton/Elf/Enkel)
+
+  // 16-19. Financials
+  rentPrice: string; // Per tahun
+  leasePeriod: string; // Min - Max tahun
+  taxPPH: string; // Ditanggung oleh...
+  notaryFee: string; // Ditanggung oleh...
+
+  // 20. Owner Data
   owner: {
     name: string;
-    phone: string;
     address: string;
+    phone: string;
   };
-  survey: {
-    pros: string[];
-    cons: string[];
+
+  // 21. Survey
+  surveySummary: {
+    pros: string;
+    cons: string;
   };
 }
 
