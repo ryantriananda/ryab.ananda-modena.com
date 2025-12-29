@@ -496,9 +496,10 @@ export interface ReminderRecord {
 }
 
 export interface GeneralAssetRecord {
+  id: string; // Added ID for data management
   assetNumber: string;
   assetCategory: string;
-  ownership: string;
+  ownership: 'Own' | 'Rent' | string;
   type: string;
   assetLocation: string;
   channel: string;

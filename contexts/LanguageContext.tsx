@@ -35,7 +35,10 @@ const translations: Record<string, Record<Language, string>> = {
   'Gedung': { id: 'Gedung', en: 'Building' },
   'Building Asset Management': { id: 'Manajemen Aset Gedung', en: 'Building Asset Management' },
   'Master Asset': { id: 'Master Aset', en: 'Master Asset' },
-  'Asset HC': { id: 'Aset HC', en: 'Asset HC' }, // Updated Translation
+  'Asset HC': { id: 'Aset HC', en: 'Asset HC' }, 
+  'Asset IT': { id: 'Aset IT', en: 'Asset IT' }, // New Translation
+  'General Asset': { id: 'Aset Umum', en: 'General Asset' },
+  'General Asset List': { id: 'Daftar Aset Umum', en: 'General Asset List' }, 
   'Branch Improvement': { id: 'Branch Improvement', en: 'Branch Improvement' },
   'Pemeliharaan Asset': { id: 'Pemeliharaan Asset', en: 'Asset Maintenance' },
   'Utility Monitoring': { id: 'Pemantauan Utilitas', en: 'Utility Monitoring' },
@@ -51,6 +54,7 @@ const translations: Record<string, Record<Language, string>> = {
   'Manajemen User': { id: 'Manajemen User', en: 'User Management' },
   
   // Master Sub-items
+  'Asset Category': { id: 'Kategori Aset', en: 'Asset Category' },
   'Jenis Pajak': { id: 'Jenis Pajak', en: 'Tax Type' },
   'Jenis Pembayaran': { id: 'Jenis Pembayaran', en: 'Payment Type' },
   'Jenis Servis': { id: 'Jenis Servis', en: 'Service Type' },

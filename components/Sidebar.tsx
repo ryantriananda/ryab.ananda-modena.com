@@ -24,7 +24,11 @@ import {
   Settings,
   UserCog,
   Zap,
-  ShieldCheck
+  ShieldCheck,
+  Package,
+  List,
+  Monitor,
+  Tag
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -96,7 +100,14 @@ export const Sidebar: React.FC<Props> = ({
             { label: 'Master ARK', icon: <Settings size={16} /> },
         ]
     },
-    { label: 'Asset HC', icon: <Database size={20} /> },
+    { 
+        label: 'General Asset', 
+        icon: <Package size={20} />,
+        subItems: [
+            { label: 'Asset HC', icon: <Database size={16} /> },
+            { label: 'Asset IT', icon: <Monitor size={16} /> },
+        ]
+    },
     { label: 'Log Book', icon: <BookOpen size={20} /> },
     { 
         label: 'Kendaraan', 
@@ -127,6 +138,7 @@ export const Sidebar: React.FC<Props> = ({
       label: 'Master Data', 
       icon: <Home size={20} />,
       subItems: [
+        { label: 'Asset Category', icon: <Tag size={16} /> },
         { label: 'Jenis Pajak', icon: <Settings size={16} /> },
         { label: 'Jenis Pembayaran', icon: <Settings size={16} /> },
         { label: 'Jenis Servis', icon: <Settings size={16} /> },

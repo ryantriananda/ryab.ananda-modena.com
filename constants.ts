@@ -1,5 +1,5 @@
 
-import { AssetRecord, MasterItem, VehicleRecord, TaxKirRecord, MasterVendorRecord, DeliveryLocationRecord, LogBookRecord, BuildingRecord, ReminderRecord, VehicleContractRecord, GeneralMasterItem, UserRecord, BuildingAssetRecord, BuildingMaintenanceRecord, UtilityRecord } from './types';
+import { AssetRecord, MasterItem, VehicleRecord, TaxKirRecord, MasterVendorRecord, DeliveryLocationRecord, LogBookRecord, BuildingRecord, ReminderRecord, VehicleContractRecord, GeneralMasterItem, UserRecord, BuildingAssetRecord, BuildingMaintenanceRecord, UtilityRecord, GeneralAssetRecord } from './types';
 
 export const MOCK_BUILDING_DATA: BuildingRecord[] = [
     {
@@ -524,6 +524,15 @@ export const MOCK_VEHICLE_TYPE_DATA: GeneralMasterItem[] = [
     { id: 5, name: 'MOTORCYCLE' }
 ];
 
+export const MOCK_ASSET_CATEGORY_DATA: GeneralMasterItem[] = [
+    { id: 1, name: 'FURNITURE' },
+    { id: 2, name: 'ELECTRONICS' },
+    { id: 3, name: 'VEHICLE' },
+    { id: 4, name: 'MACHINERY' },
+    { id: 5, name: 'IT HARDWARE' },
+    { id: 6, name: 'BUILDING' }
+];
+
 export const MOCK_GENERAL_MASTER_DATA = { 
     jenisPajak: [{id: 1, name: 'STNK 1 TAHUN'}, {id: 2, name: 'STNK 5 TAHUN'}], 
     jenisPembayaran: [{id: 1, name: 'KASBON'}, {id: 2, name: 'REIMBURSE'}], 
@@ -554,3 +563,58 @@ export const MOCK_VEHICLE_CONTRACT_DATA: VehicleContractRecord[] = [
 export const MOCK_TAX_KIR_DATA: TaxKirRecord[] = [];
 export const MOCK_LOGBOOK_DATA: LogBookRecord[] = [];
 export const MOCK_MASTER_VENDOR_DATA: MasterVendorRecord[] = [];
+
+// Mock Data for General Asset
+export const MOCK_GENERAL_ASSET_DATA: GeneralAssetRecord[] = [
+    {
+        id: 'GA-001',
+        assetNumber: 'AST-GEN-001',
+        assetCategory: 'Furniture',
+        ownership: 'Own',
+        type: 'Office Desk',
+        assetLocation: 'Jakarta',
+        channel: 'Direct',
+        department: 'HRGA',
+        subLocation: 'Lantai 2 - HR Room',
+        address: 'Jl. Prof. DR. Satrio No. C4'
+    },
+    {
+        id: 'GA-002',
+        assetNumber: 'AST-GEN-002',
+        assetCategory: 'Electronic',
+        ownership: 'Rent',
+        type: 'Coffee Machine',
+        assetLocation: 'Surabaya',
+        channel: 'Indirect',
+        department: 'Operation',
+        subLocation: 'Pantry',
+        address: 'Jl. Mayjen Sungkono No. 10'
+    }
+];
+
+export const MOCK_IT_ASSET_DATA: GeneralAssetRecord[] = [
+    {
+        id: 'IT-001',
+        assetNumber: 'AST-IT-001',
+        assetCategory: 'Hardware',
+        ownership: 'Own',
+        type: 'Laptop',
+        assetLocation: 'Jakarta',
+        channel: 'Direct',
+        department: 'IT',
+        subLocation: 'IT Room',
+        address: 'Jl. Prof. DR. Satrio No. C4'
+    },
+    {
+        id: 'IT-002',
+        assetNumber: 'AST-IT-002',
+        assetCategory: 'Peripheral',
+        ownership: 'Own',
+        type: 'Monitor',
+        assetLocation: 'Jakarta',
+        channel: 'Direct',
+        department: 'IT',
+        subLocation: 'Server Room',
+        address: 'Jl. Prof. DR. Satrio No. C4'
+    }
+];
