@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { X, Save, Car, Shield, FileText, Briefcase, MapPin, DollarSign, UploadCloud, Trash2, Calendar, User, Info, CheckCircle2, Clock, GitBranch, Image as ImageIcon } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { X, Save, Car, Shield, FileText, Briefcase, MapPin, DollarSign, UploadCloud, Trash2, Calendar, User, Info, CheckCircle2, Clock, GitBranch, Image as ImageIcon, Calculator, TrendingDown, TrendingUp } from 'lucide-react';
 import { VehicleRecord, GeneralMasterItem } from '../types';
 
 interface Props {
@@ -42,7 +42,10 @@ export const VehicleModal: React.FC<Props> = ({
     ownership: 'Milik Modena',
     channel: 'Human Capital Operation',
     cabang: 'Pusat',
-    approvalStatus: 'Pending'
+    approvalStatus: 'Pending',
+    depreciationMethod: 'Garis Lurus (Straight Line)',
+    usefulLife: 4, // Default 4 years
+    residualValue: '0'
   });
 
   useEffect(() => {
@@ -63,13 +66,53 @@ export const VehicleModal: React.FC<Props> = ({
             ownership: 'Milik Modena', 
             channel: 'Human Capital Operation', 
             cabang: 'Pusat',
-            approvalStatus: 'Pending'
+            approvalStatus: 'Pending',
+            depreciationMethod: 'Garis Lurus (Straight Line)',
+            usefulLife: 4,
+            residualValue: '0'
         });
         setDocPreviews({ stnk: null, kir: null, front: null, rear: null, right: null, left: null });
       }
       setActiveTab('INFORMASI');
     }
   }, [isOpen, initialData]);
+
+  // Calculate Depreciation Logic
+  const depreciationData = useMemo(() => {
+      const price = parseInt(form.hargaBeli || '0') || 0;
+      const residual = parseInt(form.residualValue || '0') || 0;
+      const years = form.usefulLife || 4;
+      
+      const depreciableAmount = Math.max(0, price - residual);
+      const yearlyDep = depreciableAmount / years;
+      const monthlyDep = yearlyDep / 12;
+
+      let accumulatedDep = 0;
+      let monthsPassed = 0;
+
+      if (form.tglBeli) {
+          const start = new Date(form.tglBeli);
+          const now = new Date();
+          const diffTime = Math.abs(now.getTime() - start.getTime());
+          monthsPassed = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30)); 
+          
+          // Cap months passed at useful life * 12
+          const maxMonths = years * 12;
+          const effectiveMonths = Math.min(monthsPassed, maxMonths);
+          
+          accumulatedDep = effectiveMonths * monthlyDep;
+      }
+
+      const netBookValue = Math.max(price - accumulatedDep, residual);
+
+      return {
+          yearlyDep,
+          monthlyDep,
+          accumulatedDep,
+          netBookValue,
+          monthsPassed: Math.floor(monthsPassed/12) + " Thn " + (monthsPassed % 12) + " Bln"
+      };
+  }, [form.hargaBeli, form.residualValue, form.usefulLife, form.tglBeli]);
 
   if (!isOpen) return null;
 
@@ -113,13 +156,16 @@ export const VehicleModal: React.FC<Props> = ({
       onSave(updatedData);
   }
 
-  const SectionHeader = ({ title, sub }: { title: string, sub?: string }) => (
-    <div className="flex items-center gap-4 mb-8">
-      <div className="w-1.5 h-6 bg-black rounded-full shadow-sm"></div>
-      <div>
-          <h3 className="text-[12px] font-black text-black uppercase tracking-[0.2em] leading-none">{title}</h3>
-          {sub && <p className="text-[9px] font-bold text-gray-400 uppercase mt-1.5 tracking-widest">{sub}</p>}
+  const SectionHeader = ({ title, sub, icon: Icon }: { title: string, sub?: string, icon?: any }) => (
+    <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center gap-4">
+        <div className="w-1.5 h-6 bg-black rounded-full shadow-sm"></div>
+        <div>
+            <h3 className="text-[12px] font-black text-black uppercase tracking-[0.2em] leading-none">{title}</h3>
+            {sub && <p className="text-[9px] font-bold text-gray-400 uppercase mt-1.5 tracking-widest">{sub}</p>}
+        </div>
       </div>
+      {Icon && <div className="bg-black text-white p-2 rounded-xl shadow-lg"><Icon size={16} /></div>}
     </div>
   );
 
@@ -361,6 +407,123 @@ export const VehicleModal: React.FC<Props> = ({
                     <InputField label="Jangka Pertanggungan" value={form.jangkaPertanggungan} field="jangkaPertanggungan" type="date" className="md:col-span-2" />
                     </div>
                 </div>
+
+                {/* Card 6: DEPRECIATION & VALUE (NEW) */}
+                <div className="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden">
+                    <SectionHeader title="DEPRECIATION & VALUE" sub="Accounting & Asset Management" icon={Calculator} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <Label>Metode Penyusutan</Label>
+                            <select 
+                                disabled={isView}
+                                className="w-full bg-white border border-gray-100 rounded-2xl px-5 py-4 text-[13px] font-black outline-none"
+                                value={form.depreciationMethod}
+                                onChange={(e) => setForm({...form, depreciationMethod: e.target.value})}
+                            >
+                                <option value="Garis Lurus (Straight Line)">Garis Lurus (Straight Line)</option>
+                                <option value="Saldo Menurun (Declining)">Saldo Menurun (Declining)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <Label>Masa Manfaat (Tahun)</Label>
+                            <div className="relative">
+                                <input 
+                                    type="number" 
+                                    className="w-full bg-white border border-gray-100 rounded-2xl px-5 py-4 text-[13px] font-black outline-none"
+                                    value={form.usefulLife}
+                                    onChange={(e) => setForm({...form, usefulLife: parseInt(e.target.value) || 0})}
+                                    disabled={isView}
+                                />
+                                <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-300 uppercase">Years</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <Label>Nilai Residu (IDR)</Label>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-300">RP</span>
+                                <input 
+                                    type="number" 
+                                    className="w-full bg-white border border-gray-100 rounded-2xl pl-10 pr-6 py-4 text-[13px] font-black outline-none"
+                                    value={form.residualValue}
+                                    onChange={(e) => setForm({...form, residualValue: e.target.value})}
+                                    disabled={isView}
+                                    placeholder="0"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col justify-center">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Monthly Dep.</span>
+                                <span className="text-[13px] font-black text-black">Rp {Math.round(depreciationData.monthlyDep).toLocaleString('id-ID')}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Yearly Dep.</span>
+                                <span className="text-[13px] font-black text-black">Rp {Math.round(depreciationData.yearlyDep).toLocaleString('id-ID')}</span>
+                            </div>
+                        </div>
+
+                        {/* Results Highlight */}
+                        <div className="md:col-span-2 bg-gray-50 rounded-[1.5rem] p-8 flex items-center justify-between border border-gray-100">
+                            <div>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Akumulasi Penyusutan</p>
+                                <h4 className="text-[18px] font-black text-red-500 font-mono">- Rp {Math.round(depreciationData.accumulatedDep).toLocaleString('id-ID')}</h4>
+                                <div className="flex items-center gap-1 mt-1 text-[10px] text-gray-400 font-medium">
+                                    <Clock size={12} /> Masa Pakai: {depreciationData.monthsPassed}
+                                </div>
+                            </div>
+                            <div className="h-12 w-[1px] bg-gray-200 mx-6"></div>
+                            <div className="text-right">
+                                <p className="text-[10px] font-bold text-green-600 uppercase tracking-widest mb-1">Nilai Buku Saat Ini (Net Book Value)</p>
+                                <h4 className="text-[24px] font-black text-black font-mono">Rp {Math.round(depreciationData.netBookValue).toLocaleString('id-ID')}</h4>
+                            </div>
+                        </div>
+
+                        {/* Schedule Table Preview (Simple) */}
+                        <div className="md:col-span-2">
+                            <div className="flex items-center gap-2 mb-4">
+                                <FileText size={14} className="text-black"/>
+                                <span className="text-[10px] font-black text-black uppercase tracking-widest">Schedule Penyusutan (Preview)</span>
+                            </div>
+                            <div className="overflow-hidden rounded-xl border border-gray-100">
+                                <table className="w-full text-left">
+                                    <thead className="bg-gray-50 text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                                        <tr>
+                                            <th className="p-3">Periode</th>
+                                            <th className="p-3 text-right">Beban Penyusutan</th>
+                                            <th className="p-3 text-right">Akumulasi</th>
+                                            <th className="p-3 text-right">Nilai Buku</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="text-[10px] font-medium text-gray-600">
+                                        {form.hargaBeli && form.tglBeli ? (
+                                            <>
+                                                <tr className="border-b border-gray-50">
+                                                    <td className="p-3">Year 1</td>
+                                                    <td className="p-3 text-right">{Math.round(depreciationData.yearlyDep).toLocaleString('id-ID')}</td>
+                                                    <td className="p-3 text-right">{Math.round(depreciationData.yearlyDep).toLocaleString('id-ID')}</td>
+                                                    <td className="p-3 text-right">{Math.round(parseInt(form.hargaBeli) - depreciationData.yearlyDep).toLocaleString('id-ID')}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="p-3">Year 2</td>
+                                                    <td className="p-3 text-right">{Math.round(depreciationData.yearlyDep).toLocaleString('id-ID')}</td>
+                                                    <td className="p-3 text-right">{Math.round(depreciationData.yearlyDep * 2).toLocaleString('id-ID')}</td>
+                                                    <td className="p-3 text-right">{Math.round(parseInt(form.hargaBeli) - (depreciationData.yearlyDep * 2)).toLocaleString('id-ID')}</td>
+                                                </tr>
+                                            </>
+                                        ) : (
+                                            <tr>
+                                                <td colSpan={4} className="p-4 text-center text-gray-300 italic">Lengkapi data harga beli & masa manfaat untuk melihat jadwal</td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 </div>
             </div>
           )}

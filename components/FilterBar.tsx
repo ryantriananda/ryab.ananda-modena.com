@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Search, Plus, Download, Upload, Filter, Grid, List } from 'lucide-react';
+import { Search, Plus, Download, Upload, Filter, Grid, List, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface Props {
@@ -8,12 +8,13 @@ interface Props {
   activeTab: string;
   onTabChange: (tab: string) => void;
   onAddClick: () => void;
-  onExportClick?: () => void; // New Prop
+  onExportClick?: () => void;
+  onSyncClick?: () => void;
   searchPlaceholder?: string;
   moduleName?: string;
   hideAdd?: boolean;
   hideImport?: boolean;
-  hideExport?: boolean; // New Prop
+  hideExport?: boolean;
   customAddLabel?: string;
 }
 
@@ -23,6 +24,7 @@ export const FilterBar: React.FC<Props> = ({
   onTabChange, 
   onAddClick, 
   onExportClick,
+  onSyncClick,
   searchPlaceholder, 
   moduleName,
   hideAdd = false,
@@ -90,9 +92,18 @@ export const FilterBar: React.FC<Props> = ({
           </div>
 
           <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm h-[42px]">
+            {onSyncClick && (
+                <button 
+                  onClick={onSyncClick}
+                  className="flex items-center gap-2 px-4 h-full border-r border-gray-100 text-gray-500 hover:text-black hover:bg-gray-50 transition-all text-[10px] font-black uppercase tracking-widest"
+                  title="Synchronize Data"
+                >
+                <RefreshCw size={14} /> <span className="hidden sm:inline">SYNC</span>
+                </button>
+            )}
             {!hideImport && (
                 <button className="flex items-center gap-2 px-4 h-full border-r border-gray-100 text-gray-500 hover:text-black hover:bg-gray-50 transition-all text-[10px] font-black uppercase tracking-widest">
-                <Upload size={14} /> <span className="hidden sm:inline">Import</span>
+                <Upload size={14} /> <span className="hidden sm:inline">IMPORT</span>
                 </button>
             )}
             {!hideExport && (
@@ -100,11 +111,11 @@ export const FilterBar: React.FC<Props> = ({
                   onClick={onExportClick}
                   className="flex items-center gap-2 px-4 h-full border-r border-gray-100 text-gray-500 hover:text-black hover:bg-gray-50 transition-all text-[10px] font-black uppercase tracking-widest"
                 >
-                <Download size={14} /> <span className="hidden sm:inline">Export</span>
+                <Download size={14} /> <span className="hidden sm:inline">EXPORT</span>
                 </button>
             )}
             <button className="flex items-center gap-2 px-4 h-full text-gray-500 hover:text-black hover:bg-gray-50 transition-all text-[10px] font-black uppercase tracking-widest">
-              <Filter size={14} /> <span className="hidden sm:inline">Filter</span>
+              <Filter size={14} /> <span className="hidden sm:inline">FILTER</span>
             </button>
           </div>
 

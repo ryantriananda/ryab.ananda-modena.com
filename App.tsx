@@ -162,7 +162,7 @@ const App: React.FC = () => {
   const [operatorData, setOperatorData] = useState<GeneralMasterItem[]>(() => getInitialData('operatorData', MOCK_OPERATOR_DATA));
   const [masterVendorData, setMasterVendorData] = useState<MasterVendorRecord[]>(() => getInitialData('masterVendorData', MOCK_MASTER_VENDOR_DATA));
 
-  // Expanded Master Data States (From Request)
+  // Expanded Master Data States
   const [taxTypeData, setTaxTypeData] = useState<GeneralMasterItem[]>(() => getInitialData('taxTypeData', MOCK_GENERAL_MASTER_DATA.jenisPajak));
   const [paymentTypeData, setPaymentTypeData] = useState<GeneralMasterItem[]>(() => getInitialData('paymentTypeData', MOCK_GENERAL_MASTER_DATA.jenisPembayaran));
   const [serviceTypeData, setServiceTypeData] = useState<GeneralMasterItem[]>(() => getInitialData('serviceTypeData', MOCK_GENERAL_MASTER_DATA.jenisServis));
@@ -375,6 +375,13 @@ const App: React.FC = () => {
       // In a real app, this would convert the corresponding state data to CSV and trigger a download.
   };
 
+  // Sync Handler for Asset HC/IT
+  const handleSync = () => {
+      const timestamp = new Date().toLocaleTimeString('id-ID');
+      alert(`Synchronizing data for ${activeModule}...\nLast Sync: ${timestamp}`);
+      // In real app, trigger API sync
+  };
+
   // Determine if Export button should be shown
   const shouldShowExport = [
       // Vehicle Submenus
@@ -394,7 +401,10 @@ const App: React.FC = () => {
   activeModule.includes('Sync') ||
   activeModule === 'Asset Category';
 
+  const shouldShowSync = ['Asset HC', 'Asset IT', 'General Asset List'].includes(activeModule);
+
   // --- WORKFLOW HANDLERS (VEHICLE MODULES) ---
+  // ... (Existing workflow handlers remain unchanged)
   const handleVehicleWorkflowAction = (item: VehicleRecord, action: 'Approve' | 'Reject' | 'Revise') => {
       const statusMap: Record<string, 'Approved' | 'Rejected' | 'Revised'> = {
           'Approve': 'Approved',
@@ -478,7 +488,7 @@ const App: React.FC = () => {
   };
 
   // --- SAVE HANDLERS ---
-  // ... (Existing save handlers remain unchanged) ...
+  // ... (Existing save handlers remain unchanged)
   const handleSaveBuilding = (data: Partial<BuildingRecord>) => {
       const isBranchImprovement = activeModule === 'Branch Improvement';
       const updateFunction = isBranchImprovement ? setBranchImprovementData : setBuildingData;
@@ -983,7 +993,7 @@ const App: React.FC = () => {
          case 'Master Cost Center': return <GeneralMasterTable data={costCenterData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setCostCenterData(prev => prev.filter(i => i.id !== id))} />;
          case 'Master Warna': return <GeneralMasterTable data={colorData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setColorData(prev => prev.filter(i => i.id !== id))} />;
          case 'Master Tipe Gedung': return <GeneralMasterTable data={buildingTypeData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setBuildingTypeData(prev => prev.filter(i => i.id !== id))} />;
-         case 'Master Asset Type': case 'Master Tipe Aset': return <GeneralMasterTable data={genAssetTypeData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setGenAssetTypeData(prev => prev.filter(i => i.id !== id))} />;
+         case 'Master Tipe Aset': case 'Master Asset Type': return <GeneralMasterTable data={genAssetTypeData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setGenAssetTypeData(prev => prev.filter(i => i.id !== id))} />;
          case 'Master PPN': return <GeneralMasterTable data={ppnData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setPpnData(prev => prev.filter(i => i.id !== id))} />;
          case 'Master Brand Type': return <GeneralMasterTable data={brandTypeData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setBrandTypeData(prev => prev.filter(i => i.id !== id))} />;
          case 'Master Operator': return <GeneralMasterTable data={operatorData} title={activeModule} onEdit={(item) => { setSelectedGeneralItem(item); setModalMode('edit'); setIsGeneralMasterModalOpen(true); }} onDelete={(id) => setOperatorData(prev => prev.filter(i => i.id !== id))} />;
@@ -1084,6 +1094,7 @@ const App: React.FC = () => {
                 onTabChange={setActiveTab} 
                 onAddClick={handleAddClick}
                 onExportClick={handleExport}
+                onSyncClick={shouldShowSync ? handleSync : undefined}
                 moduleName={activeModule}
                 hideAdd={isReminderModule}
                 hideImport={isReminderModule || activeModule === 'Utility Monitoring'}

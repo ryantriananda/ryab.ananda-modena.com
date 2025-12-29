@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { X, Save, Wrench, Plus, Trash2, Calendar, Clock, User, CheckCircle2, AlertCircle, FileText, PlayCircle } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { X, Save, Wrench, Plus, Trash2, Calendar, Clock, User, CheckCircle2, AlertCircle, FileText, PlayCircle, Info, Hash, MapPin, Tag, ShieldCheck, Camera, Image as ImageIcon } from 'lucide-react';
 import { ServiceRecord, VehicleRecord, SparePart } from '../types';
 
 interface Props {
@@ -34,6 +34,10 @@ export const ServiceModal: React.FC<Props> = ({
   });
 
   const [parts, setParts] = useState<SparePart[]>([]);
+  
+  // Logic for Image Upload
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activePartIndex, setActivePartIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -59,9 +63,15 @@ export const ServiceModal: React.FC<Props> = ({
   }, [isOpen, initialData]);
 
   const isView = mode === 'view';
+  const isNonRoutine = form.jenisServis === 'Non-Rutin';
+
+  // Get Selected Vehicle Details
+  const selectedVehicle = useMemo(() => {
+      return vehicleList.find(v => v.noPolisi === form.noPolisi);
+  }, [form.noPolisi, vehicleList]);
 
   const addPart = () => {
-    setParts([...parts, { name: '', qty: 1, price: '0' }]);
+    setParts([...parts, { name: '', qty: 1, price: '0', imageUrl: '' }]);
   };
 
   const removePart = (index: number) => {
@@ -72,6 +82,31 @@ export const ServiceModal: React.FC<Props> = ({
     const newParts = [...parts];
     newParts[index] = { ...newParts[index], [field]: value };
     setParts(newParts);
+  };
+
+  // Image Upload Handlers
+  const handlePartImageUpload = (index: number) => {
+      if (!isView) {
+          setActivePartIndex(index);
+          fileInputRef.current?.click();
+      }
+  };
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file && activePartIndex !== null) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+              updatePart(activePartIndex, 'imageUrl', ev.target?.result as string);
+          };
+          reader.readAsDataURL(file);
+      }
+      e.target.value = ''; // Reset
+  };
+
+  const removePartImage = (e: React.MouseEvent, index: number) => {
+      e.stopPropagation();
+      updatePart(index, 'imageUrl', undefined);
   };
 
   const totalBiaya = useMemo(() => {
@@ -126,6 +161,17 @@ export const ServiceModal: React.FC<Props> = ({
     </label>
   );
 
+  const DetailItem = ({ label, value, icon: Icon, isDate = false }: { label: string, value?: string, icon?: any, isDate?: boolean }) => (
+      <div className="flex flex-col">
+          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5 flex items-center gap-1">
+              {Icon && <Icon size={10} />} {label}
+          </span>
+          <span className={`text-[11px] font-black text-black leading-tight ${isDate ? 'font-mono' : ''} truncate`} title={value}>
+              {value || '-'}
+          </span>
+      </div>
+  );
+
   return (
     <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center backdrop-blur-sm p-4">
       <div className="bg-white w-full max-w-[1200px] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-200">
@@ -177,6 +223,59 @@ export const ServiceModal: React.FC<Props> = ({
                             {vehicleList.map(v => <option key={v.id} value={v.noPolisi}>{v.noPolisi} - {v.nama}</option>)}
                             </select>
                         </div>
+
+                        {/* Display Detailed Vehicle Info if Selected */}
+                        {selectedVehicle && (
+                            <div className="mt-6 bg-gray-50 rounded-[1.5rem] p-6 border border-gray-100 animate-in fade-in slide-in-from-top-2">
+                                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200/60">
+                                    <div className="bg-black text-white p-1 rounded">
+                                        <Info size={12} />
+                                    </div>
+                                    <span className="text-[10px] font-black text-black uppercase tracking-widest">Spesifikasi Aset</span>
+                                </div>
+                                
+                                <div className="grid grid-cols-3 gap-y-6 gap-x-4">
+                                    <DetailItem label="Merek / Brand" value={selectedVehicle.merek} icon={Tag} />
+                                    <DetailItem label="Tipe Kendaraan" value={selectedVehicle.tipeKendaraan} />
+                                    <DetailItem label="Model" value={selectedVehicle.model} />
+                                    
+                                    <DetailItem label="Tahun" value={selectedVehicle.tahunPembuatan} icon={Calendar} />
+                                    <DetailItem label="Warna" value={selectedVehicle.warna} />
+                                    <DetailItem label="Silinder (CC)" value={selectedVehicle.isiSilinder} />
+
+                                    <div className="col-span-3 h-px bg-gray-200/60"></div>
+
+                                    <div className="col-span-1">
+                                        <DetailItem label="No. Rangka" value={selectedVehicle.noRangka} icon={Hash} />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <DetailItem label="No. Mesin" value={selectedVehicle.noMesin} icon={Hash} />
+                                    </div>
+
+                                    <div className="col-span-3 h-px bg-gray-200/60"></div>
+
+                                    <DetailItem label="STNK 1 Tahun" value={selectedVehicle.masaBerlaku1} isDate icon={ShieldCheck} />
+                                    <DetailItem label="STNK 5 Tahun" value={selectedVehicle.masaBerlaku5} isDate />
+                                    <DetailItem label="KIR" value={selectedVehicle.masaBerlakuKir} isDate />
+
+                                    <div className="col-span-3 bg-white p-3 rounded-xl border border-gray-100 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+                                                <User size={14} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[9px] font-bold text-gray-400 uppercase">Pengguna</p>
+                                                <p className="text-[11px] font-black text-black">{selectedVehicle.pengguna || '-'}</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-[9px] font-bold text-gray-400 uppercase flex items-center gap-1 justify-end"><MapPin size={10}/> Lokasi</p>
+                                            <p className="text-[11px] font-black text-black">{selectedVehicle.cabang} - {selectedVehicle.channel}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <div>
                         <Label>Kategori Pemeliharaan</Label>
@@ -256,6 +355,9 @@ export const ServiceModal: React.FC<Props> = ({
                 )}
               </div>
 
+              {/* Hidden File Input for Parts */}
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={onFileChange} />
+
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
@@ -264,6 +366,7 @@ export const ServiceModal: React.FC<Props> = ({
                       <th className="pb-4 px-2 text-center w-24">QTY</th>
                       <th className="pb-4 px-2 text-right w-40">PRICE (IDR)</th>
                       <th className="pb-4 px-2 text-right w-40">SUBTOTAL</th>
+                      {isNonRoutine && <th className="pb-4 px-2 text-center w-20">BUKTI / FOTO</th>}
                       {!isView && <th className="pb-4 w-12"></th>}
                     </tr>
                   </thead>
@@ -306,6 +409,36 @@ export const ServiceModal: React.FC<Props> = ({
                           <td className="py-4 px-2 text-right font-black text-[13px] text-black">
                             {subtotal.toLocaleString('id-ID')}
                           </td>
+                          
+                          {/* Image Upload Column for Non-Routine */}
+                          {isNonRoutine && (
+                              <td className="py-4 px-2 text-center">
+                                  {part.imageUrl ? (
+                                      <div className="relative w-10 h-10 mx-auto group/img">
+                                          <img src={part.imageUrl} alt="Part" className="w-full h-full object-cover rounded-lg border border-gray-200" />
+                                          {!isView && (
+                                              <button 
+                                                  onClick={(e) => removePartImage(e, idx)}
+                                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover/img:opacity-100 transition-opacity"
+                                              >
+                                                  <X size={10} />
+                                              </button>
+                                          )}
+                                      </div>
+                                  ) : (
+                                      !isView && (
+                                          <button 
+                                              onClick={() => handlePartImageUpload(idx)}
+                                              className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-100 transition-all mx-auto"
+                                              title="Upload Evidence"
+                                          >
+                                              <Camera size={14} />
+                                          </button>
+                                      )
+                                  )}
+                              </td>
+                          )}
+
                           {!isView && (
                             <td className="py-4 px-2 text-right">
                               <button onClick={() => removePart(idx)} className="text-gray-200 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50">
@@ -325,6 +458,7 @@ export const ServiceModal: React.FC<Props> = ({
                       <td className="pt-8 pb-2 text-right">
                         <span className="text-[18px] font-black text-black">Rp {totalBiaya.toLocaleString('id-ID')}</span>
                       </td>
+                      {isNonRoutine && <td className="pt-8"></td>}
                       {!isView && <td className="pt-8"></td>}
                     </tr>
                   </tfoot>

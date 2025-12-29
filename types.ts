@@ -27,6 +27,7 @@ export interface SparePart {
   name: string;
   qty: number;
   price: string;
+  imageUrl?: string; // Added image URL for spare parts
 }
 
 export interface PurchaseRecord {
@@ -93,6 +94,11 @@ export interface VehicleRecord {
   noPolisAsuransi?: string;
   jangkaPertanggungan?: string;
   
+  // Depreciation Fields
+  depreciationMethod?: string;
+  usefulLife?: number;
+  residualValue?: string;
+
   // Documents & Photos
   stnkUrl?: string;
   kirUrl?: string;

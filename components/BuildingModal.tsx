@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { X, Save, Building, MapPin, Phone, FileText, CheckCircle2, Clock, AlertCircle, Trash2, Plus, ChevronDown, User, Home, DollarSign, Ruler, Zap } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Save, Building, MapPin, Phone, FileText, CheckCircle2, Clock, AlertCircle, Trash2, Plus, ChevronDown, User, Home, DollarSign, Ruler, Zap, Key, UploadCloud, MousePointer2, TrendingUp, PieChart } from 'lucide-react';
 import { BuildingRecord, GeneralMasterItem, BuildingProposal, WorkflowStep } from '../types';
 
 interface Props {
@@ -20,12 +20,18 @@ export const BuildingModal: React.FC<Props> = ({
     mode = 'create',
     buildingTypeList = []
 }) => {
-  const [activeTab, setActiveTab] = useState('INFORMASI UTAMA');
+  const [activeTab, setActiveTab] = useState('INFORMASI UMUM');
   const [form, setForm] = useState<Partial<BuildingRecord>>({
     status: 'Pending',
     ownership: 'Rent',
-    workflow: []
+    workflow: [],
+    // Mock financial data defaults
+    rentCost: '250000000',
+    totalMaintenanceCost: '45000000',
+    utilityCost: '12000000'
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // State for a proposal being edited
   const [currentProposal, setCurrentProposal] = useState<Partial<BuildingProposal>>({
@@ -51,11 +57,14 @@ export const BuildingModal: React.FC<Props> = ({
         setForm({
             status: 'Pending',
             ownership: 'Rent',
-            assetNo: '[AUTO]',
+            assetNo: 'REQ-BI-NEW-01',
             name: '',
-            type: '',
+            type: 'MHC',
             location: '',
             address: '',
+            rentCost: '250000000',
+            totalMaintenanceCost: '45000000',
+            utilityCost: '12000000',
             workflow: [
                 { role: 'BM', status: 'Pending' },
                 { role: 'Regional Branches', status: 'Pending' },
@@ -75,7 +84,7 @@ export const BuildingModal: React.FC<Props> = ({
             environmentConditions: []
         });
       }
-      setActiveTab('INFORMASI UTAMA');
+      setActiveTab('INFORMASI UMUM');
     }
   }, [isOpen, initialData]);
 
@@ -84,7 +93,6 @@ export const BuildingModal: React.FC<Props> = ({
   const isView = mode === 'view';
 
   const handleSave = () => {
-      // Merge currentProposal into form.proposals
       const updatedProposals = form.proposals ? [...form.proposals] : [];
       if (updatedProposals.length > 0) {
           updatedProposals[0] = { ...updatedProposals[0], ...currentProposal } as BuildingProposal;
@@ -95,11 +103,22 @@ export const BuildingModal: React.FC<Props> = ({
       onSave({ ...form, proposals: updatedProposals });
   };
 
+  const handleFloorPlanUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+              setForm(prev => ({ ...prev, floorPlanImage: ev.target?.result as string }));
+          };
+          reader.readAsDataURL(file);
+      }
+  };
+
   const SectionHeader = ({ num, title, sub }: { num?: string, title: string, sub?: string }) => (
     <div className="flex items-center gap-3 mb-6 pb-2 border-b border-gray-100">
-      {num && <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[10px] font-black">{num}</div>}
+      {num && <div className="w-1.5 h-6 bg-black rounded-full"></div>}
       <div>
-        <h3 className="text-[11px] font-black text-black uppercase tracking-[0.2em]">{title}</h3>
+        <h3 className="text-[12px] font-black text-black uppercase tracking-[0.2em]">{title}</h3>
         {sub && <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">{sub}</p>}
       </div>
     </div>
@@ -139,9 +158,19 @@ export const BuildingModal: React.FC<Props> = ({
       }));
   };
 
+  // Financial Calculations
+  const rent = parseInt(form.rentCost || '0');
+  const maintenance = parseInt(form.totalMaintenanceCost || '0');
+  const utility = parseInt(form.utilityCost || '0');
+  const duration = 5; // Default 5 years for calculation
+  const tco = rent + (maintenance * duration) + (utility * duration);
+  const burnRate = tco / (duration * 12);
+
+  const formatCurrency = (val: number) => "Rp " + val.toLocaleString('id-ID');
+
   return (
     <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center backdrop-blur-sm p-4">
-      <div className="bg-white w-full max-w-5xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col transform transition-all scale-100 max-h-[95vh]">
+      <div className="bg-white w-full max-w-6xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col transform transition-all scale-100 max-h-[95vh]">
         
         {/* Header */}
         <div className="px-10 py-8 bg-white border-b border-gray-100 flex items-center justify-between shrink-0">
@@ -150,20 +179,27 @@ export const BuildingModal: React.FC<Props> = ({
                 <Building size={24} strokeWidth={2.5} />
             </div>
             <div>
-                <h2 className="text-[18px] font-black text-black uppercase tracking-tight leading-none">
-                    {mode === 'create' ? 'Branch Improvement Request' : mode === 'edit' ? 'Edit Branch Proposal' : 'Branch Detail'}
+                <h2 className="text-[20px] font-black text-black uppercase tracking-tight leading-none">
+                    {form.name || 'NEW BRANCH REQUEST'}
                 </h2>
-                <p className="text-[9px] font-bold text-gray-400 mt-2 uppercase tracking-[0.3em]">Expansion & Relocation</p>
+                <p className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-[0.2em]">
+                    {form.assetNo} • {form.type || 'BRANCH'}
+                </p>
             </div>
           </div>
-          <button onClick={onClose} className="text-gray-300 hover:text-black transition-all p-3 rounded-full hover:bg-gray-50">
-            <X size={28} />
-          </button>
+          <div className="flex items-center gap-4">
+              <span className="px-4 py-2 bg-[#FFF7ED] text-[#EA580C] text-[10px] font-black uppercase tracking-widest rounded-xl border border-[#FDBA74]/50">
+                  {form.status || 'PENDING'}
+              </span>
+              <button onClick={onClose} className="text-gray-300 hover:text-black transition-all p-2 rounded-full hover:bg-gray-50">
+                <X size={28} strokeWidth={2} />
+              </button>
+          </div>
         </div>
 
         {/* Tabs */}
         <div className="bg-white border-b border-gray-100 flex px-10 shrink-0 gap-8 overflow-x-auto no-scrollbar">
-            {['INFORMASI UTAMA', 'DATA KANDIDAT', 'WORKFLOW', 'DOKUMEN LEGAL'].map(tab => (
+            {['INFORMASI UMUM', 'PROPOSAL & PERBANDINGAN', 'WORKFLOW', 'FLOOR PLAN', 'FINANCIAL SUMMARY', 'DOKUMEN'].map(tab => (
                 <button 
                     key={tab}
                     onClick={() => setActiveTab(tab)}
@@ -177,179 +213,254 @@ export const BuildingModal: React.FC<Props> = ({
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-12 custom-scrollbar bg-[#FBFBFB]">
-            {activeTab === 'INFORMASI UTAMA' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                    <div className="md:col-span-2">
-                        <SectionHeader title="IDENTITAS REQUEST" sub="Basic Project Information" />
-                    </div>
-
-                    <Input 
-                        label="Judul Project / Nama Cabang" 
-                        value={form.name || ''} 
-                        onChange={e => setForm({...form, name: e.target.value})} 
-                        placeholder="Contoh: Relokasi MHC Bintaro"
-                    />
+            {activeTab === 'INFORMASI UMUM' && (
+                <div className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     
+                    {/* Section 1: Jenis Kepemilikan */}
                     <div>
-                        <Label>Tipe Properti</Label>
-                        <div className="relative">
-                            <select 
+                        <SectionHeader num="1" title="1. JENIS KEPEMILIKAN" sub="PROPERTY OWNERSHIP TYPE" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <button
+                                onClick={() => !isView && setForm({...form, ownership: 'Rent'})}
                                 disabled={isView}
-                                className="w-full bg-[#F8F9FA] border-none rounded-2xl px-5 py-4 text-[13px] font-black text-black outline-none appearance-none shadow-sm cursor-pointer"
-                                value={form.type || ''}
-                                onChange={(e) => setForm({...form, type: e.target.value})}
+                                className={`h-40 rounded-[2rem] flex flex-col items-center justify-center gap-4 transition-all duration-300 group border-2
+                                    ${form.ownership === 'Rent' 
+                                    ? 'bg-black text-white border-black shadow-2xl shadow-black/20 scale-[1.02]' 
+                                    : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'}`}
                             >
-                                <option value="">(Pilih Tipe)</option>
-                                {buildingTypeList.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
-                            </select>
-                            <ChevronDown size={16} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                <div className={`p-4 rounded-full ${form.ownership === 'Rent' ? 'bg-white/20' : 'bg-gray-50'}`}>
+                                    <Key size={24} />
+                                </div>
+                                <div className="text-center">
+                                    <span className="text-[14px] font-black uppercase tracking-widest block">SEWA (LEASE)</span>
+                                    <span className={`text-[9px] font-bold uppercase tracking-wider mt-1 block ${form.ownership === 'Rent' ? 'text-white/60' : 'text-gray-300'}`}>SEWA TAHUNAN / KONTRAK</span>
+                                </div>
+                            </button>
+
+                            <button
+                                onClick={() => !isView && setForm({...form, ownership: 'Own'})}
+                                disabled={isView}
+                                className={`h-40 rounded-[2rem] flex flex-col items-center justify-center gap-4 transition-all duration-300 group border-2
+                                    ${form.ownership === 'Own' 
+                                    ? 'bg-black text-white border-black shadow-2xl shadow-black/20 scale-[1.02]' 
+                                    : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'}`}
+                            >
+                                <div className={`p-4 rounded-full ${form.ownership === 'Own' ? 'bg-white/20' : 'bg-gray-50'}`}>
+                                    <Home size={24} />
+                                </div>
+                                <div className="text-center">
+                                    <span className="text-[14px] font-black uppercase tracking-widest block">MILIK SENDIRI (OWN)</span>
+                                    <span className={`text-[9px] font-bold uppercase tracking-wider mt-1 block ${form.ownership === 'Own' ? 'text-white/60' : 'text-gray-300'}`}>ASET PERUSAHAAN / BELI PUTUS</span>
+                                </div>
+                            </button>
                         </div>
                     </div>
 
-                    <Input 
-                        label="Target Lokasi (Kota/Area)" 
-                        value={form.location || ''} 
-                        onChange={e => setForm({...form, location: e.target.value})} 
-                        placeholder="Contoh: Jakarta Selatan"
-                        icon={MapPin}
-                    />
-
-                    <div>
-                        <Label>Jenis Pengajuan</Label>
-                        <div className="flex gap-4">
-                            {['Own', 'Rent'].map(type => (
-                                <button
-                                    key={type}
-                                    onClick={() => !isView && setForm({...form, ownership: type as any})}
+                    {/* Section 2: Identitas Aset */}
+                    <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                        <SectionHeader num="2" title="2. IDENTITAS ASET" sub="ASSET CLASSIFICATION & NUMBERING" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="md:col-span-2">
+                                <Label>NAMA PROPERTI / GEDUNG <span className="text-red-500">*</span></Label>
+                                <input 
+                                    type="text"
+                                    className="w-full bg-[#F8F9FA] border-none rounded-2xl px-6 py-5 text-[14px] font-black text-black outline-none transition-all placeholder:text-gray-300 focus:ring-2 focus:ring-black/5"
+                                    value={form.name || ''} 
+                                    onChange={e => setForm({...form, name: e.target.value})} 
+                                    placeholder="Contoh: MODENA Home Center Bintaro"
                                     disabled={isView}
-                                    className={`flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${
-                                        form.ownership === type 
-                                        ? 'bg-black text-white border-black shadow-lg' 
-                                        : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
-                                    }`}
-                                >
-                                    {type === 'Own' ? 'Pembelian (Beli)' : 'Sewa (Sewa/Kontrak)'}
-                                </button>
-                            ))}
+                                />
+                            </div>
+                            
+                            <div>
+                                <Label>ASSET NUMBER</Label>
+                                <div className="w-full bg-[#F8F9FA] rounded-2xl px-6 py-5 text-[14px] font-black text-gray-400 cursor-not-allowed">
+                                    {form.assetNo}
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label>TIPE GEDUNG <span className="text-red-500">*</span></Label>
+                                <div className="relative">
+                                    <select 
+                                        disabled={isView}
+                                        className="w-full bg-[#F8F9FA] border-none rounded-2xl px-6 py-5 text-[14px] font-black text-black outline-none appearance-none shadow-sm cursor-pointer"
+                                        value={form.type || ''}
+                                        onChange={(e) => setForm({...form, type: e.target.value})}
+                                    >
+                                        <option value="">(PILIH TIPE)</option>
+                                        {buildingTypeList.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+                                    </select>
+                                    <ChevronDown size={18} className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                </div>
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <Label>LOKASI / ALAMAT LENGKAP</Label>
+                                <textarea 
+                                    disabled={isView}
+                                    className="w-full bg-[#F8F9FA] border-none rounded-2xl px-6 py-5 text-[13px] font-medium text-black outline-none transition-all placeholder:text-gray-300 shadow-sm min-h-[120px] resize-none"
+                                    placeholder="Input alamat lengkap gedung..."
+                                    value={form.address || ''}
+                                    onChange={(e) => setForm({...form, address: e.target.value})}
+                                />
+                            </div>
                         </div>
                     </div>
-
-                    <div className="md:col-span-2">
-                        <Label>Catatan / Alasan Relokasi</Label>
-                        <textarea 
-                            disabled={isView}
-                            className="w-full bg-[#F8F9FA] border-none rounded-2xl px-6 py-5 text-[13px] font-black text-black outline-none transition-all placeholder:text-gray-300 shadow-sm min-h-[120px] resize-none"
-                            placeholder="Jelaskan alasan kebutuhan..."
-                            value={form.address || ''}
-                            onChange={(e) => setForm({...form, address: e.target.value})}
-                        />
-                    </div>
-
-                    <Input 
-                        label="Estimasi Tanggal Mulai" 
-                        value={form.startDate || ''} 
-                        onChange={e => setForm({...form, startDate: e.target.value})} 
-                        type="date"
-                    />
-
-                    <Input 
-                        label="Estimasi Tanggal Selesai" 
-                        value={form.endDate || ''} 
-                        onChange={e => setForm({...form, endDate: e.target.value})} 
-                        type="date"
-                        disabled={form.ownership === 'Own' || isView}
-                    />
                 </div>
             )}
 
-            {activeTab === 'DATA KANDIDAT' && (
+            {activeTab === 'PROPOSAL & PERBANDINGAN' && (
                 <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    
-                    {/* Section 1: Lokasi & Fisik */}
-                    <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                        <SectionHeader title="LOKASI & SPESIFIKASI FISIK" sub="Physical Building Details" />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="md:col-span-2">
-                                <Input 
-                                    label="Nama Kandidat / Label" 
-                                    value={currentProposal.name} 
-                                    onChange={e => setCurrentProposal({...currentProposal, name: e.target.value})}
-                                    placeholder="Contoh: Ruko Boulevard No. 5"
-                                    icon={Building}
-                                />
+                    <div className="bg-[#F8F9FA] rounded-[2.5rem] p-12 flex flex-col items-center justify-center text-center">
+                        <div className="mb-6">
+                            <h3 className="text-[16px] font-black text-black uppercase tracking-tight">PERBANDINGAN KANDIDAT</h3>
+                            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-2">MENINJAU 1 OPSI PROPERTI</p>
+                        </div>
+                        
+                        {/* Placeholder for Candidates List */}
+                        {/* If we had candidates, map them here. Since mock only has 1, we show placeholder for add */}
+                        
+                        <button className="bg-black text-white px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-gray-900 shadow-xl transition-all flex items-center gap-3">
+                            <Plus size={16} /> Tambah Kandidat
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'FLOOR PLAN' && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                        <SectionHeader title="VISUAL FLOOR PLAN" sub="INTERACTIVE ASSET MAPPING" />
+                        
+                        <div className="relative min-h-[400px] bg-[#F8F9FA] rounded-[2rem] border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden group">
+                            {form.floorPlanImage ? (
+                                <>
+                                    <img src={form.floorPlanImage} alt="Floor Plan" className="w-full h-full object-contain" />
+                                    {!isView && (
+                                        <button 
+                                            onClick={() => setForm(prev => ({ ...prev, floorPlanImage: undefined }))}
+                                            className="absolute top-4 right-4 bg-white/80 p-2 rounded-full hover:bg-red-50 text-gray-500 hover:text-red-500 transition-all backdrop-blur-sm"
+                                        >
+                                            <Trash2 size={20} />
+                                        </button>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="text-center p-8">
+                                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-md text-gray-300 group-hover:text-black transition-colors">
+                                        <UploadCloud size={24} />
+                                    </div>
+                                    <p className="text-[12px] font-black text-gray-400 uppercase tracking-widest mb-6">Upload Denah Lantai (JPG/PNG)</p>
+                                    
+                                    {!isView && (
+                                        <div className="flex gap-4 justify-center">
+                                            <button 
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="bg-gray-100 hover:bg-black hover:text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2"
+                                            >
+                                                <UploadCloud size={14} /> Upload Map Image
+                                            </button>
+                                            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFloorPlanUpload} />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {form.floorPlanImage && (
+                            <div className="mt-6 flex justify-end">
+                                <button className="bg-blue-50 text-blue-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-100 transition-all flex items-center gap-2">
+                                    <MousePointer2 size={14} /> Click Map to Add Pin
+                                </button>
                             </div>
-                            <div className="md:col-span-2 grid grid-cols-2 gap-4">
-                                <Input label="Jalan / Alamat" value={currentProposal.address?.jl} onChange={e => updateProposalAddress('jl', e.target.value)} />
-                                <Input label="Kota" value={currentProposal.address?.kota} onChange={e => updateProposalAddress('kota', e.target.value)} />
+                        )}
+                        
+                        <div className="mt-8 border-t border-gray-100 pt-6">
+                             <p className="text-[10px] font-mono text-gray-300 text-center uppercase tracking-widest">----------------------------------------------------------------------------------------</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'FINANCIAL SUMMARY' && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    {/* Dark Card Summary */}
+                    <div className="bg-black text-white p-12 rounded-[3rem] shadow-2xl shadow-black/30 relative overflow-hidden">
+                        {/* Background Decoration */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10">
+                            <div>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">TOTAL COST OF OWNERSHIP (TCO)</p>
+                                <h2 className="text-[42px] font-black tracking-tighter leading-none mb-2">Rp 1.307.000.000</h2>
+                                <p className="text-[10px] text-gray-500 font-medium">Estimated over 5 years</p>
                             </div>
-                            
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input label="Luas Tanah (m2)" value={currentProposal.landArea} onChange={e => setCurrentProposal({...currentProposal, landArea: e.target.value})} placeholder="0" icon={Ruler} />
-                                <Input label="Luas Bangunan (m2)" value={currentProposal.buildingArea} onChange={e => setCurrentProposal({...currentProposal, buildingArea: e.target.value})} placeholder="0" icon={Ruler} />
+                            <div className="flex flex-col justify-center md:items-start">
+                                <div className="flex items-center justify-between w-full mb-3">
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">AVG. MONTHLY BURN RATE</p>
+                                </div>
+                                <h3 className="text-[28px] font-black tracking-tight leading-none mb-1">Rp 21.833.333,333</h3>
                             </div>
-                            
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input label="Jml Lantai" value={currentProposal.totalFloors} onChange={e => setCurrentProposal({...currentProposal, totalFloors: e.target.value})} placeholder="0" />
-                                <Input label="Kapasitas Parkir (Mobil)" value={currentProposal.parkingCapacity} onChange={e => setCurrentProposal({...currentProposal, parkingCapacity: e.target.value})} placeholder="0" />
-                            </div>
+                        </div>
+
+                        <div className="absolute right-12 top-1/2 -translate-y-1/2 bg-white/10 p-4 rounded-full backdrop-blur-md hidden md:block">
+                            <TrendingUp size={32} className="text-green-400" />
                         </div>
                     </div>
 
-                    {/* Section 2: Utilitas & Fasilitas */}
-                    <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                        <SectionHeader title="UTILITAS & KONDISI" sub="Utilities & Environment" />
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <Input label="Daya Listrik (VA)" value={currentProposal.electricity} onChange={e => setCurrentProposal({...currentProposal, electricity: e.target.value})} placeholder="e.g. 16500" icon={Zap} />
-                            <Input label="Sumber Air" value={currentProposal.water} onChange={e => setCurrentProposal({...currentProposal, water: e.target.value})} placeholder="PAM / Jetpump" />
-                            <Input label="Line Telepon" value={currentProposal.phoneLines} onChange={e => setCurrentProposal({...currentProposal, phoneLines: e.target.value})} placeholder="Jumlah Line" icon={Phone} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Cost Breakdown */}
+                        <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                            <SectionHeader num="1" title="1. COST BREAKDOWN" sub="ANNUAL EXPENSE ANALYSIS" />
                             
-                            <div className="md:col-span-3">
-                                <Label>Kondisi Jalan / Akses</Label>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <Input placeholder="Lebar Jalan (meter)" value={currentProposal.roadWidth} onChange={e => setCurrentProposal({...currentProposal, roadWidth: e.target.value})} />
-                                    <Input placeholder="Kondisi (Aspal/Beton/Rusak)" value={currentProposal.roadCondition} onChange={e => setCurrentProposal({...currentProposal, roadCondition: e.target.value})} />
+                            <div className="space-y-6 mt-8">
+                                <div>
+                                    <div className="flex justify-between mb-2">
+                                        <span className="text-[11px] font-black text-black">Rent / Lease</span>
+                                        <span className="text-[11px] font-mono font-bold text-black">Rp {parseInt(form.rentCost || '0').toLocaleString('id-ID')}</span>
+                                    </div>
+                                    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-blue-500 w-[80%] rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="flex justify-between mb-2">
+                                        <span className="text-[11px] font-black text-black">Maintenance</span>
+                                        <span className="text-[11px] font-mono font-bold text-black">Rp {parseInt(form.totalMaintenanceCost || '0').toLocaleString('id-ID')}</span>
+                                    </div>
+                                    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-orange-400 w-[20%] rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="flex justify-between mb-2">
+                                        <span className="text-[11px] font-black text-black">Utilities (Electric/Water)</span>
+                                        <span className="text-[11px] font-mono font-bold text-black">Rp {parseInt(form.utilityCost || '0').toLocaleString('id-ID')}</span>
+                                    </div>
+                                    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-green-500 w-[15%] rounded-full"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Financial Health */}
+                        <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                            <SectionHeader num="2" title="2. FINANCIAL HEALTH" sub="ASSET PERFORMANCE" />
+                            
+                            <div className="grid grid-cols-2 gap-6 mt-8">
+                                <div className="bg-green-50 p-6 rounded-3xl border border-green-100">
+                                    <p className="text-[9px] font-black text-green-800 uppercase tracking-widest mb-2">EFFICIENCY SCORE</p>
+                                    <h3 className="text-[32px] font-black text-black">A+</h3>
+                                </div>
+                                <div className="bg-blue-50 p-6 rounded-3xl border border-blue-100">
+                                    <p className="text-[9px] font-black text-blue-800 uppercase tracking-widest mb-2">BUDGET USAGE</p>
+                                    <h3 className="text-[32px] font-black text-black">82%</h3>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    {/* Section 3: Pemilik & Legalitas */}
-                    <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                        <SectionHeader title="PEMILIK & LEGALITAS" sub="Ownership Information" />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <Input label="Nama Pemilik" value={currentProposal.owner?.name} onChange={e => updateOwner('name', e.target.value)} icon={User} />
-                            <Input label="No. Telepon" value={currentProposal.owner?.phone} onChange={e => updateOwner('phone', e.target.value)} icon={Phone} />
-                            <div className="md:col-span-2">
-                                <Input label="Alamat Pemilik" value={currentProposal.owner?.address} onChange={e => updateOwner('address', e.target.value)} icon={Home} />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Section 4: Harga & Sewa */}
-                    <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-green-500"></div>
-                        <SectionHeader title="BIAYA & SEWA" sub="Financial Proposal" />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="relative">
-                                <Label>Harga Sewa Per Tahun (IDR)</Label>
-                                <div className="relative">
-                                    <input 
-                                        type="text"
-                                        className="w-full bg-[#F8F9FA] border-none rounded-2xl pl-12 pr-5 py-4 text-[16px] font-black text-black outline-none"
-                                        value={currentProposal.rentPrice}
-                                        onChange={e => setCurrentProposal({...currentProposal, rentPrice: e.target.value})}
-                                        placeholder="0"
-                                    />
-                                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
-                                </div>
-                            </div>
-                            <Input label="Periode Sewa (Tahun)" value={currentProposal.leasePeriod} onChange={e => setCurrentProposal({...currentProposal, leasePeriod: e.target.value})} placeholder="e.g. 5 Tahun" icon={Clock} />
-                            
-                            <Input label="Pajak PPH Sewa" value={currentProposal.taxPPH} onChange={e => setCurrentProposal({...currentProposal, taxPPH: e.target.value})} placeholder="Ditanggung Siapa?" />
-                            <Input label="Biaya Notaris" value={currentProposal.notaryFee} onChange={e => setCurrentProposal({...currentProposal, notaryFee: e.target.value})} placeholder="Sharing / Full?" />
-                        </div>
-                    </div>
-
                 </div>
             )}
 
@@ -406,7 +517,7 @@ export const BuildingModal: React.FC<Props> = ({
               </div>
             )}
 
-            {activeTab === 'DOKUMEN LEGAL' && (
+            {activeTab === 'DOKUMEN' && (
                 <div className="flex flex-col items-center justify-center py-20 text-center opacity-50">
                     <FileText size={64} className="text-gray-300 mb-6" />
                     <h3 className="text-[14px] font-black text-gray-400 uppercase tracking-widest">Dokumen belum tersedia</h3>
@@ -417,15 +528,15 @@ export const BuildingModal: React.FC<Props> = ({
 
         {/* Footer */}
         <div className="px-10 py-8 bg-white border-t border-gray-100 flex justify-end gap-4 shrink-0">
-          <button onClick={onClose} className="px-12 py-4 text-[11px] font-black uppercase tracking-widest text-gray-400 bg-white border border-gray-200 rounded-2xl hover:bg-gray-50 hover:text-black transition-all">
-            Batal
+          <button onClick={onClose} className="px-16 py-4 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 bg-[#F8F9FA] rounded-[1.2rem] hover:bg-gray-100 hover:text-black transition-all">
+            BATAL
           </button>
           {!isView && (
             <button 
                 onClick={handleSave} 
-                className="px-16 py-4 text-[11px] font-black uppercase tracking-widest text-white bg-black rounded-2xl hover:bg-gray-900 shadow-xl shadow-black/20 transition-all active:scale-95 flex items-center gap-3"
+                className="px-16 py-4 text-[11px] font-black uppercase tracking-[0.2em] text-white bg-black rounded-[1.2rem] hover:bg-gray-900 shadow-2xl shadow-black/20 transition-all active:scale-95 flex items-center gap-3"
             >
-                <Save size={18} strokeWidth={2.5} /> Simpan Data
+                <Save size={18} strokeWidth={2.5} /> SIMPAN DATA KONTRAK
             </button>
           )}
         </div>
