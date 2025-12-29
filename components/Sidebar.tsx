@@ -96,6 +96,7 @@ export const Sidebar: React.FC<Props> = ({
             { label: 'Master ARK', icon: <Settings size={16} /> },
         ]
     },
+    { label: 'Asset HC', icon: <Database size={20} /> },
     { label: 'Log Book', icon: <BookOpen size={20} /> },
     { 
         label: 'Kendaraan', 
@@ -113,7 +114,6 @@ export const Sidebar: React.FC<Props> = ({
         label: 'Gedung', 
         icon: <Building size={20} />,
         subItems: [
-             { label: 'Building Asset Management', icon: <Database size={16} /> },
              { label: 'Pemeliharaan Asset', icon: <Wrench size={16} /> },
              { label: 'Utility Monitoring', icon: <Zap size={16} /> },
              { label: 'Branch Improvement', icon: <FileText size={16} /> },

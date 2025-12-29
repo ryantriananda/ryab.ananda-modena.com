@@ -3,7 +3,7 @@
 // Type mismatches between BuildingRecord and BuildingAssetRecord are resolved using 'any' casts to satisfy TypeScript 
 // while keeping the existing UI logic.
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { TopBar } from './components/TopBar';
 import { FilterBar } from './components/FilterBar';
@@ -23,8 +23,8 @@ import { MasterAtkTable } from './components/MasterAtkTable';
 import { MasterDeliveryLocationTable } from './components/MasterDeliveryLocationTable';
 import { LogBookTable } from './components/LogBookTable';
 import { UserTable } from './components/UserTable';
-import { MutationTable } from './components/MutationTable'; // Import Mutation Table
-import { SalesTable } from './components/SalesTable'; // Import Sales Table
+import { MutationTable } from './components/MutationTable'; 
+import { SalesTable } from './components/SalesTable'; 
 
 import { VehicleModal } from './components/VehicleModal';
 import { BuildingModal } from './components/BuildingModal';
@@ -40,8 +40,8 @@ import { TaxKirModal } from './components/TaxKirModal';
 import { VehicleContractModal } from './components/VehicleContractModal';
 import { UserModal } from './components/UserModal';
 import { UtilityModal } from './components/UtilityModal';
-import { MutationModal } from './components/MutationModal'; // Import New Mutation Modal
-import { SalesModal } from './components/SalesModal'; // Import New Sales Modal
+import { MutationModal } from './components/MutationModal'; 
+import { SalesModal } from './components/SalesModal'; 
 
 import { Zap, Droplets, TrendingUp } from 'lucide-react';
 import { 
@@ -91,32 +91,63 @@ import {
 } from './types';
 import { useLanguage } from './contexts/LanguageContext';
 
+// Helper for LocalStorage Persistence
+const getInitialData = <T,>(key: string, fallback: T): T => {
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : fallback;
+  } catch (e) {
+    console.warn(`Error reading ${key} from localStorage`, e);
+    return fallback;
+  }
+};
+
 const App: React.FC = () => {
   const { t } = useLanguage();
-  const [activeModule, setActiveModule] = useState('Building Asset Management');
+  const [activeModule, setActiveModule] = useState('Asset HC'); // Default changed to Asset HC
   const [activeTab, setActiveTab] = useState('SEMUA');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // DATA STATES
-  const [atkData, setAtkData] = useState<AssetRecord[]>(MOCK_ATK_DATA);
-  const [arkData, setArkData] = useState<AssetRecord[]>(MOCK_ARK_DATA);
-  const [vehicleData, setVehicleData] = useState<VehicleRecord[]>(MOCK_VEHICLE_DATA);
-  const [buildingData, setBuildingData] = useState<BuildingRecord[]>(MOCK_BUILDING_DATA);
-  const [buildingAssetData, setBuildingAssetData] = useState<BuildingAssetRecord[]>(MOCK_BUILDING_ASSETS);
-  const [buildingMaintenanceData, setBuildingMaintenanceData] = useState<BuildingMaintenanceRecord[]>(MOCK_BUILDING_MAINTENANCE_DATA);
-  const [utilityData, setUtilityData] = useState<UtilityRecord[]>(MOCK_UTILITY_DATA);
-  const [branchImprovementData, setBranchImprovementData] = useState<BuildingRecord[]>(MOCK_BRANCH_IMPROVEMENT_DATA);
-  const [serviceData, setServiceData] = useState<ServiceRecord[]>([]);
-  const [taxKirData, setTaxKirData] = useState<TaxKirRecord[]>(MOCK_TAX_KIR_DATA);
-  const [vehicleContractData, setVehicleContractData] = useState<VehicleContractRecord[]>(MOCK_VEHICLE_CONTRACT_DATA);
-  const [logBookData, setLogBookData] = useState<LogBookRecord[]>(MOCK_LOGBOOK_DATA);
-  const [userData, setUserData] = useState<UserRecord[]>(MOCK_USER_DATA);
-  const [vehicleTypeData, setVehicleTypeData] = useState<GeneralMasterItem[]>(MOCK_VEHICLE_TYPE_DATA);
-  const [mutationData, setMutationData] = useState<MutationRecord[]>([]);
-  const [salesData, setSalesData] = useState<SalesRecord[]>([]);
-  const [reminderData, setReminderData] = useState<ReminderRecord[]>(MOCK_REMINDER_DATA);
-  const [maintenanceReminderData, setMaintenanceReminderData] = useState<ReminderRecord[]>(MOCK_MAINTENANCE_REMINDER);
+  // DATA STATES (INITIALIZED WITH LOCAL STORAGE OR MOCK DATA)
+  const [atkData, setAtkData] = useState<AssetRecord[]>(() => getInitialData('atkData', MOCK_ATK_DATA));
+  const [arkData, setArkData] = useState<AssetRecord[]>(() => getInitialData('arkData', MOCK_ARK_DATA));
+  const [vehicleData, setVehicleData] = useState<VehicleRecord[]>(() => getInitialData('vehicleData', MOCK_VEHICLE_DATA));
+  const [buildingData, setBuildingData] = useState<BuildingRecord[]>(() => getInitialData('buildingData', MOCK_BUILDING_DATA));
+  const [buildingAssetData, setBuildingAssetData] = useState<BuildingAssetRecord[]>(() => getInitialData('buildingAssetData', MOCK_BUILDING_ASSETS));
+  const [buildingMaintenanceData, setBuildingMaintenanceData] = useState<BuildingMaintenanceRecord[]>(() => getInitialData('buildingMaintenanceData', MOCK_BUILDING_MAINTENANCE_DATA));
+  const [utilityData, setUtilityData] = useState<UtilityRecord[]>(() => getInitialData('utilityData', MOCK_UTILITY_DATA));
+  const [branchImprovementData, setBranchImprovementData] = useState<BuildingRecord[]>(() => getInitialData('branchImprovementData', MOCK_BRANCH_IMPROVEMENT_DATA));
+  const [serviceData, setServiceData] = useState<ServiceRecord[]>(() => getInitialData('serviceData', []));
+  const [taxKirData, setTaxKirData] = useState<TaxKirRecord[]>(() => getInitialData('taxKirData', MOCK_TAX_KIR_DATA));
+  const [vehicleContractData, setVehicleContractData] = useState<VehicleContractRecord[]>(() => getInitialData('vehicleContractData', MOCK_VEHICLE_CONTRACT_DATA));
+  const [logBookData, setLogBookData] = useState<LogBookRecord[]>(() => getInitialData('logBookData', MOCK_LOGBOOK_DATA));
+  const [userData, setUserData] = useState<UserRecord[]>(() => getInitialData('userData', MOCK_USER_DATA));
+  const [vehicleTypeData, setVehicleTypeData] = useState<GeneralMasterItem[]>(() => getInitialData('vehicleTypeData', MOCK_VEHICLE_TYPE_DATA));
+  const [mutationData, setMutationData] = useState<MutationRecord[]>(() => getInitialData('mutationData', []));
+  const [salesData, setSalesData] = useState<SalesRecord[]>(() => getInitialData('salesData', []));
+  const [reminderData, setReminderData] = useState<ReminderRecord[]>(() => getInitialData('reminderData', MOCK_REMINDER_DATA));
+  const [maintenanceReminderData, setMaintenanceReminderData] = useState<ReminderRecord[]>(() => getInitialData('maintenanceReminderData', MOCK_MAINTENANCE_REMINDER));
+
+  // PERSISTENCE EFFECTS
+  useEffect(() => localStorage.setItem('atkData', JSON.stringify(atkData)), [atkData]);
+  useEffect(() => localStorage.setItem('arkData', JSON.stringify(arkData)), [arkData]);
+  useEffect(() => localStorage.setItem('vehicleData', JSON.stringify(vehicleData)), [vehicleData]);
+  useEffect(() => localStorage.setItem('buildingData', JSON.stringify(buildingData)), [buildingData]);
+  useEffect(() => localStorage.setItem('buildingAssetData', JSON.stringify(buildingAssetData)), [buildingAssetData]);
+  useEffect(() => localStorage.setItem('buildingMaintenanceData', JSON.stringify(buildingMaintenanceData)), [buildingMaintenanceData]);
+  useEffect(() => localStorage.setItem('utilityData', JSON.stringify(utilityData)), [utilityData]);
+  useEffect(() => localStorage.setItem('branchImprovementData', JSON.stringify(branchImprovementData)), [branchImprovementData]);
+  useEffect(() => localStorage.setItem('serviceData', JSON.stringify(serviceData)), [serviceData]);
+  useEffect(() => localStorage.setItem('taxKirData', JSON.stringify(taxKirData)), [taxKirData]);
+  useEffect(() => localStorage.setItem('vehicleContractData', JSON.stringify(vehicleContractData)), [vehicleContractData]);
+  useEffect(() => localStorage.setItem('logBookData', JSON.stringify(logBookData)), [logBookData]);
+  useEffect(() => localStorage.setItem('userData', JSON.stringify(userData)), [userData]);
+  useEffect(() => localStorage.setItem('vehicleTypeData', JSON.stringify(vehicleTypeData)), [vehicleTypeData]);
+  useEffect(() => localStorage.setItem('mutationData', JSON.stringify(mutationData)), [mutationData]);
+  useEffect(() => localStorage.setItem('salesData', JSON.stringify(salesData)), [salesData]);
+  useEffect(() => localStorage.setItem('reminderData', JSON.stringify(reminderData)), [reminderData]);
+  useEffect(() => localStorage.setItem('maintenanceReminderData', JSON.stringify(maintenanceReminderData)), [maintenanceReminderData]);
 
   // MODAL STATES
   const [isStockModalOpen, setIsStockModalOpen] = useState(false);
@@ -130,8 +161,8 @@ const App: React.FC = () => {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isGeneralMasterModalOpen, setIsGeneralMasterModalOpen] = useState(false);
   const [isUtilityModalOpen, setIsUtilityModalOpen] = useState(false);
-  const [isMutationModalOpen, setIsMutationModalOpen] = useState(false); // NEW
-  const [isSalesModalOpen, setIsSalesModalOpen] = useState(false); // NEW
+  const [isMutationModalOpen, setIsMutationModalOpen] = useState(false); 
+  const [isSalesModalOpen, setIsSalesModalOpen] = useState(false); 
   
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedAsset, setSelectedAsset] = useState<AssetRecord | null>(null);
@@ -142,8 +173,8 @@ const App: React.FC = () => {
   const [selectedBuildingAsset, setSelectedBuildingAsset] = useState<BuildingAssetRecord | null>(null);
   const [selectedBuildingMaintenance, setSelectedBuildingMaintenance] = useState<BuildingMaintenanceRecord | null>(null);
   const [selectedUtility, setSelectedUtility] = useState<UtilityRecord | null>(null);
-  const [selectedMutation, setSelectedMutation] = useState<MutationRecord | null>(null); // NEW
-  const [selectedSales, setSelectedSales] = useState<SalesRecord | null>(null); // NEW
+  const [selectedMutation, setSelectedMutation] = useState<MutationRecord | null>(null); 
+  const [selectedSales, setSelectedSales] = useState<SalesRecord | null>(null); 
 
   const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -166,7 +197,7 @@ const App: React.FC = () => {
       setIsStockModalOpen(true);
     } else if (activeModule === 'Daftar Aset') {
       setIsVehicleModalOpen(true);
-    } else if (activeModule === 'Building Asset Management') {
+    } else if (activeModule === 'Asset HC') { // Changed from Master Asset
       setSelectedBuildingAsset(null);
       setIsBuildingAssetItemModalOpen(true);
     } else if (activeModule === 'Pemeliharaan Asset') {
@@ -200,6 +231,7 @@ const App: React.FC = () => {
     }
   };
 
+  // --- WORKFLOW HANDLERS (PERSISTED) ---
   const handleWorkflowAction = (item: BuildingAssetRecord, action: 'Approve' | 'Reject' | 'Revise') => {
       const statusMap: Record<string, BuildingAssetRecord['approvalStatus']> = {
           'Approve': 'Approved',
@@ -227,6 +259,7 @@ const App: React.FC = () => {
       setBranchImprovementData(prev => prev.map(b => b.id === item.id ? { ...b, status: statusMap[action] } : b));
   };
 
+  // --- SAVE HANDLERS (PERSISTED) ---
   const handleSaveBuilding = (data: Partial<BuildingRecord>) => {
       const isBranchImprovement = activeModule === 'Branch Improvement';
       const updateFunction = isBranchImprovement ? setBranchImprovementData : setBuildingData;
@@ -421,11 +454,11 @@ const App: React.FC = () => {
          case 'Daftar Aset':
             return <VehicleTable 
                 data={vehicleData} 
-                onEdit={()=>{}} 
-                onView={()=>{}} 
+                onEdit={(item) => { setSelectedAsset(item as any); /* Quick cast fix */ setModalMode('edit'); setIsVehicleModalOpen(true); }}
+                onView={(item) => { setSelectedAsset(item as any); setModalMode('view'); setIsVehicleModalOpen(true); }}
                 onDelete={(id) => setVehicleData(prev => prev.filter(v => v.id !== id))}
             />;
-         case 'Building Asset Management':
+         case 'Asset HC': // Changed case name
             return <BuildingAssetTable 
                 data={filteredBuildingAssets} 
                 onEdit={(item) => { setSelectedBuildingAsset(item); setModalMode('edit'); setIsBuildingAssetItemModalOpen(true); }} 
@@ -575,7 +608,7 @@ const App: React.FC = () => {
   };
 
   const isReminderModule = activeModule.includes('Reminder') || activeModule === 'Compliance & Legal';
-  const isBuildingAssetModule = activeModule === 'Building Asset Management';
+  const isBuildingAssetModule = activeModule === 'Asset HC'; // Updated
   const isMaintenanceModule = activeModule === 'Pemeliharaan Asset';
 
   const getModuleTabs = () => {
@@ -649,7 +682,17 @@ const App: React.FC = () => {
       <VehicleModal 
         isOpen={isVehicleModalOpen} 
         onClose={() => setIsVehicleModalOpen(false)} 
-        onSave={(data) => { setVehicleData(prev => [{id: Date.now(), ...data} as VehicleRecord, ...prev]); setIsVehicleModalOpen(false); }} 
+        onSave={(data) => { 
+            if (modalMode === 'create') {
+                setVehicleData(prev => [{id: Date.now(), ...data} as VehicleRecord, ...prev]); 
+            } else if (selectedAsset) {
+                // Fix for edit mode in Vehicle
+                setVehicleData(prev => prev.map(v => v.id === (selectedAsset as any).id ? { ...v, ...data } as VehicleRecord : v));
+            }
+            setIsVehicleModalOpen(false); 
+        }}
+        initialData={selectedAsset as any} 
+        mode={modalMode}
       />
 
       <BuildingModal 
@@ -698,7 +741,7 @@ const App: React.FC = () => {
          onSave={handleSaveVehicleContract}
          initialData={selectedContract || undefined}
          mode={modalMode}
-         vehicleList={vehicleData} // Pass Vehicle List for Integration
+         vehicleList={vehicleData} 
       />
 
       <UserModal 
@@ -726,7 +769,6 @@ const App: React.FC = () => {
         buildingList={[...buildingData, ...branchImprovementData]}
       />
 
-      {/* New Integrated Modals */}
       <MutationModal 
         isOpen={isMutationModalOpen}
         onClose={() => setIsMutationModalOpen(false)}
