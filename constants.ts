@@ -340,9 +340,12 @@ export const MOCK_USER_DATA: UserRecord[] = [
     email: 'ibnu.faisal@modena.com',
     role: 'Manager',
     department: 'GA & Facility',
+    location: 'Jakarta Head Office',
     phone: '0812-3456-7890',
     status: 'Active',
     lastActive: '10 Min Ago',
+    joinDate: '2022-01-15',
+    employeeId: 'EMP-2022001',
     avatar: 'https://picsum.photos/id/1005/100/100'
   },
   {
@@ -351,9 +354,12 @@ export const MOCK_USER_DATA: UserRecord[] = [
     email: 'sarah.amelia@modena.com',
     role: 'Staff',
     department: 'Human Capital',
+    location: 'Jakarta Head Office',
     phone: '0812-9876-5432',
     status: 'Active',
     lastActive: '1 Hour Ago',
+    joinDate: '2023-05-10',
+    employeeId: 'EMP-2023045',
     avatar: 'https://picsum.photos/id/1027/100/100'
   },
   {
@@ -361,10 +367,13 @@ export const MOCK_USER_DATA: UserRecord[] = [
     name: 'Budi Santoso',
     email: 'budi.santoso@modena.com',
     role: 'Staff',
-    department: 'General Affair',
+    department: 'GA & Facility',
+    location: 'Warehouse Cakung',
     phone: '0811-1111-2222',
     status: 'Inactive',
     lastActive: '2 Days Ago',
+    joinDate: '2021-11-20',
+    employeeId: 'EMP-2021088',
     avatar: 'https://picsum.photos/id/1012/100/100'
   }
 ];
