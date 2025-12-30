@@ -6,7 +6,7 @@ import {
     Trash2, CheckCircle2, Clock, AlertCircle, Calendar,
     DollarSign, FileCheck, QrCode, Building
 } from 'lucide-react';
-import { BuildingAssetRecord, MaintenanceProposal, BuildingRecord } from '../types';
+import { BuildingAssetRecord, MaintenanceProposal, BuildingRecord, GeneralMasterItem } from '../types';
 
 interface Props {
   isOpen: boolean;
@@ -14,7 +14,8 @@ interface Props {
   onSave: (data: Partial<BuildingAssetRecord>) => void;
   initialData?: BuildingAssetRecord | null;
   mode?: 'create' | 'edit' | 'view';
-  buildingList?: BuildingRecord[]; // New Prop for Data Relation
+  buildingList?: BuildingRecord[];
+  assetTypeList?: GeneralMasterItem[];
 }
 
 export const BuildingAssetItemModal: React.FC<Props> = ({ 
@@ -23,7 +24,8 @@ export const BuildingAssetItemModal: React.FC<Props> = ({
     onSave, 
     initialData, 
     mode = 'create',
-    buildingList = [] // Default empty array
+    buildingList = [],
+    assetTypeList = []
 }) => {
   const [activeTab, setActiveTab] = useState('GENERAL INFO');
   const [form, setForm] = useState<Partial<BuildingAssetRecord>>({
@@ -144,18 +146,21 @@ export const BuildingAssetItemModal: React.FC<Props> = ({
                                     <Label>Tipe Aset</Label>
                                     <select 
                                         disabled={isView}
-                                        className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-[13px] font-black text-black focus:border-black outline-none disabled:bg-gray-50 shadow-sm cursor-pointer appearance-none"
+                                        className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-[13px] font-black text-black focus:border-black outline-none disabled:bg-gray-50 shadow-sm cursor-pointer appearance-none uppercase"
                                         value={form.assetType || ''}
                                         onChange={(e) => setForm({...form, assetType: e.target.value})}
                                     >
                                         <option value="">Pilih Tipe</option>
-                                        <option value="AC">AC</option>
-                                        <option value="APAR">APAR</option>
-                                        <option value="CCTV">CCTV</option>
-                                        <option value="Genset">Genset</option>
-                                        <option value="Lift">Lift</option>
-                                        <option value="Pompa">Pompa Air</option>
-                                        <option value="Furniture">Furniture</option>
+                                        {assetTypeList.map(t => (
+                                            <option key={t.id} value={t.name}>{t.name}</option>
+                                        ))}
+                                        {!assetTypeList.length && (
+                                            <>
+                                                <option value="AC">AC</option>
+                                                <option value="APAR">APAR</option>
+                                                <option value="CCTV">CCTV</option>
+                                            </>
+                                        )}
                                     </select>
                                 </div>
                                 

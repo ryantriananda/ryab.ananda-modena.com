@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { X, Save, Wrench, Plus, Trash2, Calendar, Clock, User, CheckCircle2, AlertCircle, FileText, PlayCircle, Info, Hash, MapPin, Tag, ShieldCheck, Camera, Image as ImageIcon } from 'lucide-react';
-import { ServiceRecord, VehicleRecord, SparePart } from '../types';
+import { ServiceRecord, VehicleRecord, SparePart, GeneralMasterItem, VendorRecord } from '../types';
 
 interface Props {
   isOpen: boolean;
@@ -10,6 +10,8 @@ interface Props {
   initialData?: ServiceRecord | null;
   mode?: 'create' | 'edit' | 'view';
   vehicleList: VehicleRecord[];
+  serviceTypeList?: GeneralMasterItem[];
+  vendorList?: VendorRecord[];
 }
 
 export const ServiceModal: React.FC<Props> = ({ 
@@ -18,7 +20,9 @@ export const ServiceModal: React.FC<Props> = ({
     onSave, 
     initialData, 
     mode = 'create',
-    vehicleList
+    vehicleList,
+    serviceTypeList = [],
+    vendorList = []
 }) => {
   const [form, setForm] = useState<Partial<ServiceRecord>>({
     noPolisi: '',
@@ -63,7 +67,7 @@ export const ServiceModal: React.FC<Props> = ({
   }, [isOpen, initialData]);
 
   const isView = mode === 'view';
-  const isNonRoutine = form.jenisServis === 'Non-Rutin';
+  const isNonRoutine = form.jenisServis === 'Non-Rutin' || form.jenisServis === 'Ganti Ban'; // Example condition
 
   // Get Selected Vehicle Details
   const selectedVehicle = useMemo(() => {
@@ -279,24 +283,24 @@ export const ServiceModal: React.FC<Props> = ({
                     </div>
                     <div>
                         <Label>Kategori Pemeliharaan</Label>
-                        <div className="flex gap-3">
-                            {['Servis Rutin', 'Non-Rutin'].map(type => {
-                                const isSelected = form.jenisServis === type;
-                                return (
-                                    <button
-                                        key={type}
-                                        onClick={() => !isView && setForm({...form, jenisServis: type})}
-                                        disabled={isView}
-                                        className={`flex-1 py-4 rounded-xl border transition-all relative overflow-hidden group ${
-                                            isSelected 
-                                            ? 'bg-black text-white border-black shadow-lg' 
-                                            : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                                        }`}
-                                    >
-                                        <span className="text-[10px] font-black uppercase tracking-widest">{type}</span>
-                                    </button>
-                                );
-                            })}
+                        <div className="relative">
+                            <select
+                                className="w-full border border-gray-200 rounded-2xl px-5 py-4 text-[13px] font-black bg-white focus:border-black outline-none appearance-none shadow-sm cursor-pointer uppercase"
+                                disabled={isView}
+                                value={form.jenisServis || ''}
+                                onChange={(e) => setForm({...form, jenisServis: e.target.value})}
+                            >
+                                <option value="">(Pilih Kategori)</option>
+                                {serviceTypeList.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+                                {/* Fallback/Default Options */}
+                                {!serviceTypeList.length && (
+                                    <>
+                                        <option value="Servis Rutin">Servis Rutin</option>
+                                        <option value="Non-Rutin">Non-Rutin</option>
+                                        <option value="Ganti Ban">Ganti Ban</option>
+                                    </>
+                                )}
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -315,14 +319,22 @@ export const ServiceModal: React.FC<Props> = ({
                   </div>
                   <div>
                     <Label>Bengkel / Rekanan</Label>
-                    <input 
-                      type="text"
-                      className="w-full border border-gray-200 rounded-2xl px-5 py-4 text-[13px] font-black placeholder:text-gray-300 focus:border-black outline-none shadow-sm"
-                      value={form.vendor}
-                      onChange={(e) => setForm({...form, vendor: e.target.value})}
-                      disabled={isView}
-                      placeholder="Nama Bengkel"
-                    />
+                    <div className="relative">
+                        <input 
+                            list="vendor-list"
+                            type="text"
+                            className="w-full border border-gray-200 rounded-2xl px-5 py-4 text-[13px] font-black placeholder:text-gray-300 focus:border-black outline-none shadow-sm"
+                            value={form.vendor}
+                            onChange={(e) => setForm({...form, vendor: e.target.value})}
+                            disabled={isView}
+                            placeholder="Nama Bengkel"
+                        />
+                        <datalist id="vendor-list">
+                            {vendorList.filter(v => v.type === 'Service' || v.type === 'Both').map(v => (
+                                <option key={v.id} value={v.vendorName}>{v.vendorName}</option>
+                            ))}
+                        </datalist>
+                    </div>
                   </div>
                 </div>
 

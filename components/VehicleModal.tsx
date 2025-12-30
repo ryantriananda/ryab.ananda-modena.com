@@ -11,6 +11,8 @@ interface Props {
   mode?: 'create' | 'edit' | 'view';
   brandList?: GeneralMasterItem[];
   colorList?: GeneralMasterItem[];
+  channelList?: GeneralMasterItem[];
+  branchList?: GeneralMasterItem[];
 }
 
 type DocKeys = 'stnk' | 'kir' | 'front' | 'rear' | 'right' | 'left';
@@ -22,7 +24,9 @@ export const VehicleModal: React.FC<Props> = ({
     initialData, 
     mode = 'create',
     brandList = [],
-    colorList = []
+    colorList = [],
+    channelList = [],
+    branchList = []
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeUploadKey, setActiveUploadKey] = useState<DocKeys | null>(null);
@@ -40,8 +44,8 @@ export const VehicleModal: React.FC<Props> = ({
   const [form, setForm] = useState<Partial<VehicleRecord>>({
     status: 'Aktif',
     ownership: 'Milik Modena',
-    channel: 'Human Capital Operation',
-    cabang: 'Pusat',
+    channel: '',
+    cabang: '',
     approvalStatus: 'Pending',
     depreciationMethod: 'Garis Lurus (Straight Line)',
     usefulLife: 4, // Default 4 years
@@ -64,8 +68,8 @@ export const VehicleModal: React.FC<Props> = ({
         setForm({ 
             status: 'Aktif', 
             ownership: 'Milik Modena', 
-            channel: 'Human Capital Operation', 
-            cabang: 'Pusat',
+            channel: '', 
+            cabang: '',
             approvalStatus: 'Pending',
             depreciationMethod: 'Garis Lurus (Straight Line)',
             usefulLife: 4,
@@ -351,16 +355,30 @@ export const VehicleModal: React.FC<Props> = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
                         <Label>Channel</Label>
-                        <select className="w-full bg-white border border-gray-100 rounded-2xl px-5 py-4 text-[12px] font-black" disabled={isView} value={form.channel} onChange={e => setForm({...form, channel: e.target.value})}>
-                            <option value="Human Capital Operation">Human Capital Operation</option>
-                            <option value="Management">Management</option>
+                        <select 
+                            className="w-full bg-white border border-gray-100 rounded-2xl px-5 py-4 text-[12px] font-black outline-none disabled:bg-gray-50 uppercase cursor-pointer"
+                            disabled={isView} 
+                            value={form.channel || ''} 
+                            onChange={e => setForm({...form, channel: e.target.value})}
+                        >
+                            <option value="">(PILIH CHANNEL)</option>
+                            {channelList.map((c) => (
+                                <option key={c.id} value={c.name}>{c.name}</option>
+                            ))}
                         </select>
                     </div>
                     <div>
                         <Label>Dept / Cabang</Label>
-                        <select className="w-full bg-white border border-gray-100 rounded-2xl px-5 py-4 text-[12px] font-black" disabled={isView} value={form.cabang} onChange={e => setForm({...form, cabang: e.target.value})}>
-                            <option value="Pusat">Pusat</option>
-                            <option value="Surabaya">Surabaya</option>
+                        <select 
+                            className="w-full bg-white border border-gray-100 rounded-2xl px-5 py-4 text-[12px] font-black outline-none disabled:bg-gray-50 uppercase cursor-pointer"
+                            disabled={isView} 
+                            value={form.cabang || ''} 
+                            onChange={e => setForm({...form, cabang: e.target.value})}
+                        >
+                            <option value="">(PILIH CABANG)</option>
+                            {branchList.map((b) => (
+                                <option key={b.id} value={b.name}>{b.name}</option>
+                            ))}
                         </select>
                     </div>
                     <InputField label="Pengguna Utama" value={form.pengguna} field="pengguna" placeholder="Full Name" className="md:col-span-2" />

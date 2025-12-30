@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Save, User, Mail, Phone, Building, Shield, MapPin, Calendar, Camera, Lock, Activity, Key, CheckCircle2, History, Layers, ChevronDown, ChevronUp, CheckSquare, Square } from 'lucide-react';
-import { UserRecord } from '../types';
+import { UserRecord, GeneralMasterItem } from '../types';
 
 interface Props {
   isOpen: boolean;
@@ -9,6 +9,9 @@ interface Props {
   onSave: (data: Partial<UserRecord>) => void;
   initialData?: UserRecord;
   mode?: 'create' | 'edit' | 'view';
+  departmentList?: GeneralMasterItem[];
+  locationList?: GeneralMasterItem[];
+  roleList?: GeneralMasterItem[];
 }
 
 const MENU_PERMISSIONS = [
@@ -71,14 +74,23 @@ const MENU_PERMISSIONS = [
     { id: 'master', label: 'Master Data', icon: Layers, description: 'Configure system master data.' },
 ];
 
-export const UserModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialData, mode = 'create' }) => {
+export const UserModal: React.FC<Props> = ({ 
+    isOpen, 
+    onClose, 
+    onSave, 
+    initialData, 
+    mode = 'create',
+    departmentList = [],
+    locationList = [],
+    roleList = []
+}) => {
   const [activeTab, setActiveTab] = useState('PROFILE');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   
   const [form, setForm] = useState<Partial<UserRecord>>({
     status: 'Active',
-    role: 'Staff',
+    role: '',
     avatar: 'https://via.placeholder.com/150',
     joinDate: new Date().toISOString().split('T')[0],
     permissions: ['dashboard']
@@ -95,7 +107,7 @@ export const UserModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialDat
       } else {
         setForm({ 
             status: 'Active', 
-            role: 'Staff', 
+            role: '', 
             employeeId: `EMP-${Math.floor(Math.random() * 10000)}`,
             joinDate: new Date().toISOString().split('T')[0],
             avatar: 'https://via.placeholder.com/150',
@@ -282,12 +294,10 @@ export const UserModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialDat
                                             value={form.department || ''}
                                             onChange={(e) => setForm({...form, department: e.target.value})}
                                         >
-                                            <option value="">Select Dept</option>
-                                            <option value="GA & Facility">GA & Facility</option>
-                                            <option value="Human Capital">Human Capital</option>
-                                            <option value="Finance">Finance</option>
-                                            <option value="IT">IT</option>
-                                            <option value="Sales">Sales</option>
+                                            <option value="">(Select Dept)</option>
+                                            {departmentList.map(dept => (
+                                                <option key={dept.id} value={dept.name}>{dept.name}</option>
+                                            ))}
                                         </select>
                                         <Building size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
                                     </div>
@@ -302,11 +312,10 @@ export const UserModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialDat
                                             value={form.location || ''}
                                             onChange={(e) => setForm({...form, location: e.target.value})}
                                         >
-                                            <option value="">Select Location</option>
-                                            <option value="Jakarta Head Office">Jakarta Head Office</option>
-                                            <option value="Surabaya Branch">Surabaya Branch</option>
-                                            <option value="Medan Branch">Medan Branch</option>
-                                            <option value="Warehouse Cakung">Warehouse Cakung</option>
+                                            <option value="">(Select Location)</option>
+                                            {locationList.map(loc => (
+                                                <option key={loc.id} value={loc.name}>{loc.name}</option>
+                                            ))}
                                         </select>
                                         <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
                                     </div>
@@ -327,20 +336,38 @@ export const UserModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialDat
                         <div className="space-y-6">
                             <Label>Assigned Role</Label>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {['Admin', 'Manager', 'Staff', 'Viewer'].map((role) => (
-                                    <button
-                                        key={role}
-                                        disabled={isView}
-                                        onClick={() => setForm({...form, role})}
-                                        className={`py-4 px-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 group
-                                            ${form.role === role 
-                                            ? 'border-black bg-black text-white shadow-xl' 
-                                            : 'border-gray-100 bg-white text-gray-400 hover:border-gray-300 hover:text-black'}`}
-                                    >
-                                        <Shield size={20} className={form.role === role ? 'text-white' : 'text-gray-300 group-hover:text-black'} />
-                                        <span className="text-[11px] font-black uppercase tracking-widest">{role}</span>
-                                    </button>
-                                ))}
+                                {roleList.length > 0 ? (
+                                    roleList.map((role) => (
+                                        <button
+                                            key={role.id}
+                                            disabled={isView}
+                                            onClick={() => setForm({...form, role: role.name})}
+                                            className={`py-4 px-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 group
+                                                ${form.role === role.name 
+                                                ? 'border-black bg-black text-white shadow-xl' 
+                                                : 'border-gray-100 bg-white text-gray-400 hover:border-gray-300 hover:text-black'}`}
+                                        >
+                                            <Shield size={20} className={form.role === role.name ? 'text-white' : 'text-gray-300 group-hover:text-black'} />
+                                            <span className="text-[11px] font-black uppercase tracking-widest">{role.name}</span>
+                                        </button>
+                                    ))
+                                ) : (
+                                    // Fallback if no Role Data
+                                    ['Admin', 'Manager', 'Staff', 'Viewer'].map((role) => (
+                                        <button
+                                            key={role}
+                                            disabled={isView}
+                                            onClick={() => setForm({...form, role})}
+                                            className={`py-4 px-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 group
+                                                ${form.role === role 
+                                                ? 'border-black bg-black text-white shadow-xl' 
+                                                : 'border-gray-100 bg-white text-gray-400 hover:border-gray-300 hover:text-black'}`}
+                                        >
+                                            <Shield size={20} className={form.role === role ? 'text-white' : 'text-gray-300 group-hover:text-black'} />
+                                            <span className="text-[11px] font-black uppercase tracking-widest">{role}</span>
+                                        </button>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>

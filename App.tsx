@@ -695,6 +695,7 @@ const App: React.FC = () => {
   };
 
   const renderContent = () => {
+     // ... (Existing Filters logic skipped for brevity) ...
      const filteredBuildingAssets = useMemo(() => {
         if (activeTab === 'SEMUA') return buildingAssetData;
         const target = activeTab.toLowerCase();
@@ -1093,6 +1094,9 @@ const App: React.FC = () => {
         mode={modalMode}
         brandList={brandData}
         colorList={colorData}
+        // New Props
+        channelList={syncChannelData}
+        branchList={locationData}
       />
 
       <BuildingModal 
@@ -1111,6 +1115,8 @@ const App: React.FC = () => {
         initialData={selectedBuildingAsset}
         mode={modalMode}
         buildingList={[...buildingData, ...branchImprovementData]}
+        // New Props
+        assetTypeList={genAssetTypeData}
       />
 
       <BuildingMaintenanceModal
@@ -1127,6 +1133,9 @@ const App: React.FC = () => {
         onClose={() => setIsServiceModalOpen(false)} 
         onSave={(data) => { setServiceData(prev => [{id: `SRV-${Date.now()}`, ...data} as ServiceRecord, ...prev]); setIsServiceModalOpen(false); }} 
         vehicleList={vehicleData}
+        // New Props
+        serviceTypeList={serviceTypeData}
+        vendorList={vendorData}
       />
 
       <TaxKirModal 
@@ -1153,6 +1162,10 @@ const App: React.FC = () => {
         onSave={handleSaveUser}
         initialData={selectedUser || undefined}
         mode={modalMode}
+        // New Props
+        departmentList={departmentData}
+        locationList={locationData}
+        roleList={roleData}
       />
 
       <GeneralMasterModal 
@@ -1218,7 +1231,7 @@ const App: React.FC = () => {
         mode={modalMode}
         branchList={locationData}
         roleList={roleData}
-        userList={userData} // Pass user data for dynamic selection
+        userList={userData} 
       />
 
       <TimesheetModal 
