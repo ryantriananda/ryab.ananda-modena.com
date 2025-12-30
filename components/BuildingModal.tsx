@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Save, Building, MapPin, Phone, FileText, CheckCircle2, Clock, AlertCircle, Trash2, Plus, ChevronDown, User, Home, DollarSign, Ruler, Zap, Key, UploadCloud, MousePointer2, TrendingUp, PieChart } from 'lucide-react';
+import { X, Save, Building, MapPin, Phone, FileText, CheckCircle2, Clock, AlertCircle, Trash2, Plus, ChevronDown, User, Home, DollarSign, Ruler, Zap, Key, UploadCloud, MousePointer2, TrendingUp, PieChart, ShieldCheck, ChevronLeft, Edit3, Flag } from 'lucide-react';
 import { BuildingRecord, GeneralMasterItem, BuildingProposal, WorkflowStep } from '../types';
 
 interface Props {
@@ -21,19 +21,23 @@ export const BuildingModal: React.FC<Props> = ({
     buildingTypeList = []
 }) => {
   const [activeTab, setActiveTab] = useState('INFORMASI UMUM');
+  const [proposalTab, setProposalTab] = useState('INFO UTAMA'); // New state for proposal tabs
   const [form, setForm] = useState<Partial<BuildingRecord>>({
     status: 'Pending',
     ownership: 'Rent',
     workflow: [],
-    // Mock financial data defaults
-    rentCost: '250000000',
-    totalMaintenanceCost: '45000000',
-    utilityCost: '12000000'
+    rentCost: '0',
+    totalMaintenanceCost: '0',
+    utilityCost: '0',
+    securityFeatures: [],
+    documentsAvailable: [],
+    proposals: []
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // State for a proposal being edited
+  // Proposal Management State
+  const [isEditingProposal, setIsEditingProposal] = useState(false);
   const [currentProposal, setCurrentProposal] = useState<Partial<BuildingProposal>>({
       name: '',
       address: { jl: '', kota: '', kabupaten: '', propinsi: '' },
@@ -41,7 +45,10 @@ export const BuildingModal: React.FC<Props> = ({
       owner: { name: '', address: '', phone: '' },
       surveySummary: { pros: '', cons: '' },
       securityFeatures: [],
-      buildingMaterials: [],
+      structureChecklist: { tiang: [], atap: [], dinding: [], lantai: [], pintu: [], jendela: [], others: [] },
+      renovationDetailsObj: { costSharing: '', gracePeriod: '', items: { partition: false, paint: false, roof: '', lights: false, other: '' } },
+      locationContext: { right: '', left: '', front: '', back: '', nearIndustry: false, operationalHours: '' },
+      businessNotes: { deliveryTime: '', dealersCount: '', staffComposition: '', margin: '', competitorPareto: '' },
       documents: [],
       environmentConditions: []
   });
@@ -50,9 +57,6 @@ export const BuildingModal: React.FC<Props> = ({
     if (isOpen) {
       if (initialData) {
         setForm(initialData);
-        if (initialData.proposals && initialData.proposals.length > 0) {
-            setCurrentProposal(initialData.proposals[0]);
-        }
       } else {
         setForm({
             status: 'Pending',
@@ -65,6 +69,9 @@ export const BuildingModal: React.FC<Props> = ({
             rentCost: '250000000',
             totalMaintenanceCost: '45000000',
             utilityCost: '12000000',
+            securityFeatures: [],
+            documentsAvailable: [],
+            proposals: [],
             workflow: [
                 { role: 'BM', status: 'Pending' },
                 { role: 'Regional Branches', status: 'Pending' },
@@ -72,19 +79,9 @@ export const BuildingModal: React.FC<Props> = ({
                 { role: 'Owner', status: 'Pending' }
             ]
         });
-        setCurrentProposal({
-            name: '',
-            address: { jl: '', kota: '', kabupaten: '', propinsi: '' },
-            floors: { ground: '', f1: '', f2: '', f3: '', f4: '' },
-            owner: { name: '', address: '', phone: '' },
-            surveySummary: { pros: '', cons: '' },
-            securityFeatures: [],
-            buildingMaterials: [],
-            documents: [],
-            environmentConditions: []
-        });
       }
       setActiveTab('INFORMASI UMUM');
+      setIsEditingProposal(false);
     }
   }, [isOpen, initialData]);
 
@@ -93,14 +90,65 @@ export const BuildingModal: React.FC<Props> = ({
   const isView = mode === 'view';
 
   const handleSave = () => {
-      const updatedProposals = form.proposals ? [...form.proposals] : [];
-      if (updatedProposals.length > 0) {
-          updatedProposals[0] = { ...updatedProposals[0], ...currentProposal } as BuildingProposal;
-      } else {
-          updatedProposals.push({ id: `PROP-${Date.now()}`, ...currentProposal } as BuildingProposal);
-      }
+      onSave(form);
+  };
+
+  const handleSaveProposal = () => {
+      const newProposal = { 
+          ...currentProposal, 
+          id: currentProposal.id || `PROP-${Date.now()}` 
+      } as BuildingProposal;
+
+      const existingProposals = form.proposals || [];
+      const index = existingProposals.findIndex(p => p.id === newProposal.id);
       
-      onSave({ ...form, proposals: updatedProposals });
+      let updatedProposals;
+      if (index >= 0) {
+          updatedProposals = [...existingProposals];
+          updatedProposals[index] = newProposal;
+      } else {
+          updatedProposals = [...existingProposals, newProposal];
+      }
+
+      setForm({ ...form, proposals: updatedProposals });
+      setIsEditingProposal(false);
+  };
+
+  const handleEditProposal = (proposal: BuildingProposal) => {
+      setCurrentProposal({
+          ...proposal,
+          // Ensure nested objects exist to avoid undefined errors
+          telephoneDetails: proposal.telephoneDetails || { canAdd: false, costPerLine: '', borneBy: '' },
+          structureChecklist: proposal.structureChecklist || { tiang: [], atap: [], dinding: [], lantai: [], pintu: [], jendela: [], others: [] },
+          renovationDetailsObj: proposal.renovationDetailsObj || { costSharing: '', gracePeriod: '', items: { partition: false, paint: false, roof: '', lights: false, other: '' } },
+          locationContext: proposal.locationContext || { right: '', left: '', front: '', back: '', nearIndustry: false, operationalHours: '' },
+          businessNotes: proposal.businessNotes || { deliveryTime: '', dealersCount: '', staffComposition: '', margin: '', competitorPareto: '' }
+      });
+      setIsEditingProposal(true);
+      setProposalTab('INFO UTAMA');
+  };
+
+  const handleAddProposal = () => {
+      setCurrentProposal({
+          name: `Kandidat ${ (form.proposals?.length || 0) + 1}`,
+          address: { jl: '', kota: '', kabupaten: '', propinsi: '' },
+          floors: { ground: '', f1: '', f2: '', f3: '', f4: '' },
+          owner: { name: '', address: '', phone: '' },
+          surveySummary: { pros: '', cons: '' },
+          securityFeatures: [],
+          structureChecklist: { tiang: [], atap: [], dinding: [], lantai: [], pintu: [], jendela: [], others: [] },
+          renovationDetailsObj: { costSharing: '', gracePeriod: '', items: { partition: false, paint: false, roof: '', lights: false, other: '' } },
+          locationContext: { right: '', left: '', front: '', back: '', nearIndustry: false, operationalHours: '' },
+          businessNotes: { deliveryTime: '', dealersCount: '', staffComposition: '', margin: '', competitorPareto: '' },
+          documents: [],
+          environmentConditions: []
+      });
+      setIsEditingProposal(true);
+      setProposalTab('INFO UTAMA');
+  };
+
+  const handleDeleteProposal = (id: string) => {
+      setForm({ ...form, proposals: form.proposals?.filter(p => p.id !== id) });
   };
 
   const handleFloorPlanUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,6 +160,31 @@ export const BuildingModal: React.FC<Props> = ({
           };
           reader.readAsDataURL(file);
       }
+  };
+
+  const toggleCheckbox = (listName: 'securityFeatures' | 'documentsAvailable', value: string) => {
+      if (isView) return;
+      const list = form[listName] || [];
+      if (list.includes(value)) {
+          setForm({ ...form, [listName]: list.filter(item => item !== value) });
+      } else {
+          setForm({ ...form, [listName]: [...list, value] });
+      }
+  };
+
+  const toggleProposalCheckbox = (field: 'securityFeatures' | 'documents' | 'environmentConditions', value: string) => {
+      const list = currentProposal[field] || [];
+      const updatedList = list.includes(value) ? list.filter(i => i !== value) : [...list, value];
+      setCurrentProposal({ ...currentProposal, [field]: updatedList });
+  };
+
+  const toggleStructureCheckbox = (category: keyof typeof currentProposal.structureChecklist, value: string) => {
+      const list = currentProposal.structureChecklist?.[category] || [];
+      const updatedList = list.includes(value) ? list.filter(i => i !== value) : [...list, value];
+      setCurrentProposal({ 
+          ...currentProposal, 
+          structureChecklist: { ...currentProposal.structureChecklist!, [category]: updatedList } 
+      });
   };
 
   const SectionHeader = ({ num, title, sub }: { num?: string, title: string, sub?: string }) => (
@@ -144,29 +217,22 @@ export const BuildingModal: React.FC<Props> = ({
     </div>
   );
 
-  const updateProposalAddress = (field: string, value: string) => {
-      setCurrentProposal(prev => ({
-          ...prev,
-          address: { ...prev.address!, [field]: value }
-      }));
-  };
-
-  const updateOwner = (field: string, value: string) => {
-      setCurrentProposal(prev => ({
-          ...prev,
-          owner: { ...prev.owner!, [field]: value }
-      }));
-  };
-
-  // Financial Calculations
-  const rent = parseInt(form.rentCost || '0');
-  const maintenance = parseInt(form.totalMaintenanceCost || '0');
-  const utility = parseInt(form.utilityCost || '0');
-  const duration = 5; // Default 5 years for calculation
-  const tco = rent + (maintenance * duration) + (utility * duration);
-  const burnRate = tco / (duration * 12);
-
-  const formatCurrency = (val: number) => "Rp " + val.toLocaleString('id-ID');
+  const CheckboxGroup = ({ title, items, selected, onChange }: { title: string, items: string[], selected: string[], onChange: (val: string) => void }) => (
+      <div className="mb-4">
+          <Label>{title}</Label>
+          <div className="grid grid-cols-2 gap-2">
+              {items.map(item => (
+                  <label key={item} className="flex items-center gap-2 p-2 bg-[#F8F9FA] rounded-lg cursor-pointer hover:bg-gray-100 transition-all">
+                      <div className={`w-4 h-4 rounded border flex items-center justify-center ${selected.includes(item) ? 'bg-black border-black' : 'bg-white border-gray-300'}`}>
+                          {selected.includes(item) && <CheckCircle2 size={10} className="text-white" />}
+                      </div>
+                      <input type="checkbox" className="hidden" checked={selected.includes(item)} onChange={() => onChange(item)} disabled={isView} />
+                      <span className="text-[10px] font-bold text-gray-600">{item}</span>
+                  </label>
+              ))}
+          </div>
+      </div>
+  );
 
   return (
     <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center backdrop-blur-sm p-4">
@@ -202,7 +268,7 @@ export const BuildingModal: React.FC<Props> = ({
             {['INFORMASI UMUM', 'PROPOSAL & PERBANDINGAN', 'WORKFLOW', 'FLOOR PLAN', 'FINANCIAL SUMMARY', 'DOKUMEN'].map(tab => (
                 <button 
                     key={tab}
-                    onClick={() => setActiveTab(tab)}
+                    onClick={() => { setActiveTab(tab); setIsEditingProposal(false); }}
                     className={`py-5 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-[4px] whitespace-nowrap
                         ${activeTab === tab ? 'border-black text-black' : 'border-transparent text-gray-300 hover:text-gray-500'}`}
                 >
@@ -215,48 +281,30 @@ export const BuildingModal: React.FC<Props> = ({
         <div className="flex-1 overflow-y-auto p-12 custom-scrollbar bg-[#FBFBFB]">
             {activeTab === 'INFORMASI UMUM' && (
                 <div className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    
-                    {/* Section 1: Jenis Kepemilikan */}
-                    <div>
-                        <SectionHeader num="1" title="1. JENIS KEPEMILIKAN" sub="PROPERTY OWNERSHIP TYPE" />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {['Rent', 'Own'].map(type => (
                             <button
-                                onClick={() => !isView && setForm({...form, ownership: 'Rent'})}
+                                key={type}
+                                onClick={() => !isView && setForm({...form, ownership: type as any})}
                                 disabled={isView}
                                 className={`h-40 rounded-[2rem] flex flex-col items-center justify-center gap-4 transition-all duration-300 group border-2
-                                    ${form.ownership === 'Rent' 
+                                    ${form.ownership === type 
                                     ? 'bg-black text-white border-black shadow-2xl shadow-black/20 scale-[1.02]' 
                                     : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'}`}
                             >
-                                <div className={`p-4 rounded-full ${form.ownership === 'Rent' ? 'bg-white/20' : 'bg-gray-50'}`}>
-                                    <Key size={24} />
+                                <div className={`p-4 rounded-full ${form.ownership === type ? 'bg-white/20' : 'bg-gray-50'}`}>
+                                    {type === 'Rent' ? <Key size={24} /> : <Home size={24} />}
                                 </div>
                                 <div className="text-center">
-                                    <span className="text-[14px] font-black uppercase tracking-widest block">SEWA (LEASE)</span>
-                                    <span className={`text-[9px] font-bold uppercase tracking-wider mt-1 block ${form.ownership === 'Rent' ? 'text-white/60' : 'text-gray-300'}`}>SEWA TAHUNAN / KONTRAK</span>
+                                    <span className="text-[14px] font-black uppercase tracking-widest block">{type === 'Rent' ? 'SEWA (LEASE)' : 'MILIK SENDIRI (OWN)'}</span>
+                                    <span className={`text-[9px] font-bold uppercase tracking-wider mt-1 block ${form.ownership === type ? 'text-white/60' : 'text-gray-300'}`}>
+                                        {type === 'Rent' ? 'SEWA TAHUNAN / KONTRAK' : 'ASET PERUSAHAAN / BELI PUTUS'}
+                                    </span>
                                 </div>
                             </button>
-
-                            <button
-                                onClick={() => !isView && setForm({...form, ownership: 'Own'})}
-                                disabled={isView}
-                                className={`h-40 rounded-[2rem] flex flex-col items-center justify-center gap-4 transition-all duration-300 group border-2
-                                    ${form.ownership === 'Own' 
-                                    ? 'bg-black text-white border-black shadow-2xl shadow-black/20 scale-[1.02]' 
-                                    : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'}`}
-                            >
-                                <div className={`p-4 rounded-full ${form.ownership === 'Own' ? 'bg-white/20' : 'bg-gray-50'}`}>
-                                    <Home size={24} />
-                                </div>
-                                <div className="text-center">
-                                    <span className="text-[14px] font-black uppercase tracking-widest block">MILIK SENDIRI (OWN)</span>
-                                    <span className={`text-[9px] font-bold uppercase tracking-wider mt-1 block ${form.ownership === 'Own' ? 'text-white/60' : 'text-gray-300'}`}>ASET PERUSAHAAN / BELI PUTUS</span>
-                                </div>
-                            </button>
-                        </div>
+                        ))}
                     </div>
 
-                    {/* Section 2: Identitas Aset */}
                     <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
                         <SectionHeader num="2" title="2. IDENTITAS ASET" sub="ASSET CLASSIFICATION & NUMBERING" />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -296,11 +344,11 @@ export const BuildingModal: React.FC<Props> = ({
                             </div>
 
                             <div className="md:col-span-2">
-                                <Label>LOKASI / ALAMAT LENGKAP</Label>
+                                <Label>ALAMAT JALAN</Label>
                                 <textarea 
                                     disabled={isView}
-                                    className="w-full bg-[#F8F9FA] border-none rounded-2xl px-6 py-5 text-[13px] font-medium text-black outline-none transition-all placeholder:text-gray-300 shadow-sm min-h-[120px] resize-none"
-                                    placeholder="Input alamat lengkap gedung..."
+                                    className="w-full bg-[#F8F9FA] border-none rounded-2xl px-6 py-5 text-[13px] font-medium text-black outline-none transition-all placeholder:text-gray-300 shadow-sm min-h-[80px] resize-none"
+                                    placeholder="Input nama jalan, nomor, RT/RW..."
                                     value={form.address || ''}
                                     onChange={(e) => setForm({...form, address: e.target.value})}
                                 />
@@ -312,22 +360,254 @@ export const BuildingModal: React.FC<Props> = ({
 
             {activeTab === 'PROPOSAL & PERBANDINGAN' && (
                 <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <div className="bg-[#F8F9FA] rounded-[2.5rem] p-12 flex flex-col items-center justify-center text-center">
-                        <div className="mb-6">
-                            <h3 className="text-[16px] font-black text-black uppercase tracking-tight">PERBANDINGAN KANDIDAT</h3>
-                            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-2">MENINJAU 1 OPSI PROPERTI</p>
+                    {!isEditingProposal ? (
+                        <>
+                            {form.proposals && form.proposals.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {form.proposals.map((proposal) => (
+                                        <div key={proposal.id} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-lg transition-all group">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="p-3 bg-black text-white rounded-xl">
+                                                    <Building size={20} />
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => handleEditProposal(proposal)} className="p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all"><Edit3 size={16} /></button>
+                                                    <button onClick={() => handleDeleteProposal(proposal.id)} className="p-2 bg-red-50 rounded-lg hover:bg-red-100 text-red-500 transition-all"><Trash2 size={16} /></button>
+                                                </div>
+                                            </div>
+                                            <h3 className="text-[14px] font-black text-black uppercase tracking-tight">{proposal.name}</h3>
+                                            <p className="text-[11px] text-gray-500 font-medium mt-1 truncate">{proposal.address.jl}, {proposal.address.kota}</p>
+                                            <div className="mt-6 pt-6 border-t border-gray-100 flex justify-between items-center">
+                                                <div>
+                                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">HARGA SEWA</p>
+                                                    <p className="text-[13px] font-mono font-black text-black">Rp {parseInt(proposal.rentPrice || '0').toLocaleString('id-ID')}</p>
+                                                </div>
+                                                <span className="bg-gray-50 px-3 py-1 rounded-lg text-[9px] font-bold uppercase text-gray-600 border border-gray-100">{proposal.leaseNature}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    
+                                    {!isView && (
+                                        <button onClick={handleAddProposal} className="bg-[#F8F9FA] rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-200 hover:border-black transition-all group min-h-[250px]">
+                                            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 group-hover:bg-black group-hover:text-white transition-all">
+                                                <Plus size={24} />
+                                            </div>
+                                            <h3 className="text-[12px] font-black text-gray-400 uppercase tracking-widest group-hover:text-black">Tambah Kandidat</h3>
+                                        </button>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="bg-[#F8F9FA] rounded-[2.5rem] p-16 flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-200">
+                                    <div className="mb-6">
+                                        <h3 className="text-[16px] font-black text-black uppercase tracking-tight">PERBANDINGAN KANDIDAT</h3>
+                                        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-2">BELUM ADA OPSI PROPERTI</p>
+                                    </div>
+                                    {!isView && (
+                                        <button onClick={handleAddProposal} className="bg-black text-white px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-gray-900 shadow-xl transition-all flex items-center gap-3">
+                                            <Plus size={16} /> Tambah Kandidat
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+                            <div className="flex items-center gap-4 mb-4">
+                                <button onClick={() => setIsEditingProposal(false)} className="p-3 bg-gray-100 rounded-full hover:bg-gray-200 transition-all"><ChevronLeft size={20} /></button>
+                                <div>
+                                    <h3 className="text-[16px] font-black text-black uppercase tracking-tight">INPUT DATA KANDIDAT</h3>
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">PROPOSAL LENGKAP</p>
+                                </div>
+                            </div>
+
+                            {/* Internal Tabs for Proposal */}
+                            <div className="flex border-b border-gray-100 overflow-x-auto gap-6 pb-1">
+                                {['INFO UTAMA', 'SPESIFIKASI FISIK', 'RENOVASI & LINGKUNGAN', 'BIAYA & LEGAL'].map(tab => (
+                                    <button 
+                                        key={tab}
+                                        onClick={() => setProposalTab(tab)}
+                                        className={`py-3 text-[10px] font-black uppercase tracking-widest border-b-2 whitespace-nowrap transition-all ${proposalTab === tab ? 'border-black text-black' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                                    >
+                                        {tab}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-10">
+                                
+                                {/* 1. INFO UTAMA (Lokasi & Utilitas) */}
+                                {proposalTab === 'INFO UTAMA' && (
+                                    <>
+                                        <div>
+                                            <SectionHeader num="1" title="ALAMAT LOKASI" />
+                                            <Input label="NAMA KANDIDAT" value={currentProposal.name} onChange={(e) => setCurrentProposal({...currentProposal, name: e.target.value})} placeholder="Contoh: Ruko Blok A No. 1" />
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <Input label="JALAN" value={currentProposal.address?.jl} onChange={(e) => setCurrentProposal({...currentProposal, address: {...currentProposal.address!, jl: e.target.value}})} />
+                                                <Input label="KOTA" value={currentProposal.address?.kota} onChange={(e) => setCurrentProposal({...currentProposal, address: {...currentProposal.address!, kota: e.target.value}})} />
+                                                <Input label="KABUPATEN" value={currentProposal.address?.kabupaten} onChange={(e) => setCurrentProposal({...currentProposal, address: {...currentProposal.address!, kabupaten: e.target.value}})} />
+                                                <Input label="PROPINSI" value={currentProposal.address?.propinsi} onChange={(e) => setCurrentProposal({...currentProposal, address: {...currentProposal.address!, propinsi: e.target.value}})} />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-6">
+                                                <Input label="JARAK KE DEALER (KM)" value={currentProposal.distanceToDealer} onChange={(e) => setCurrentProposal({...currentProposal, distanceToDealer: e.target.value})} />
+                                                <Input label="KONDISI JALAN / AKSES" value={currentProposal.roadCondition} onChange={(e) => setCurrentProposal({...currentProposal, roadCondition: e.target.value})} />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <SectionHeader num="2" title="UTILITAS" />
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                                <Input label="LISTRIK (WATT/AMPERE)" value={currentProposal.electricity} onChange={(e) => setCurrentProposal({...currentProposal, electricity: e.target.value})} icon={Zap} />
+                                                <Input label="SUMBER AIR" value={currentProposal.water} onChange={(e) => setCurrentProposal({...currentProposal, water: e.target.value})} />
+                                                <Input label="LINE TELEPON (QTY)" value={currentProposal.phoneLines} onChange={(e) => setCurrentProposal({...currentProposal, phoneLines: e.target.value})} icon={Phone} />
+                                            </div>
+                                            {/* Detail Line Telepon */}
+                                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                                <Label>PENAMBAHAN LINE TELEPON</Label>
+                                                <div className="grid grid-cols-2 gap-4 mt-2">
+                                                    <div className="flex items-center gap-4">
+                                                        <label className="flex items-center gap-2 cursor-pointer">
+                                                            <input type="radio" name="canAddPhone" checked={currentProposal.telephoneDetails?.canAdd} onChange={() => setCurrentProposal({...currentProposal, telephoneDetails: {...currentProposal.telephoneDetails!, canAdd: true}})} /> <span className="text-[10px] font-bold">Bisa Tambah</span>
+                                                        </label>
+                                                        <label className="flex items-center gap-2 cursor-pointer">
+                                                            <input type="radio" name="canAddPhone" checked={!currentProposal.telephoneDetails?.canAdd} onChange={() => setCurrentProposal({...currentProposal, telephoneDetails: {...currentProposal.telephoneDetails!, canAdd: false}})} /> <span className="text-[10px] font-bold">Tidak</span>
+                                                        </label>
+                                                    </div>
+                                                    {currentProposal.telephoneDetails?.canAdd && (
+                                                        <>
+                                                            <Input label="BIAYA PER LINE (RP)" value={currentProposal.telephoneDetails?.costPerLine} onChange={(e) => setCurrentProposal({...currentProposal, telephoneDetails: {...currentProposal.telephoneDetails!, costPerLine: e.target.value}})} />
+                                                            <Input label="DITANGGUNG OLEH" value={currentProposal.telephoneDetails?.borneBy} onChange={(e) => setCurrentProposal({...currentProposal, telephoneDetails: {...currentProposal.telephoneDetails!, borneBy: e.target.value}})} />
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* 2. SPESIFIKASI FISIK */}
+                                {proposalTab === 'SPESIFIKASI FISIK' && (
+                                    <>
+                                        <div>
+                                            <SectionHeader num="3" title="DIMENSI & FISIK" />
+                                            <div className="grid grid-cols-3 gap-6">
+                                                <Input label="LUAS TANAH (M2)" type="number" value={currentProposal.landArea} onChange={(e) => setCurrentProposal({...currentProposal, landArea: e.target.value})} />
+                                                <Input label="LUAS BANGUNAN (M2)" type="number" value={currentProposal.buildingArea} onChange={(e) => setCurrentProposal({...currentProposal, buildingArea: e.target.value})} />
+                                                <Input label="HALAMAN DEPAN (M2)" type="number" value={currentProposal.frontYardArea} onChange={(e) => setCurrentProposal({...currentProposal, frontYardArea: e.target.value})} />
+                                                <Input label="JUMLAH TINGKAT" value={currentProposal.totalFloors} onChange={(e) => setCurrentProposal({...currentProposal, totalFloors: e.target.value})} />
+                                                <Input label="KAPASITAS PARKIR" value={currentProposal.parkingCapacity} onChange={(e) => setCurrentProposal({...currentProposal, parkingCapacity: e.target.value})} />
+                                                <Input label="USIA BANGUNAN (THN)" value={currentProposal.buildingAge} onChange={(e) => setCurrentProposal({...currentProposal, buildingAge: e.target.value})} />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-6 mt-4">
+                                                <Input label="KONDISI PAGAR" value={currentProposal.fenceCondition} onChange={(e) => setCurrentProposal({...currentProposal, fenceCondition: e.target.value})} />
+                                                <Input label="KONDISI PINTU PAGAR" value={currentProposal.gateCondition} onChange={(e) => setCurrentProposal({...currentProposal, gateCondition: e.target.value})} />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <SectionHeader num="4" title="MATERIAL & STRUKTUR" />
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <CheckboxGroup title="TIANG / STRUKTUR" items={['Baja', 'Kayu', 'Beton']} selected={currentProposal.structureChecklist?.tiang || []} onChange={(v) => toggleStructureCheckbox('tiang', v)} />
+                                                <CheckboxGroup title="ATAP" items={['Alumunium', 'Tanah Liat', 'Beton Cor', 'Genting Beton']} selected={currentProposal.structureChecklist?.atap || []} onChange={(v) => toggleStructureCheckbox('atap', v)} />
+                                                <CheckboxGroup title="DINDING" items={['Batako', 'Bata Merah', 'Seng', 'Triplek']} selected={currentProposal.structureChecklist?.dinding || []} onChange={(v) => toggleStructureCheckbox('dinding', v)} />
+                                                <CheckboxGroup title="LANTAI" items={['Keramik', 'Tanpa Keramik']} selected={currentProposal.structureChecklist?.lantai || []} onChange={(v) => toggleStructureCheckbox('lantai', v)} />
+                                                <CheckboxGroup title="PINTU" items={['Kayu', 'Triplek', 'Baja', 'Alumunium', 'Seng']} selected={currentProposal.structureChecklist?.pintu || []} onChange={(v) => toggleStructureCheckbox('pintu', v)} />
+                                                <CheckboxGroup title="JENDELA" items={['Kayu', 'Alumunium', 'Besi']} selected={currentProposal.structureChecklist?.jendela || []} onChange={(v) => toggleStructureCheckbox('jendela', v)} />
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* 3. RENOVASI & LINGKUNGAN */}
+                                {proposalTab === 'RENOVASI & LINGKUNGAN' && (
+                                    <>
+                                        <div>
+                                            <SectionHeader num="5" title="KONDISI LINGKUNGAN" />
+                                            <div className="grid grid-cols-1 gap-6 mb-6">
+                                                <Label>BATAS LOKASI / POSISI</Label>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <Input label="DEPAN" value={currentProposal.locationContext?.front} onChange={(e) => setCurrentProposal({...currentProposal, locationContext: {...currentProposal.locationContext!, front: e.target.value}})} placeholder="Ada apa di depan?" />
+                                                    <Input label="BELAKANG" value={currentProposal.locationContext?.back} onChange={(e) => setCurrentProposal({...currentProposal, locationContext: {...currentProposal.locationContext!, back: e.target.value}})} placeholder="Ada apa di belakang?" />
+                                                    <Input label="KANAN" value={currentProposal.locationContext?.right} onChange={(e) => setCurrentProposal({...currentProposal, locationContext: {...currentProposal.locationContext!, right: e.target.value}})} placeholder="Ada apa di kanan?" />
+                                                    <Input label="KIRI" value={currentProposal.locationContext?.left} onChange={(e) => setCurrentProposal({...currentProposal, locationContext: {...currentProposal.locationContext!, left: e.target.value}})} placeholder="Ada apa di kiri?" />
+                                                </div>
+                                            </div>
+                                            <CheckboxGroup title="TIPE LINGKUNGAN" items={['Cluster', 'Padat Penduduk', 'Pergudangan', 'Perkantoran', 'Dekat Lapangan']} selected={currentProposal.environmentConditions || []} onChange={(v) => toggleProposalCheckbox('environmentConditions', v)} />
+                                        </div>
+
+                                        <div>
+                                            <SectionHeader num="6" title="KEBUTUHAN RENOVASI" />
+                                            <div className="flex gap-4 mb-4">
+                                                <label className="flex items-center gap-2"><input type="radio" checked={currentProposal.renovationNeeded} onChange={() => setCurrentProposal({...currentProposal, renovationNeeded: true})} /> <span className="text-[11px] font-bold">Perlu Renovasi</span></label>
+                                                <label className="flex items-center gap-2"><input type="radio" checked={!currentProposal.renovationNeeded} onChange={() => setCurrentProposal({...currentProposal, renovationNeeded: false})} /> <span className="text-[11px] font-bold">Tidak Perlu</span></label>
+                                            </div>
+                                            {currentProposal.renovationNeeded && (
+                                                <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <Input label="ESTIMASI BIAYA (+/- RP)" value={currentProposal.renovationCostEstimate} onChange={(e) => setCurrentProposal({...currentProposal, renovationCostEstimate: e.target.value})} />
+                                                    <Input label="ESTIMASI WAKTU (HARI)" value={currentProposal.renovationTimeEstimate} onChange={(e) => setCurrentProposal({...currentProposal, renovationTimeEstimate: e.target.value})} />
+                                                    <Input label="DITANGGUNG OLEH (%)" value={currentProposal.renovationDetailsObj?.costSharing} onChange={(e) => setCurrentProposal({...currentProposal, renovationDetailsObj: {...currentProposal.renovationDetailsObj!, costSharing: e.target.value}})} placeholder="Contoh: Pemilik 50%, Penyewa 50%" />
+                                                    <Input label="TENGGANG WAKTU (GRACE PERIOD)" value={currentProposal.renovationDetailsObj?.gracePeriod} onChange={(e) => setCurrentProposal({...currentProposal, renovationDetailsObj: {...currentProposal.renovationDetailsObj!, gracePeriod: e.target.value}})} placeholder="Hari" />
+                                                    
+                                                    <div className="md:col-span-2">
+                                                        <Label>ITEM RENOVASI</Label>
+                                                        <div className="grid grid-cols-2 gap-4 mt-2">
+                                                            <label className="flex items-center gap-2"><input type="checkbox" checked={currentProposal.renovationDetailsObj?.items.partition} onChange={(e) => setCurrentProposal({...currentProposal, renovationDetailsObj: {...currentProposal.renovationDetailsObj!, items: {...currentProposal.renovationDetailsObj!.items, partition: e.target.checked}}})} /> <span className="text-[10px] font-bold">Sekat Ruangan</span></label>
+                                                            <label className="flex items-center gap-2"><input type="checkbox" checked={currentProposal.renovationDetailsObj?.items.paint} onChange={(e) => setCurrentProposal({...currentProposal, renovationDetailsObj: {...currentProposal.renovationDetailsObj!, items: {...currentProposal.renovationDetailsObj!.items, paint: e.target.checked}}})} /> <span className="text-[10px] font-bold">Pengecatan</span></label>
+                                                            <label className="flex items-center gap-2"><input type="checkbox" checked={currentProposal.renovationDetailsObj?.items.lights} onChange={(e) => setCurrentProposal({...currentProposal, renovationDetailsObj: {...currentProposal.renovationDetailsObj!, items: {...currentProposal.renovationDetailsObj!.items, lights: e.target.checked}}})} /> <span className="text-[10px] font-bold">Lampu-Lampu</span></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* 4. BIAYA & LEGAL */}
+                                {proposalTab === 'BIAYA & LEGAL' && (
+                                    <>
+                                        <div>
+                                            <SectionHeader num="7" title="FINANSIAL" />
+                                            <div className="grid grid-cols-2 gap-6">
+                                                <Input label="HARGA SEWA / TAHUN (RP)" type="number" value={currentProposal.rentPrice} onChange={(e) => setCurrentProposal({...currentProposal, rentPrice: e.target.value})} />
+                                                <Input label="PERIODE SEWA (THN)" value={currentProposal.leasePeriod} onChange={(e) => setCurrentProposal({...currentProposal, leasePeriod: e.target.value})} placeholder="Min - Max Tahun" />
+                                                <Input label="PAJAK PPH DITANGGUNG" value={currentProposal.taxPPH} onChange={(e) => setCurrentProposal({...currentProposal, taxPPH: e.target.value})} placeholder="Pemilik / Penyewa" />
+                                                <Input label="BIAYA NOTARIS" value={currentProposal.notaryFee} onChange={(e) => setCurrentProposal({...currentProposal, notaryFee: e.target.value})} placeholder="Pemilik % / Penyewa %" />
+                                                <Input label="BIAYA SEWA SEBELUMNYA" value={currentProposal.previousRentPrice} onChange={(e) => setCurrentProposal({...currentProposal, previousRentPrice: e.target.value})} placeholder="(Jika Perpanjangan)" />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <SectionHeader num="8" title="LEGALITAS & PEMILIK" />
+                                            <div className="grid grid-cols-2 gap-6 mb-6">
+                                                <Input label="NAMA PEMILIK" value={currentProposal.owner?.name} onChange={(e) => setCurrentProposal({...currentProposal, owner: {...currentProposal.owner!, name: e.target.value}})} icon={User} />
+                                                <Input label="NO TELP PEMILIK" value={currentProposal.owner?.phone} onChange={(e) => setCurrentProposal({...currentProposal, owner: {...currentProposal.owner!, phone: e.target.value}})} icon={Phone} />
+                                                <Input label="ALAMAT PEMILIK" value={currentProposal.owner?.address} onChange={(e) => setCurrentProposal({...currentProposal, owner: {...currentProposal.owner!, address: e.target.value}})} />
+                                            </div>
+                                            <CheckboxGroup title="DOKUMEN TERSEDIA" items={['SHM', 'SHGB', 'IMB']} selected={currentProposal.documents || []} onChange={(v) => toggleProposalCheckbox('documents', v)} />
+                                        </div>
+
+                                        <div className="bg-blue-50 p-6 rounded-[2.5rem] border border-blue-100">
+                                            <SectionHeader num="9" title="ANALISA BISNIS (BM NOTES)" />
+                                            <div className="grid grid-cols-2 gap-6">
+                                                <Input label="ESTIMASI OMZET/TAHUN" value={currentProposal.businessNotes?.margin} onChange={(e) => setCurrentProposal({...currentProposal, businessNotes: {...currentProposal.businessNotes!, margin: e.target.value}})} />
+                                                <Input label="WAKTU PENGIRIMAN (HARI)" value={currentProposal.businessNotes?.deliveryTime} onChange={(e) => setCurrentProposal({...currentProposal, businessNotes: {...currentProposal.businessNotes!, deliveryTime: e.target.value}})} />
+                                                <Input label="JUMLAH DEALER PARETO" value={currentProposal.businessNotes?.dealersCount} onChange={(e) => setCurrentProposal({...currentProposal, businessNotes: {...currentProposal.businessNotes!, dealersCount: e.target.value}})} />
+                                                <Input label="KOMPOSISI STAFF" value={currentProposal.businessNotes?.staffComposition} onChange={(e) => setCurrentProposal({...currentProposal, businessNotes: {...currentProposal.businessNotes!, staffComposition: e.target.value}})} />
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                <div className="flex justify-end gap-4 pt-6 border-t border-gray-100">
+                                    <button onClick={() => setIsEditingProposal(false)} className="px-8 py-3 rounded-xl bg-white border border-gray-200 text-[11px] font-black uppercase tracking-widest hover:bg-gray-50">Cancel</button>
+                                    <button onClick={handleSaveProposal} className="px-10 py-3 rounded-xl bg-black text-white text-[11px] font-black uppercase tracking-widest hover:bg-gray-900 shadow-xl">Simpan Kandidat</button>
+                                </div>
+                            </div>
                         </div>
-                        
-                        {/* Placeholder for Candidates List */}
-                        {/* If we had candidates, map them here. Since mock only has 1, we show placeholder for add */}
-                        
-                        <button className="bg-black text-white px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-gray-900 shadow-xl transition-all flex items-center gap-3">
-                            <Plus size={16} /> Tambah Kandidat
-                        </button>
-                    </div>
+                    )}
                 </div>
             )}
 
+            {/* ... Other Tabs remain same ... */}
             {activeTab === 'FLOOR PLAN' && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">

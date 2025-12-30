@@ -164,7 +164,11 @@ export const MOCK_BRANCH_IMPROVEMENT_DATA: BuildingRecord[] = [
                 securityFeatures: ['Security Area Wilayah', 'CCTV'],
                 floors: { ground: '60', f1: '60', f2: '60', f3: '60', f4: '0' },
                 totalFloors: '3',
-                buildingMaterials: ['Struktur Beton', 'Dinding Bata', 'Lantai Keramik'],
+                structureChecklist: {
+                    tiang: ['Beton'],
+                    dinding: ['Bata'],
+                    lantai: ['Keramik']
+                },
                 buildingAge: '<5 tahun',
                 leaseNature: 'Baru',
                 leasePurpose: 'Showroom',
