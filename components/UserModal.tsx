@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Save, User, Mail, Phone, Building, Shield, MapPin, Calendar, Camera, Lock, Activity, Key, CheckCircle2, History } from 'lucide-react';
+import { X, Save, User, Mail, Phone, Building, Shield, MapPin, Calendar, Camera, Lock, Activity, Key, CheckCircle2, History, Layers, ChevronDown, ChevronUp, CheckSquare, Square } from 'lucide-react';
 import { UserRecord } from '../types';
 
 interface Props {
@@ -11,28 +11,95 @@ interface Props {
   mode?: 'create' | 'edit' | 'view';
 }
 
+const MENU_PERMISSIONS = [
+    { 
+        id: 'dashboard', label: 'Dashboard', icon: Activity,
+        description: 'View overview statistics and alerts.'
+    },
+    { 
+        id: 'atk', label: 'ATK Management', icon: Layers,
+        description: 'Manage stationery requests and approvals.',
+        subItems: [
+            { id: 'atk_req', label: 'Request ATK' },
+            { id: 'atk_app', label: 'Approval' },
+            { id: 'atk_mst', label: 'Master Data' }
+        ]
+    },
+    { 
+        id: 'ark', label: 'ARK Management', icon: Layers,
+        description: 'Manage household requests and approvals.',
+        subItems: [
+            { id: 'ark_req', label: 'Request ARK' },
+            { id: 'ark_app', label: 'Approval' },
+            { id: 'ark_mst', label: 'Master Data' }
+        ]
+    },
+    { 
+        id: 'ga', label: 'General Asset', icon: Layers,
+        description: 'Manage general assets (HC & IT).',
+        subItems: [
+            { id: 'ga_hc', label: 'Asset HC' },
+            { id: 'ga_it', label: 'Asset IT' }
+        ]
+    },
+    { 
+        id: 'vehicle', label: 'Fleet Management', icon: Layers,
+        description: 'Manage vehicles, contracts, service, tax, etc.',
+        subItems: [
+            { id: 'veh_list', label: 'Asset List' },
+            { id: 'veh_contract', label: 'Contracts' },
+            { id: 'veh_service', label: 'Service' },
+            { id: 'veh_tax', label: 'Tax & KIR' },
+            { id: 'veh_mut', label: 'Mutation' },
+            { id: 'veh_sale', label: 'Sales' }
+        ]
+    },
+    { 
+        id: 'building', label: 'Building Management', icon: Layers,
+        description: 'Manage building assets, maintenance, and utilities.',
+        subItems: [
+            { id: 'bld_maint', label: 'Maintenance' },
+            { id: 'bld_util', label: 'Utility' },
+            { id: 'bld_impr', label: 'Branch Improvement' },
+            { id: 'bld_legal', label: 'Legal & Compliance' }
+        ]
+    },
+    { id: 'logbook', label: 'Log Book', icon: Layers, description: 'View and manage guest logs.' },
+    { id: 'timesheet', label: 'Timesheet', icon: Layers, description: 'Access employee timesheets.' },
+    { id: 'vendor', label: 'Vendor Management', icon: Layers, description: 'Manage vendor database.' },
+    { id: 'usermgmt', label: 'User Management', icon: Layers, description: 'Manage system users and roles.' },
+    { id: 'master', label: 'Master Data', icon: Layers, description: 'Configure system master data.' },
+];
+
 export const UserModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialData, mode = 'create' }) => {
   const [activeTab, setActiveTab] = useState('PROFILE');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   
   const [form, setForm] = useState<Partial<UserRecord>>({
     status: 'Active',
     role: 'Staff',
     avatar: 'https://via.placeholder.com/150',
-    joinDate: new Date().toISOString().split('T')[0]
+    joinDate: new Date().toISOString().split('T')[0],
+    permissions: ['dashboard']
   });
 
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
         setForm(initialData);
+        // Ensure permissions array exists
+        if (!initialData.permissions) {
+            setForm(prev => ({ ...prev, permissions: ['dashboard'] }));
+        }
       } else {
         setForm({ 
             status: 'Active', 
             role: 'Staff', 
             employeeId: `EMP-${Math.floor(Math.random() * 10000)}`,
             joinDate: new Date().toISOString().split('T')[0],
-            avatar: 'https://via.placeholder.com/150' 
+            avatar: 'https://via.placeholder.com/150',
+            permissions: ['dashboard']
         });
       }
       setActiveTab('PROFILE');
@@ -52,6 +119,38 @@ export const UserModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialDat
           };
           reader.readAsDataURL(file);
       }
+  };
+
+  const togglePermission = (id: string) => {
+      if (isView) return;
+      const currentPermissions = form.permissions || [];
+      if (currentPermissions.includes(id)) {
+          setForm({ ...form, permissions: currentPermissions.filter(p => p !== id && !p.startsWith(id + '_')) });
+      } else {
+          setForm({ ...form, permissions: [...currentPermissions, id] });
+      }
+  };
+
+  const toggleSubPermission = (parentId: string, subId: string) => {
+      if (isView) return;
+      const currentPermissions = form.permissions || [];
+      
+      // Ensure parent is checked if sub is checked
+      let newPermissions = [...currentPermissions];
+      if (!newPermissions.includes(parentId)) {
+          newPermissions.push(parentId);
+      }
+
+      if (newPermissions.includes(subId)) {
+          newPermissions = newPermissions.filter(p => p !== subId);
+      } else {
+          newPermissions.push(subId);
+      }
+      setForm({ ...form, permissions: newPermissions });
+  };
+
+  const toggleMenuExpand = (id: string) => {
+      setExpandedMenus(prev => prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]);
   };
 
   const SectionHeader = ({ title, sub }: { title: string, sub?: string }) => (
@@ -222,7 +321,7 @@ export const UserModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialDat
 
             {/* TAB: ACCESS & SECURITY */}
             {activeTab === 'ACCESS & SECURITY' && (
-                <div className="max-w-3xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm">
                         <SectionHeader title="ROLE CONFIGURATION" sub="System Permission Levels" />
                         <div className="space-y-6">
@@ -276,6 +375,68 @@ export const UserModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialDat
                                     </button>
                                 </div>
                             )}
+                        </div>
+                    </div>
+
+                    {/* MENU ACCESS SECTION */}
+                    <div className="bg-white p-10 rounded-[2rem] border border-gray-100 shadow-sm">
+                        <SectionHeader title="MENU ACCESS PERMISSIONS" sub="Configure visible modules for this user" />
+                        <div className="grid grid-cols-1 gap-6">
+                            {MENU_PERMISSIONS.map((menu) => {
+                                const isChecked = (form.permissions || []).includes(menu.id);
+                                const isExpanded = expandedMenus.includes(menu.id);
+                                const hasSubItems = menu.subItems && menu.subItems.length > 0;
+
+                                return (
+                                    <div key={menu.id} className="border border-gray-100 rounded-2xl bg-gray-50/50 overflow-hidden">
+                                        <div className="flex items-center justify-between p-5 bg-white border-b border-gray-50">
+                                            <div className="flex items-center gap-4">
+                                                <div 
+                                                    onClick={() => togglePermission(menu.id)}
+                                                    className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center cursor-pointer transition-colors ${
+                                                        isChecked ? 'bg-black border-black text-white' : 'bg-white border-gray-300'
+                                                    }`}
+                                                >
+                                                    {isChecked && <CheckSquare size={14} />}
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-[12px] font-black text-black uppercase tracking-wide">{menu.label}</h4>
+                                                    <p className="text-[10px] text-gray-400 mt-0.5">{menu.description}</p>
+                                                </div>
+                                            </div>
+                                            {hasSubItems && (
+                                                <button 
+                                                    onClick={() => toggleMenuExpand(menu.id)}
+                                                    className="p-2 text-gray-400 hover:text-black hover:bg-gray-50 rounded-lg transition-all"
+                                                >
+                                                    {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                                                </button>
+                                            )}
+                                        </div>
+                                        
+                                        {hasSubItems && isExpanded && (
+                                            <div className="p-5 bg-gray-50 grid grid-cols-1 md:grid-cols-2 gap-4 animate-in slide-in-from-top-2">
+                                                {menu.subItems?.map(sub => {
+                                                    const isSubChecked = (form.permissions || []).includes(sub.id);
+                                                    return (
+                                                        <div key={sub.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm">
+                                                            <div 
+                                                                onClick={() => toggleSubPermission(menu.id, sub.id)}
+                                                                className={`w-5 h-5 rounded flex items-center justify-center cursor-pointer border transition-colors ${
+                                                                    isSubChecked ? 'bg-black border-black text-white' : 'bg-white border-gray-300'
+                                                                }`}
+                                                            >
+                                                                {isSubChecked && <CheckSquare size={12} />}
+                                                            </div>
+                                                            <span className="text-[11px] font-bold text-gray-600 uppercase tracking-tight">{sub.label}</span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>

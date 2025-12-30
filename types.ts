@@ -21,6 +21,7 @@ export interface UserRecord {
   status: 'Active' | 'Inactive';
   lastActive: string;
   avatar: string;
+  permissions?: string[]; // Array of allowed module IDs
 }
 
 export interface SparePart {
