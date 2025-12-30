@@ -40,7 +40,8 @@ import {
   Radio,
   Stamp,
   RefreshCw,
-  Sliders
+  Sliders,
+  CheckCircle2
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -150,6 +151,9 @@ export const Sidebar: React.FC<Props> = ({
       label: 'Master Data', 
       icon: <Home size={20} />,
       subItems: [
+        // Moved Master Approval to top for better visibility
+        { label: 'Master Approval', icon: <CheckCircle2 size={16} /> },
+        
         // Group 1: General Masters
         { label: 'Master Vendor', icon: <Users size={16} /> },
         { label: 'Master PPN', icon: <Percent size={16} /> },

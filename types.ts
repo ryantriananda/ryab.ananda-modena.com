@@ -684,12 +684,15 @@ export interface TimesheetRecord {
   id: string | number;
   employee: Employee;
   date: string;
-  dayType: string;
-  task: string;
+  location?: string; // New: Building/Branch
+  area?: string; // New: Lobby, Toilet, etc.
+  shift: 'Pagi' | 'Siang' | 'Malam' | string;
   clockIn: string;
   clockOut: string;
-  status: string;
-  photos: string[];
+  status: 'Tepat Waktu' | 'Terlambat' | 'Absen' | string;
+  tasks?: string[]; // List of completed tasks
+  photos: string[]; // Evidence
+  note?: string;
 }
 
 export interface VendorRecord {
@@ -739,4 +742,19 @@ export interface GeneralAssetRecord {
   subLocation: string;
   address: string;
   approvalStatus?: 'Pending' | 'Approved' | 'Rejected'; // Added approval status
+}
+
+export interface ApprovalTier {
+    level: number;
+    type: 'Role' | 'User'; // Added to distinguish between Role and Specific User
+    value: string; // Was 'role', now holds Role Name or User Name
+    sla: number; // Days
+}
+
+export interface MasterApprovalRecord {
+    id: string;
+    module: string; // e.g. 'Vehicle Request', 'Service', 'Tax', 'Mutation', 'Sales'
+    branch: string; // 'All' or specific branch name
+    tiers: ApprovalTier[];
+    updatedAt: string;
 }
