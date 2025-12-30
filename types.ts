@@ -272,6 +272,7 @@ export interface BuildingRecord {
   // Financials
   assetValue?: string;
   rentCost?: string;
+  purchasePrice?: string; // For Own
 
   // Workflow
   workflow?: WorkflowStep[];
@@ -290,28 +291,94 @@ export interface BuildingRecord {
   city?: string;
   district?: string; // Kabupaten
   province?: string;
+  distanceToDealer?: string; // Added field
   
   // Utilities
   electricityPower?: string; // Ampere
   electricitySource?: string; // PLN/Swasta
   waterSource?: string; // PAM/Sumur
   phoneLineCount?: string;
+  telephoneDetails?: {
+    canAdd: boolean;
+    costPerLine: string;
+    borneBy: string;
+  };
   
   // Physical
   landArea?: string; // Luas Tanah
   buildingArea?: string; // Luas Bangunan
+  frontYardArea?: string;
   parkingCapacity?: string;
   buildingAge?: string; // Lama Bangunan Berdiri
   
+  // Physical Condition
+  fenceCondition?: string;
+  gateCondition?: string;
+  roadCondition?: string;
+  
+  // Structure & Materials
+  floors?: { ground: string; f1: string; f2: string; f3: string; f4: string; };
+  totalFloors?: string;
+  structureChecklist?: {
+    tiang?: string[]; 
+    atap?: string[]; 
+    dinding?: string[]; 
+    lantai?: string[]; 
+    pintu?: string[]; 
+    jendela?: string[]; 
+    others?: string[]; 
+  };
+
+  // Renovation
+  renovationNeeded?: boolean;
+  renovationCostEstimate?: string;
+  renovationTimeEstimate?: string;
+  renovationDetailsObj?: {
+    costSharing: string;
+    gracePeriod: string;
+    items: {
+      partition: boolean;
+      paint: boolean; 
+      roof: string;
+      lights: boolean; 
+      other: string;
+    }
+  };
+
+  // Environment & Context
+  locationContext?: {
+    right: string;
+    left: string;
+    front: string;
+    back: string;
+    nearIndustry: boolean;
+    operationalHours: string;
+  };
+  environmentConditions?: string[];
+
   // Security Features (Checkboxes)
   securityFeatures?: string[];
   
   // Owner
   ownerName?: string;
   ownerPhone?: string;
+  ownerAddress?: string;
   
   // Documents (Checkboxes)
   documentsAvailable?: string[];
+  
+  // Financial extras
+  taxPPH?: string;
+  notaryFee?: string;
+  
+  // Business Analysis
+  businessNotes?: {
+    deliveryTime: string;
+    dealersCount: string;
+    staffComposition: string;
+    margin: string;
+    competitorPareto: string;
+  };
 }
 
 // Updated based on PDF F.50/MI-HCO/R00/2021
